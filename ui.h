@@ -1515,6 +1515,25 @@ _UI_EXTERN int uiTableColumnWidth(uiTable *t, int column);
 // Note: darwin currently only resizes to header title width on -1
 _UI_EXTERN void uiTableColumnSetWidth(uiTable *t, int column, int width);
 
+// uiTableSelectionAllowMultipleSelection() return if table allows for
+// multiple items being selected or not
+_UI_EXTERN int uiTableSelectionAllowMultipleSelection(uiTable *t);
+
+// uiTableSelectionSetAllowMultipleSelection() set if table allows for
+// multiple items being selected or not
+_UI_EXTERN void uiTableSelectionSetAllowMultipleSelection(uiTable *t, int multipleSelection);
+
+// uiTableSelectionOnChanged() set a callback function to be called when
+// the table selection changes
+_UI_EXTERN void uiTableSelectionOnChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data);
+
+// uiTableSelectionCurrentSelection() get the current table selection
+// rows is a pointer to an array that will holds the current selection
+// numRows number of rows selected
+// Note: make sure to free() the array rows
+// Note: make sure to check if rows is !NULL even when numRows > 0 (indicates alloc error)
+_UI_EXTERN void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows);
+
 #ifdef __cplusplus
 }
 #endif

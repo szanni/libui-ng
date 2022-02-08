@@ -263,6 +263,23 @@ static void defaultHeaderOnClicked(uiTable *table, int column, void *data)
 	// do nothing
 }
 
+void uiTableSelectionOnChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data)
+{
+	t->selectionOnChanged = f;
+	t->selectionOnChangedData = data;
+}
+
+static void defaultSelectionOnChanged(uiTable *table, void *data)
+{
+	// do nothing
+}
+
+void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows)
+{
+	*numRows = 0;
+	*rows = NULL;
+}
+
 // TODO properly integrate compound statements
 static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 {
@@ -543,6 +560,21 @@ void uiTableHeaderSetVisible(uiTable *t, int visible)
 		SetWindowLong(t->hwnd, GWL_STYLE, style | LVS_NOCOLUMNHEADER);
 }
 
+int uiTableSelectionAllowMultipleSelection(uiTable *t)
+{
+	LONG style = GetWindowLong(t->hwnd, GWL_STYLE);
+	return !(style & LVS_SINGLESEL);
+}
+
+void uiTableSelectionSetAllowMultipleSelection(uiTable *t, int multipleSelection)
+{
+	LONG style = GetWindowLong(t->hwnd, GWL_STYLE);
+	if (multipleSelection)
+		SetWindowLong(t->hwnd, GWL_STYLE, style & ~LVS_SINGLESEL);
+	else
+		SetWindowLong(t->hwnd, GWL_STYLE, style | LVS_SINGLESEL);
+}
+
 uiTable *uiNewTable(uiTableParams *p)
 {
 	uiTable *t;
@@ -555,11 +587,12 @@ uiTable *uiNewTable(uiTableParams *p)
 	t->model = p->Model;
 	t->backgroundColumn = p->RowBackgroundColorModelColumn;
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
+	uiTableSelectionOnChanged(t, defaultSelectionOnChanged, NULL);
 
 	// WS_CLIPCHILDREN is here to prevent drawing over the edit box used for editing text
 	t->hwnd = uiWindowsEnsureCreateControlHWND(WS_EX_CLIENTEDGE,
 		WC_LISTVIEW, L"",
-		LVS_REPORT | LVS_OWNERDATA | LVS_SINGLESEL | WS_CLIPCHILDREN | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL,
+		LVS_REPORT | LVS_OWNERDATA | WS_CLIPCHILDREN | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL,
 		hInstance, NULL,
 		TRUE);
 	t->model->tables->push_back(t);
@@ -582,6 +615,8 @@ uiTable *uiNewTable(uiTableParams *p)
 	t->indeterminatePositions = new std::map<std::pair<int, int>, LONG>;
 	if (SetWindowSubclass(t->hwnd, tableSubProc, 0, (DWORD_PTR) t) == FALSE)
 		logLastError(L"SetWindowSubclass()");
+
+	uiTableSelectionSetAllowMultipleSelection(t, 0);
 
 	return t;
 }
