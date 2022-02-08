@@ -108,6 +108,12 @@ static void setBackgroundColor(uiprivTableView *t, NSTableRowView *rv, NSInteger
 	t->headerOnClicked(t, [[tc identifier] intValue], t->headerOnClickedData);
 }
 
+- (void)tableViewSelectionDidChange:(NSNotification *)notification
+{
+	uiTable *t = [(uiprivTableView*)[notification object] uiTable];
+	t->selectionOnChanged(t, t->selectionOnChangedData);
+}
+
 @end
 
 uiTableModel *uiNewTableModel(uiTableModelHandler *mh)
@@ -214,6 +220,43 @@ static void defaultHeaderOnClicked(uiTable *table, int column, void *data)
 	// do nothing
 }
 
+int uiTableSelectionAllowMultipleSelection(uiTable *t)
+{
+	return [t->tv allowsMultipleSelection];
+}
+
+void uiTableSelectionSetAllowMultipleSelection(uiTable *t, int multipleSelection)
+{
+	[t->tv setAllowsMultipleSelection: (BOOL)multipleSelection];
+}
+
+void uiTableSelectionOnChanged(uiTable *t, void (*f)(uiTable *, void *), void *data)
+{
+	t->selectionOnChanged = f;
+	t->selectionOnChangedData = data;
+}
+
+static void defaultSelectionOnChanged(uiTable *t, void *data)
+{
+	// do nothing
+}
+
+void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows)
+{
+	__block int i = 0;
+	NSIndexSet *set = [t->tv selectedRowIndexes];
+
+	*numRows = [set count];
+	*rows = malloc(*numRows * sizeof(**rows));
+
+	// TODO fix API to expose error
+	assert(*rows != NULL);
+
+	[set enumerateIndexesUsingBlock:^(NSUInteger row, BOOL *stop) {
+		(*rows)[i++] = row;
+	}];
+}
+
 uiTable *uiNewTable(uiTableParams *p)
 {
 	uiTable *t;
@@ -254,6 +297,7 @@ uiTable *uiNewTable(uiTableParams *p)
 	t->sv = uiprivMkScrollView(&sp, &(t->d));
 
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
+	uiTableSelectionOnChanged(t, defaultSelectionOnChanged, NULL);
 
 	// TODO WHY DOES THIS REMOVE ALL GRAPHICAL GLITCHES?
 	// I got the idea from http://jwilling.com/blog/optimized-nstableview-scrolling/ but that was on an unrelated problem I didn't seem to have (although I have small-ish tables to start with)
