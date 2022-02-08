@@ -20,6 +20,8 @@ struct uiTable {
 	guint indeterminateTimer;
 	void (*headerOnClicked)(uiTable *, int, void *);
 	void *headerOnClickedData;
+	void (*selectionOnChanged)(uiTable *, void *);
+	void *selectionOnChangedData;
 };
 
 // use the same size as GtkFileChooserWidget's treeview
@@ -382,6 +384,46 @@ static void headerOnClicked(GtkTreeViewColumn *c, gpointer data)
 			t->headerOnClicked(t, i, t->headerOnClickedData);
 }
 
+void uiTableSelectionOnChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data)
+{
+	t->selectionOnChanged = f;
+	t->selectionOnChangedData = data;
+}
+
+static void defaultSelectionOnChanged(uiTable *table, int column, void *data)
+{
+	// do nothing
+}
+
+static void selectionOnChanged(GtkTreeSelection *s, gpointer data)
+{
+	uiTable *t = uiTable(data);
+	t->selectionOnChanged(t, t->selectionOnChangedData);
+}
+
+void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows)
+{
+	int i = 0;
+	GList *e;
+	GList *list;
+	GtkTreeSelection *sel;
+	GtkTreeModel *m = GTK_TREE_MODEL(t->model);
+
+	sel = gtk_tree_view_get_selection(t->tv);
+	list = gtk_tree_selection_get_selected_rows(sel, &m);
+
+	*numRows = g_list_length(list);
+	*rows = malloc(*numRows * sizeof(**rows));
+	g_assert(rows != NULL);
+
+	for (e = list; e != NULL; e = e->next) {
+		GtkTreePath *path = e->data;
+		(*rows)[i++] = gtk_tree_path_get_indices(path)[0];
+	}
+
+	g_list_free_full (list, (GDestroyNotify) gtk_tree_path_free);
+}
+
 static GtkTreeViewColumn *addColumn(uiTable *t, const char *name)
 {
 	GtkTreeViewColumn *c;
@@ -588,6 +630,10 @@ uiTable *uiNewTable(uiTableParams *p)
 		uiprivFree, uiprivFree);
 
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
+	uiTableHeaderOnClicked(t, defaultSelectionOnChanged, NULL);
+
+	g_signal_connect(G_OBJECT(gtk_tree_view_get_selection(t->tv)), "changed",
+		G_CALLBACK(selectionOnChanged), t);
 
 	return t;
 }
@@ -602,4 +648,30 @@ void uiTableColumnSetWidth(uiTable *t, int column, int width)
 {
 	GtkTreeViewColumn *c = gtk_tree_view_get_column(t->tv, column);
 	gtk_tree_view_column_set_fixed_width(c, width);
+}
+
+int uiTableSelectionAllowMultipleSelection(uiTable *t)
+{
+	GtkTreeSelection *select = gtk_tree_view_get_selection(t->tv);
+
+	switch (gtk_tree_selection_get_mode(select)) {
+		case GTK_SELECTION_MULTIPLE:
+			return 1;
+		case GTK_SELECTION_SINGLE:
+		case GTK_SELECTION_BROWSE:
+			return 0;
+		default:
+			uiprivImplBug("unrecognized table selection mode");
+			return 0;
+	}
+}
+
+void uiTableSelectionSetAllowMultipleSelection(uiTable *t, int multipleSelection)
+{
+	GtkTreeSelection *select = gtk_tree_view_get_selection(t->tv);
+
+	if (multipleSelection)
+		gtk_tree_selection_set_mode (select, GTK_SELECTION_MULTIPLE);
+	else
+		gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 }
