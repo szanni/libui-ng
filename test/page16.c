@@ -105,6 +105,13 @@ void headerVisibleToggled(uiCheckbox *c, void *data)
 	uiCheckboxSetChecked(c, uiTableHeaderVisible(t));
 }
 
+void multiSelectToggled(uiCheckbox *c, void *data)
+{
+	uiTable *t = data;
+	uiTableSelectionSetAllowMultipleSelection(t, uiCheckboxChecked(c));
+	uiCheckboxSetChecked(c, uiTableSelectionAllowMultipleSelection(t));
+}
+
 uiSpinbox *columnID;
 uiSpinbox *columnWidth;
 static void changedColumnID(uiSpinbox *s, void *data)
@@ -136,11 +143,26 @@ static void headerOnClicked(uiTable *t, int col, void *data)
 	prev = col;
 }
 
+static void selectionOnChanged(uiTable *t, void *data)
+{
+	int i;
+	int *rows;
+	int numRows;
+
+	uiTableSelectionCurrentSelection(t, &rows, &numRows);
+
+	printf("Selected %d rows\n", numRows);
+	for (i = 0; i < numRows; ++i)
+		printf("  Row: %d\n", rows[i]);
+	free(rows);
+}
+
 uiBox *makePage16(void)
 {
 	uiBox *page16;
 	uiBox *controls;
 	uiCheckbox *headerVisible;
+	uiCheckbox *multiSelect;
 	uiTable *t;
 	uiTableParams p;
 	uiTableTextColumnOptionalParams tp;
@@ -194,11 +216,19 @@ uiBox *makePage16(void)
 		8);
 
 	uiTableHeaderOnClicked(t, headerOnClicked, NULL);
+	uiTableSelectionOnChanged(t, selectionOnChanged, NULL);
 
 	headerVisible = uiNewCheckbox("Header Visible");
 	uiCheckboxSetChecked(headerVisible, uiTableHeaderVisible(t));
 	uiCheckboxOnToggled(headerVisible, headerVisibleToggled, t);
 	uiBoxAppend(controls, uiControl(headerVisible), 0);
+
+	uiBoxAppend(controls, uiControl(uiNewVerticalSeparator()), 0);
+
+	multiSelect = uiNewCheckbox("Multiple Selection");
+	uiCheckboxSetChecked(multiSelect, uiTableSelectionAllowMultipleSelection(t));
+	uiCheckboxOnToggled(multiSelect, multiSelectToggled, t);
+	uiBoxAppend(controls, uiControl(multiSelect), 0);
 
 	uiBoxAppend(controls, uiControl(uiNewVerticalSeparator()), 0);
 
