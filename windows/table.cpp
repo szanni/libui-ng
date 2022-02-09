@@ -276,8 +276,28 @@ static void defaultSelectionOnChanged(uiTable *table, void *data)
 
 void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows)
 {
+	int iPos = -1;
+	unsigned cap = 20;
+
 	*numRows = 0;
-	*rows = NULL;
+	*rows = (int*) malloc(cap * sizeof(**rows));
+	if (*rows == NULL)
+		return;
+
+	while ((iPos = ListView_GetNextItem(t->hwnd, iPos, LVNI_SELECTED)) != -1) {
+		if (*numRows >= cap) {
+			cap *= 1.5f;
+			int *tmp = (int*) realloc(*rows, cap * sizeof(**rows));
+			if (tmp == NULL) {
+				free(*rows);
+				*rows = NULL;
+				return;
+			}
+			*rows = tmp;
+		}
+		(*rows)[(*numRows)++] = iPos;
+	}
+}
 }
 
 // TODO properly integrate compound statements
