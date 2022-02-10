@@ -351,15 +351,23 @@ static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 	case LVN_ITEMCHANGED:
 		{
 			NMLISTVIEW *nm = (NMLISTVIEW *) nmhdr;
+			UINT oldFocused, newFocused;
 			UINT oldSelected, newSelected;
 			HRESULT hr;
+
+
+			oldSelected = nm->uOldState & LVIS_SELECTED;
+			newSelected = nm->uNewState & LVIS_SELECTED;
+			if ((oldSelected && !newSelected) || (!oldSelected && newSelected))
+				t->selectionOnChanged(t, t->selectionOnChangedData);
 
 			// TODO clean up these if cases
 			if (!t->inLButtonDown && t->edit == NULL)
 				return FALSE;
-			oldSelected = nm->uOldState & LVIS_SELECTED;
-			newSelected = nm->uNewState & LVIS_SELECTED;
-			if (t->inLButtonDown && oldSelected == 0 && newSelected != 0) {
+
+			oldFocused = nm->uOldState & LVIS_FOCUSED;
+			newFocused = nm->uNewState & LVIS_FOCUSED;
+			if (t->inLButtonDown && !oldFocused && newFocused) {
 				t->inDoubleClickTimer = TRUE;
 				// TODO check error
 				SetTimer(t->hwnd, (UINT_PTR) (&(t->inDoubleClickTimer)),
@@ -368,7 +376,7 @@ static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 				return TRUE;
 			}
 			// the nm->iItem == -1 case is because that is used if "the change has been applied to all items in the list view"
-			if (t->edit != NULL && oldSelected != 0 && newSelected == 0 && (t->editedItem == nm->iItem || nm->iItem == -1)) {
+			if (t->edit != NULL && oldFocused && !newFocused && (t->editedItem == nm->iItem || nm->iItem == -1)) {
 				// TODO see if the real list view accepts or rejects changes here; Windows Explorer accepts
 				hr = uiprivTableFinishEditingText(t);
 				if (hr != S_OK) {
@@ -379,6 +387,11 @@ static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 				return TRUE;
 			}
 			return FALSE;
+		}
+	case LVN_ODSTATECHANGED:
+		{
+			t->selectionOnChanged(t, t->selectionOnChangedData);
+			return TRUE;
 		}
 	case LVN_COLUMNCLICK:
 		{
