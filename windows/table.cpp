@@ -298,6 +298,23 @@ void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows)
 		(*rows)[(*numRows)++] = iPos;
 	}
 }
+
+void print_state(UINT state)
+{
+	if (state & LVIS_ACTIVATING)
+		puts("  LVIS_ACTIVATING");
+	if (state & LVIS_CUT)
+		puts("  LVIS_CUT");
+	if (state & LVIS_DROPHILITED)
+		puts("  LVIS_DROPHILITED");
+	if (state & LVIS_FOCUSED)
+		puts("  LVIS_FOCUSED");
+	if (state & LVIS_OVERLAYMASK)
+		puts("  LVIS_OVERLAYMASK");
+	if (state & LVIS_SELECTED)
+		puts("  LVIS_SELECTED");
+	if (state & LVIS_STATEIMAGEMASK)
+		puts("  LVIS_STATEIMAGEMASK");
 }
 
 // TODO properly integrate compound statements
@@ -355,6 +372,11 @@ static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 			UINT oldSelected, newSelected;
 			HRESULT hr;
 
+			printf("LVN_ITEMCHANGED: item:%d\n", nm->iItem);
+			printf(" Old\n");
+			print_state(nm->uOldState);
+			printf(" New\n");
+			print_state(nm->uNewState);
 
 			oldSelected = nm->uOldState & LVIS_SELECTED;
 			newSelected = nm->uNewState & LVIS_SELECTED;
