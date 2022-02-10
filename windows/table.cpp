@@ -357,7 +357,10 @@ static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 
 			oldSelected = nm->uOldState & LVIS_SELECTED;
 			newSelected = nm->uNewState & LVIS_SELECTED;
-			if ((oldSelected && !newSelected) || (!oldSelected && newSelected))
+
+			// Signal on selection change. Ignore deselection of all items (-1) as this
+			// is always followed by a new selection. Signal then.
+			if ((oldSelected && !newSelected && nm->iItem != -1) || (!oldSelected && newSelected))
 				t->selectionOnChanged(t, t->selectionOnChangedData);
 
 			// TODO clean up these if cases
