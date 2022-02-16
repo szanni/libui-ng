@@ -220,12 +220,12 @@ static void defaultHeaderOnClicked(uiTable *table, int column, void *data)
 	// do nothing
 }
 
-int uiTableSelectionAllowMultipleSelection(uiTable *t)
+int uiTableAllowMultipleSelection(uiTable *t)
 {
 	return [t->tv allowsMultipleSelection];
 }
 
-void uiTableSelectionSetAllowMultipleSelection(uiTable *t, int multipleSelection)
+void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection)
 {
 	[t->tv setAllowsMultipleSelection: (BOOL)multipleSelection];
 }

@@ -650,7 +650,7 @@ void uiTableColumnSetWidth(uiTable *t, int column, int width)
 	gtk_tree_view_column_set_fixed_width(c, width);
 }
 
-int uiTableSelectionAllowMultipleSelection(uiTable *t)
+int uiTableAllowMultipleSelection(uiTable *t)
 {
 	GtkTreeSelection *select = gtk_tree_view_get_selection(t->tv);
 
@@ -666,7 +666,7 @@ int uiTableSelectionAllowMultipleSelection(uiTable *t)
 	}
 }
 
-void uiTableSelectionSetAllowMultipleSelection(uiTable *t, int multipleSelection)
+void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection)
 {
 	GtkTreeSelection *select = gtk_tree_view_get_selection(t->tv);
 
