@@ -1519,13 +1519,13 @@ _UI_EXTERN int uiTableColumnWidth(uiTable *t, int column);
 // Note: darwin currently only resizes to header title width on -1
 _UI_EXTERN void uiTableColumnSetWidth(uiTable *t, int column, int width);
 
-// uiTableSelectionAllowMultipleSelection() return if table allows for
+// uiTableAllowMultipleSelection() return if table allows for
 // multiple items being selected or not
-_UI_EXTERN int uiTableSelectionAllowMultipleSelection(uiTable *t);
+_UI_EXTERN int uiTableAllowMultipleSelection(uiTable *t);
 
-// uiTableSelectionSetAllowMultipleSelection() set if table allows for
+// uiTableSetAllowMultipleSelection() set if table allows for
 // multiple items being selected or not
-_UI_EXTERN void uiTableSelectionSetAllowMultipleSelection(uiTable *t, int multipleSelection);
+_UI_EXTERN void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection);
 
 // uiTableSelectionOnChanged() set a callback function to be called when
 // the table selection changes

@@ -595,13 +595,13 @@ void uiTableHeaderSetVisible(uiTable *t, int visible)
 		SetWindowLong(t->hwnd, GWL_STYLE, style | LVS_NOCOLUMNHEADER);
 }
 
-int uiTableSelectionAllowMultipleSelection(uiTable *t)
+int uiTableAllowMultipleSelection(uiTable *t)
 {
 	LONG style = GetWindowLong(t->hwnd, GWL_STYLE);
 	return !(style & LVS_SINGLESEL);
 }
 
-void uiTableSelectionSetAllowMultipleSelection(uiTable *t, int multipleSelection)
+void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection)
 {
 	LONG style = GetWindowLong(t->hwnd, GWL_STYLE);
 	if (multipleSelection)
@@ -651,7 +651,7 @@ uiTable *uiNewTable(uiTableParams *p)
 	if (SetWindowSubclass(t->hwnd, tableSubProc, 0, (DWORD_PTR) t) == FALSE)
 		logLastError(L"SetWindowSubclass()");
 
-	uiTableSelectionSetAllowMultipleSelection(t, 0);
+	uiTableSetAllowMultipleSelection(t, 0);
 
 	return t;
 }

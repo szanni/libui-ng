@@ -108,8 +108,8 @@ void headerVisibleToggled(uiCheckbox *c, void *data)
 void multiSelectToggled(uiCheckbox *c, void *data)
 {
 	uiTable *t = data;
-	uiTableSelectionSetAllowMultipleSelection(t, uiCheckboxChecked(c));
-	uiCheckboxSetChecked(c, uiTableSelectionAllowMultipleSelection(t));
+	uiTableSetAllowMultipleSelection(t, uiCheckboxChecked(c));
+	uiCheckboxSetChecked(c, uiTableAllowMultipleSelection(t));
 }
 
 uiSpinbox *columnID;
@@ -226,7 +226,7 @@ uiBox *makePage16(void)
 	uiBoxAppend(controls, uiControl(uiNewVerticalSeparator()), 0);
 
 	multiSelect = uiNewCheckbox("Multiple Selection");
-	uiCheckboxSetChecked(multiSelect, uiTableSelectionAllowMultipleSelection(t));
+	uiCheckboxSetChecked(multiSelect, uiTableAllowMultipleSelection(t));
 	uiCheckboxOnToggled(multiSelect, multiSelectToggled, t);
 	uiBoxAppend(controls, uiControl(multiSelect), 0);
 
