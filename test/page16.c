@@ -149,7 +149,7 @@ static void selectionOnChanged(uiTable *t, void *data)
 	int *rows;
 	int numRows;
 
-	uiTableSelectionCurrentSelection(t, &rows, &numRows);
+	uiTableCurrentSelection(t, &rows, &numRows);
 
 	printf("Selected %d rows\n", numRows);
 	for (i = 0; i < numRows; ++i)

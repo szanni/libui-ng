@@ -241,7 +241,7 @@ static void defaultSelectionOnChanged(uiTable *t, void *data)
 	// do nothing
 }
 
-void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows)
+void uiTableCurrentSelection(uiTable *t, int* *rows, int *numRows)
 {
 	__block int i = 0;
 	NSIndexSet *set = [t->tv selectedRowIndexes];
