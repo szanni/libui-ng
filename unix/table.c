@@ -384,7 +384,7 @@ static void headerOnClicked(GtkTreeViewColumn *c, gpointer data)
 			t->headerOnClicked(t, i, t->headerOnClickedData);
 }
 
-void uiTableSelectionOnChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data)
+void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data)
 {
 	t->selectionOnChanged = f;
 	t->selectionOnChangedData = data;
@@ -630,7 +630,7 @@ uiTable *uiNewTable(uiTableParams *p)
 		uiprivFree, uiprivFree);
 
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
-	uiTableSelectionOnChanged(t, defaultSelectionOnChanged, NULL);
+	uiTableOnSelectionChanged(t, defaultSelectionOnChanged, NULL);
 
 	g_signal_connect(G_OBJECT(gtk_tree_view_get_selection(t->tv)), "changed",
 		G_CALLBACK(selectionOnChanged), t);

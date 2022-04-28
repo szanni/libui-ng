@@ -216,7 +216,7 @@ uiBox *makePage16(void)
 		8);
 
 	uiTableHeaderOnClicked(t, headerOnClicked, NULL);
-	uiTableSelectionOnChanged(t, selectionOnChanged, NULL);
+	uiTableOnSelectionChanged(t, selectionOnChanged, NULL);
 
 	headerVisible = uiNewCheckbox("Header Visible");
 	uiCheckboxSetChecked(headerVisible, uiTableHeaderVisible(t));

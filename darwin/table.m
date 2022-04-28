@@ -230,7 +230,7 @@ void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection)
 	[t->tv setAllowsMultipleSelection: (BOOL)multipleSelection];
 }
 
-void uiTableSelectionOnChanged(uiTable *t, void (*f)(uiTable *, void *), void *data)
+void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *, void *), void *data)
 {
 	t->selectionOnChanged = f;
 	t->selectionOnChangedData = data;
@@ -297,7 +297,7 @@ uiTable *uiNewTable(uiTableParams *p)
 	t->sv = uiprivMkScrollView(&sp, &(t->d));
 
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
-	uiTableSelectionOnChanged(t, defaultSelectionOnChanged, NULL);
+	uiTableOnSelectionChanged(t, defaultSelectionOnChanged, NULL);
 
 	// TODO WHY DOES THIS REMOVE ALL GRAPHICAL GLITCHES?
 	// I got the idea from http://jwilling.com/blog/optimized-nstableview-scrolling/ but that was on an unrelated problem I didn't seem to have (although I have small-ish tables to start with)

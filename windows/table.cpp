@@ -263,7 +263,7 @@ static void defaultHeaderOnClicked(uiTable *table, int column, void *data)
 	// do nothing
 }
 
-void uiTableSelectionOnChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data)
+void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data)
 {
 	t->selectionOnChanged = f;
 	t->selectionOnChangedData = data;
@@ -622,7 +622,7 @@ uiTable *uiNewTable(uiTableParams *p)
 	t->model = p->Model;
 	t->backgroundColumn = p->RowBackgroundColorModelColumn;
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
-	uiTableSelectionOnChanged(t, defaultSelectionOnChanged, NULL);
+	uiTableOnSelectionChanged(t, defaultSelectionOnChanged, NULL);
 
 	// WS_CLIPCHILDREN is here to prevent drawing over the edit box used for editing text
 	t->hwnd = uiWindowsEnsureCreateControlHWND(WS_EX_CLIENTEDGE,
