@@ -1527,9 +1527,9 @@ _UI_EXTERN int uiTableAllowMultipleSelection(uiTable *t);
 // multiple items being selected or not
 _UI_EXTERN void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection);
 
-// uiTableSelectionOnChanged() set a callback function to be called when
+// uiTableOnSelectionChanged() set a callback function to be called when
 // the table selection changes
-_UI_EXTERN void uiTableSelectionOnChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data);
+_UI_EXTERN void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data);
 
 // uiTableSelectionCurrentSelection() get the current table selection
 // rows is a pointer to an array that will holds the current selection
