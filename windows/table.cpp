@@ -274,7 +274,7 @@ static void defaultSelectionOnChanged(uiTable *table, void *data)
 	// do nothing
 }
 
-void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows)
+void uiTableCurrentSelection(uiTable *t, int* *rows, int *numRows)
 {
 	int iPos = -1;
 	unsigned cap = 20;

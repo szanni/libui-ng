@@ -401,7 +401,7 @@ static void selectionOnChanged(GtkTreeSelection *s, gpointer data)
 	t->selectionOnChanged(t, t->selectionOnChangedData);
 }
 
-void uiTableSelectionCurrentSelection(uiTable *t, int* *rows, int *numRows)
+void uiTableCurrentSelection(uiTable *t, int* *rows, int *numRows)
 {
 	int i = 0;
 	GList *e;
