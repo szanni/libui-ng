@@ -1527,12 +1527,21 @@ _UI_EXTERN void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelecti
 // the table selection changes
 _UI_EXTERN void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data);
 
-// uiTableCurrentSelection() get the current table selection
-// rows is a pointer to an array that will holds the current selection
-// numRows number of rows selected
-// Note: make sure to free() the array rows
-// Note: make sure to check if rows is !NULL even when numRows > 0 (indicates alloc error)
-_UI_EXTERN void uiTableCurrentSelection(uiTable *t, int* *rows, int *numRows);
+// uiTableSelection holds an array of selected row indices for a table.
+typedef struct uiTableSelection uiTableSelection;
+struct uiTableSelection
+{
+	int NumRows;
+	int *Rows;
+};
+
+// uiTableCurrentSelection() return the currently selected number of rows and
+// corresponding row indexes.
+// Note: Make sure to free the result with uiFreeTableSelection()
+_UI_EXTERN uiTableSelection* uiTableCurrentSelection(uiTable *t);
+
+// uiFreeTableSelection frees the given uiTableSelection* and all resources.
+_UI_EXTERN void uiFreeTableSelection(uiTableSelection* s);
 
 #ifdef __cplusplus
 }

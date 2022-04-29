@@ -274,29 +274,31 @@ static void defaultSelectionOnChanged(uiTable *table, void *data)
 	// do nothing
 }
 
-void uiTableCurrentSelection(uiTable *t, int* *rows, int *numRows)
+uiTableSelection* uiTableCurrentSelection(uiTable *t)
 {
 	int iPos = -1;
-	unsigned cap = 20;
+	unsigned cap = 10;
+	uiTableSelection *s = uiprivNew(uiTableSelection);
 
-	*numRows = 0;
-	*rows = (int*) malloc(cap * sizeof(**rows));
-	if (*rows == NULL)
-		return;
+	s->NumRows = 0;
+	s->Rows = NULL;
 
 	while ((iPos = ListView_GetNextItem(t->hwnd, iPos, LVNI_SELECTED)) != -1) {
-		if (*numRows >= cap) {
+		if (s->NumRows >= cap || s->Rows == NULL) {
 			cap *= 1.5f;
-			int *tmp = (int*) realloc(*rows, cap * sizeof(**rows));
-			if (tmp == NULL) {
-				free(*rows);
-				*rows = NULL;
-				return;
-			}
-			*rows = tmp;
+			s->Rows = (int*) uiprivRealloc(s->Rows, cap * sizeof(*s->Rows), "uiTableSelection->Rows");
 		}
-		(*rows)[(*numRows)++] = iPos;
+		s->Rows[s->NumRows++] = iPos;
 	}
+
+	return s;
+}
+
+void uiFreeTableSelection(uiTableSelection *s)
+{
+	if (s->Rows != NULL)
+		uiprivFree(s->Rows);
+	uiprivFree(s);
 }
 
 // TODO properly integrate compound statements
