@@ -143,17 +143,24 @@ static void headerOnClicked(uiTable *t, int col, void *data)
 	prev = col;
 }
 
+uiLabel *lblNumSelectedRows;
+uiLabel *lblSumSelectedRows;
 static void onSelectionChanged(uiTable *t, void *data)
 {
 	int i;
+	int sum = 0;
+	char strNumRows[128];
+	char strSumRows[128];
 	uiTableSelection *s = uiTableCurrentSelection(t);
 
-	if (s == NULL)
-		return;
+	sprintf(strNumRows, "# Selected Rows: %d", s->NumRows);
+	uiLabelSetText(lblNumSelectedRows, strNumRows);
 
-	printf("Selected %d rows\n", s->NumRows);
 	for (i = 0; i < s->NumRows; ++i)
-		printf("  Row: %d\n", s->Rows[i]);
+		sum += s->Rows[i];
+
+	sprintf(strSumRows, "Sum Selected Rows: %d", sum);
+	uiLabelSetText(lblSumSelectedRows, strSumRows);
 
 	uiFreeTableSelection(s);
 }
@@ -162,6 +169,7 @@ uiBox *makePage16(void)
 {
 	uiBox *page16;
 	uiBox *controls;
+	uiBox *stats;
 	uiCheckbox *headerVisible;
 	uiCheckbox *multiSelect;
 	uiTable *t;
@@ -242,6 +250,16 @@ uiBox *makePage16(void)
 
 	uiSpinboxOnChanged(columnID, changedColumnID, t);
 	uiSpinboxOnChanged(columnWidth, changedColumnWidth, t);
+
+	stats = newHorizontalBox();
+	uiBoxSetPadded(stats, 1);
+	uiBoxAppend(page16, uiControl(stats), 0);
+
+	lblNumSelectedRows = uiNewLabel("");
+	uiBoxAppend(stats, uiControl(lblNumSelectedRows), 0);
+
+	lblSumSelectedRows = uiNewLabel("");
+	uiBoxAppend(stats, uiControl(lblSumSelectedRows), 0);
 
 	return page16;
 }
