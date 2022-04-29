@@ -265,11 +265,11 @@ static void defaultHeaderOnClicked(uiTable *table, int column, void *data)
 
 void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data)
 {
-	t->selectionOnChanged = f;
-	t->selectionOnChangedData = data;
+	t->onSelectionChanged = f;
+	t->onSelectionChangedData = data;
 }
 
-static void defaultSelectionOnChanged(uiTable *table, void *data)
+static void defaultOnSelectionChanged(uiTable *table, void *data)
 {
 	// do nothing
 }
@@ -363,7 +363,7 @@ static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 			// Signal on selection change. Ignore deselection of all items (-1) as this
 			// is always followed by a new selection. Signal then.
 			if ((oldSelected && !newSelected && nm->iItem != -1) || (!oldSelected && newSelected))
-				t->selectionOnChanged(t, t->selectionOnChangedData);
+				t->onSelectionChanged(t, t->onSelectionChangedData);
 
 			// TODO clean up these if cases
 			if (!t->inLButtonDown && t->edit == NULL)
@@ -394,7 +394,7 @@ static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 		}
 	case LVN_ODSTATECHANGED:
 		{
-			t->selectionOnChanged(t, t->selectionOnChangedData);
+			t->onSelectionChanged(t, t->onSelectionChangedData);
 			return TRUE;
 		}
 	case LVN_COLUMNCLICK:
@@ -624,7 +624,7 @@ uiTable *uiNewTable(uiTableParams *p)
 	t->model = p->Model;
 	t->backgroundColumn = p->RowBackgroundColorModelColumn;
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
-	uiTableOnSelectionChanged(t, defaultSelectionOnChanged, NULL);
+	uiTableOnSelectionChanged(t, defaultOnSelectionChanged, NULL);
 
 	// WS_CLIPCHILDREN is here to prevent drawing over the edit box used for editing text
 	t->hwnd = uiWindowsEnsureCreateControlHWND(WS_EX_CLIENTEDGE,

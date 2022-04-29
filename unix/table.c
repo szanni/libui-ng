@@ -20,8 +20,8 @@ struct uiTable {
 	guint indeterminateTimer;
 	void (*headerOnClicked)(uiTable *, int, void *);
 	void *headerOnClickedData;
-	void (*selectionOnChanged)(uiTable *, void *);
-	void *selectionOnChangedData;
+	void (*onSelectionChanged)(uiTable *, void *);
+	void *onSelectionChangedData;
 };
 
 // use the same size as GtkFileChooserWidget's treeview
@@ -386,19 +386,19 @@ static void headerOnClicked(GtkTreeViewColumn *c, gpointer data)
 
 void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data)
 {
-	t->selectionOnChanged = f;
-	t->selectionOnChangedData = data;
+	t->onSelectionChanged = f;
+	t->onSelectionChangedData = data;
 }
 
-static void defaultSelectionOnChanged(uiTable *table, void *data)
+static void defaultOnSelectionChanged(uiTable *table, void *data)
 {
 	// do nothing
 }
 
-static void selectionOnChanged(GtkTreeSelection *s, gpointer data)
+static void onSelectionChanged(GtkTreeSelection *s, gpointer data)
 {
 	uiTable *t = uiTable(data);
-	t->selectionOnChanged(t, t->selectionOnChangedData);
+	t->onSelectionChanged(t, t->onSelectionChangedData);
 }
 
 uiTableSelection* uiTableCurrentSelection(uiTable *t)
@@ -639,10 +639,10 @@ uiTable *uiNewTable(uiTableParams *p)
 		uiprivFree, uiprivFree);
 
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
-	uiTableOnSelectionChanged(t, defaultSelectionOnChanged, NULL);
+	uiTableOnSelectionChanged(t, defaultOnSelectionChanged, NULL);
 
 	g_signal_connect(G_OBJECT(gtk_tree_view_get_selection(t->tv)), "changed",
-		G_CALLBACK(selectionOnChanged), t);
+		G_CALLBACK(onSelectionChanged), t);
 
 	return t;
 }

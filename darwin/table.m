@@ -111,7 +111,7 @@ static void setBackgroundColor(uiprivTableView *t, NSTableRowView *rv, NSInteger
 - (void)tableViewSelectionDidChange:(NSNotification *)notification
 {
 	uiTable *t = [(uiprivTableView*)[notification object] uiTable];
-	t->selectionOnChanged(t, t->selectionOnChangedData);
+	t->onSelectionChanged(t, t->onSelectionChangedData);
 }
 
 @end
@@ -232,11 +232,11 @@ void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection)
 
 void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *, void *), void *data)
 {
-	t->selectionOnChanged = f;
-	t->selectionOnChangedData = data;
+	t->onSelectionChanged = f;
+	t->onSelectionChangedData = data;
 }
 
-static void defaultSelectionOnChanged(uiTable *t, void *data)
+static void defaultOnSelectionChanged(uiTable *t, void *data)
 {
 	// do nothing
 }
@@ -304,7 +304,7 @@ uiTable *uiNewTable(uiTableParams *p)
 	t->sv = uiprivMkScrollView(&sp, &(t->d));
 
 	uiTableHeaderOnClicked(t, defaultHeaderOnClicked, NULL);
-	uiTableOnSelectionChanged(t, defaultSelectionOnChanged, NULL);
+	uiTableOnSelectionChanged(t, defaultOnSelectionChanged, NULL);
 
 	// TODO WHY DOES THIS REMOVE ALL GRAPHICAL GLITCHES?
 	// I got the idea from http://jwilling.com/blog/optimized-nstableview-scrolling/ but that was on an unrelated problem I didn't seem to have (although I have small-ish tables to start with)
