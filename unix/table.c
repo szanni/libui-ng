@@ -426,13 +426,6 @@ uiTableSelection* uiTableCurrentSelection(uiTable *t)
 	return s;
 }
 
-void uiFreeTableSelection(uiTableSelection *s)
-{
-	if (s->Rows != NULL)
-		uiprivFree(s->Rows);
-	uiprivFree(s);
-}
-
 static GtkTreeViewColumn *addColumn(uiTable *t, const char *name)
 {
 	GtkTreeViewColumn *c;

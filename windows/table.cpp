@@ -294,13 +294,6 @@ uiTableSelection* uiTableCurrentSelection(uiTable *t)
 	return s;
 }
 
-void uiFreeTableSelection(uiTableSelection *s)
-{
-	if (s->Rows != NULL)
-		uiprivFree(s->Rows);
-	uiprivFree(s);
-}
-
 // TODO properly integrate compound statements
 static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 {

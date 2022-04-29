@@ -257,13 +257,6 @@ uiTableSelection* uiTableCurrentSelection(uiTable *t)
 	return s;
 }
 
-void uiFreeTableSelection(uiTableSelection *s)
-{
-	if (s->Rows != NULL)
-		uiprivFree(s->Rows);
-	uiprivFree(s);
-}
-
 uiTable *uiNewTable(uiTableParams *p)
 {
 	uiTable *t;
