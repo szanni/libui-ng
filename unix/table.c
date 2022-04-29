@@ -401,27 +401,36 @@ static void selectionOnChanged(GtkTreeSelection *s, gpointer data)
 	t->selectionOnChanged(t, t->selectionOnChangedData);
 }
 
-void uiTableCurrentSelection(uiTable *t, int* *rows, int *numRows)
+uiTableSelection* uiTableCurrentSelection(uiTable *t)
 {
 	int i = 0;
 	GList *e;
 	GList *list;
 	GtkTreeSelection *sel;
 	GtkTreeModel *m = GTK_TREE_MODEL(t->model);
+	uiTableSelection *s = uiprivNew(uiTableSelection);
 
 	sel = gtk_tree_view_get_selection(t->tv);
 	list = gtk_tree_selection_get_selected_rows(sel, &m);
 
-	*numRows = g_list_length(list);
-	*rows = malloc(*numRows * sizeof(**rows));
-	g_assert(rows != NULL);
+	s->NumRows = g_list_length(list);
+	s->Rows = uiprivAlloc(s->NumRows * sizeof(*s->Rows), "uiTableSelection->Rows");
 
 	for (e = list; e != NULL; e = e->next) {
 		GtkTreePath *path = e->data;
-		(*rows)[i++] = gtk_tree_path_get_indices(path)[0];
+		s->Rows[i++] = gtk_tree_path_get_indices(path)[0];
 	}
 
-	g_list_free_full (list, (GDestroyNotify) gtk_tree_path_free);
+	g_list_free_full(list, (GDestroyNotify) gtk_tree_path_free);
+
+	return s;
+}
+
+void uiFreeTableSelection(uiTableSelection *s)
+{
+	if (s->Rows != NULL)
+		uiprivFree(s->Rows);
+	uiprivFree(s);
 }
 
 static GtkTreeViewColumn *addColumn(uiTable *t, const char *name)

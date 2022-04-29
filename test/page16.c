@@ -146,15 +146,16 @@ static void headerOnClicked(uiTable *t, int col, void *data)
 static void selectionOnChanged(uiTable *t, void *data)
 {
 	int i;
-	int *rows;
-	int numRows;
+	uiTableSelection *s = uiTableCurrentSelection(t);
 
-	uiTableCurrentSelection(t, &rows, &numRows);
+	if (s == NULL)
+		return;
 
-	printf("Selected %d rows\n", numRows);
-	for (i = 0; i < numRows; ++i)
-		printf("  Row: %d\n", rows[i]);
-	free(rows);
+	printf("Selected %d rows\n", s->NumRows);
+	for (i = 0; i < s->NumRows; ++i)
+		printf("  Row: %d\n", s->Rows[i]);
+
+	uiFreeTableSelection(s);
 }
 
 uiBox *makePage16(void)

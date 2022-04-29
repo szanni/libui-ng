@@ -241,20 +241,27 @@ static void defaultSelectionOnChanged(uiTable *t, void *data)
 	// do nothing
 }
 
-void uiTableCurrentSelection(uiTable *t, int* *rows, int *numRows)
+uiTableSelection* uiTableCurrentSelection(uiTable *t)
 {
 	__block int i = 0;
 	NSIndexSet *set = [t->tv selectedRowIndexes];
+	uiTableSelection *s = uiprivNew(uiTableSelection);
 
-	*numRows = [set count];
-	*rows = malloc(*numRows * sizeof(**rows));
-
-	// TODO fix API to expose error
-	assert(*rows != NULL);
+	s->NumRows = [set count];
+	s->Rows = uiprivAlloc(s->NumRows * sizeof(*s->Rows), "uiTableSelection->Rows");
 
 	[set enumerateIndexesUsingBlock:^(NSUInteger row, BOOL *stop) {
-		(*rows)[i++] = row;
+		s->Rows[i++] = row;
 	}];
+
+	return s;
+}
+
+void uiFreeTableSelection(uiTableSelection *s)
+{
+	if (s->Rows != NULL)
+		uiprivFree(s->Rows);
+	uiprivFree(s);
 }
 
 uiTable *uiNewTable(uiTableParams *p)
