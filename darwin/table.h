@@ -18,8 +18,8 @@ struct uiTable {
 	uiTableModel *m;
 	void (*headerOnClicked)(uiTable *, int, void *);
 	void *headerOnClickedData;
-	void (*selectionOnChanged)(uiTable *, void *);
-	void *selectionOnChangedData;
+	void (*onSelectionChanged)(uiTable *, void *);
+	void *onSelectionChangedData;
 };
 
 // tablecolumn.m

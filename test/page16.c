@@ -143,7 +143,7 @@ static void headerOnClicked(uiTable *t, int col, void *data)
 	prev = col;
 }
 
-static void selectionOnChanged(uiTable *t, void *data)
+static void onSelectionChanged(uiTable *t, void *data)
 {
 	int i;
 	uiTableSelection *s = uiTableCurrentSelection(t);
@@ -217,7 +217,7 @@ uiBox *makePage16(void)
 		8);
 
 	uiTableHeaderOnClicked(t, headerOnClicked, NULL);
-	uiTableOnSelectionChanged(t, selectionOnChanged, NULL);
+	uiTableOnSelectionChanged(t, onSelectionChanged, NULL);
 
 	headerVisible = uiNewCheckbox("Header Visible");
 	uiCheckboxSetChecked(headerVisible, uiTableHeaderVisible(t));
