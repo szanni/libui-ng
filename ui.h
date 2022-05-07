@@ -1531,12 +1531,13 @@ _UI_EXTERN void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *t, void
 typedef struct uiTableSelection uiTableSelection;
 struct uiTableSelection
 {
-	int NumRows;
-	int *Rows;
+	int NumRows; //! Number of selected rows.
+	int *Rows; //! Array containing selected row indices, NULL on empty selection.
 };
 
 // uiTableCurrentSelection() return the currently selected number of rows and
 // corresponding row indexes.
+// Note: For empty selections the `Rows` pointer will be NULL.
 // Note: Make sure to free the result with uiFreeTableSelection()
 _UI_EXTERN uiTableSelection* uiTableCurrentSelection(uiTable *t);
 

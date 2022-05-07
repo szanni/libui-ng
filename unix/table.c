@@ -414,7 +414,10 @@ uiTableSelection* uiTableCurrentSelection(uiTable *t)
 	list = gtk_tree_selection_get_selected_rows(sel, &m);
 
 	s->NumRows = g_list_length(list);
-	s->Rows = uiprivAlloc(s->NumRows * sizeof(*s->Rows), "uiTableSelection->Rows");
+	if (s->NumRows == 0)
+		s->Rows = NULL;
+	else
+		s->Rows = uiprivAlloc(s->NumRows * sizeof(*s->Rows), "uiTableSelection->Rows");
 
 	for (e = list; e != NULL; e = e->next) {
 		GtkTreePath *path = e->data;
