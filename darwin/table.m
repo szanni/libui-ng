@@ -248,7 +248,10 @@ uiTableSelection* uiTableCurrentSelection(uiTable *t)
 	uiTableSelection *s = uiprivNew(uiTableSelection);
 
 	s->NumRows = [set count];
-	s->Rows = uiprivAlloc(s->NumRows * sizeof(*s->Rows), "uiTableSelection->Rows");
+	if (s->NumRows == 0)
+		s->Rows = NULL;
+	else
+		s->Rows = uiprivAlloc(s->NumRows * sizeof(*s->Rows), "uiTableSelection->Rows");
 
 	[set enumerateIndexesUsingBlock:^(NSUInteger row, BOOL *stop) {
 		s->Rows[i++] = row;
