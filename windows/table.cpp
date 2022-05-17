@@ -294,6 +294,22 @@ uiTableSelection* uiTableCurrentSelection(uiTable *t)
 	return s;
 }
 
+void uiTableSetCurrentSelection(uiTable *t, uiTableSelection *sel)
+{
+	int i;
+
+	if (!uiTableAllowMultipleSelection(t) && sel->NumRows > 1) {
+		uiprivUserBug("Can not select multiple rows in single selection mode");
+		return;
+	}
+
+	/* clear selection */
+	ListView_SetItemState(t->hwnd, -1, 0, LVIS_SELECTED);
+
+	for (i = 0; i < sel->NumRows; ++i)
+		ListView_SetItemState(t->hwnd, sel->Rows[i], LVIS_SELECTED, LVIS_SELECTED);
+}
+
 // TODO properly integrate compound statements
 static BOOL onWM_NOTIFY(uiControl *c, HWND hwnd, NMHDR *nmhdr, LRESULT *lResult)
 {

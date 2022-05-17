@@ -260,6 +260,22 @@ uiTableSelection* uiTableCurrentSelection(uiTable *t)
 	return s;
 }
 
+void uiTableSetCurrentSelection(uiTable *t, uiTableSelection *sel)
+{
+	int i;
+	NSMutableIndexSet *set;
+
+	if (!uiTableAllowMultipleSelection(t) && sel->NumRows > 1) {
+		uiprivUserBug("Can not select multiple rows in single selection mode");
+		return;
+	}
+
+	set = [NSMutableIndexSet new];
+	for (i = 0; i < sel->NumRows; ++i)
+		[set addIndex: sel->Rows[i]];
+	[t->tv selectRowIndexes: set byExtendingSelection: FALSE];
+}
+
 uiTable *uiNewTable(uiTableParams *p)
 {
 	uiTable *t;

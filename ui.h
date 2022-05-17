@@ -1541,6 +1541,12 @@ struct uiTableSelection
 // Note: Make sure to free the result with uiFreeTableSelection()
 _UI_EXTERN uiTableSelection* uiTableCurrentSelection(uiTable *t);
 
+// uiTableSetCurrentSelection() set selected row(s), clearing any existing selection
+// Note: Make sure not to select multiple rows in single select mode
+// Note: For empty selections the Rows pointer is never accessed
+// Note: Data is owned by the caller
+_UI_EXTERN void uiTableSetCurrentSelection(uiTable *t, uiTableSelection *sel);
+
 // uiFreeTableSelection frees the given uiTableSelection* and all resources.
 _UI_EXTERN void uiFreeTableSelection(uiTableSelection* s);
 
