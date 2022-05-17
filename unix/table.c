@@ -429,6 +429,26 @@ uiTableSelection* uiTableCurrentSelection(uiTable *t)
 	return s;
 }
 
+void uiTableSetCurrentSelection(uiTable *t, uiTableSelection *sel)
+{
+	int i;
+	GtkTreeSelection *ts;
+
+	if (!uiTableAllowMultipleSelection(t) && sel->NumRows > 1) {
+		uiprivUserBug("Can not select multiple rows in single selection mode");
+		return;
+	}
+
+	ts = gtk_tree_view_get_selection(t->tv);
+	gtk_tree_selection_unselect_all(ts);
+
+	for (i = 0; i < sel->NumRows; ++i) {
+		GtkTreePath *path = gtk_tree_path_new_from_indices(sel->Rows[i], -1);
+		gtk_tree_selection_select_path(ts, path);
+		gtk_tree_path_free(path);
+	}
+}
+
 static GtkTreeViewColumn *addColumn(uiTable *t, const char *name)
 {
 	GtkTreeViewColumn *c;

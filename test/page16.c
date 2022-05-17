@@ -165,6 +165,21 @@ static void onSelectionChanged(uiTable *t, void *data)
 	uiFreeTableSelection(s);
 }
 
+static void selectChecked(uiButton *b, void *data)
+{
+	unsigned i;
+	int rows[sizeof(checkStates)/sizeof(*checkStates)];
+	int numChecked = 0;
+	uiTable *t = data;
+
+	for (i = 0; i < sizeof(checkStates)/sizeof(*checkStates); ++i)
+		if (checkStates[i])
+			rows[numChecked++] = i;
+
+	uiTableSelection sel = {.NumRows = numChecked, .Rows = rows};
+	uiTableSetCurrentSelection(t, &sel);
+}
+
 uiBox *makePage16(void)
 {
 	uiBox *page16;
@@ -175,6 +190,7 @@ uiBox *makePage16(void)
 	uiTable *t;
 	uiTableParams p;
 	uiTableTextColumnOptionalParams tp;
+	uiButton *buttonSelectChecked;
 
 	img[0] = uiNewImage(16, 16);
 	appendImageNamed(img[0], "andlabs_16x16test_24june2016.png");
@@ -247,9 +263,14 @@ uiBox *makePage16(void)
 	uiBoxAppend(controls, uiControl(uiNewLabel("Width")), 0);
 	columnWidth = uiNewSpinbox(-1, INT_MAX);
 	uiBoxAppend(controls, uiControl(columnWidth), 0);
-
 	uiSpinboxOnChanged(columnID, changedColumnID, t);
 	uiSpinboxOnChanged(columnWidth, changedColumnWidth, t);
+
+	uiBoxAppend(controls, uiControl(uiNewVerticalSeparator()), 0);
+
+	buttonSelectChecked = uiNewButton("Select Checked");
+	uiButtonOnClicked(buttonSelectChecked, selectChecked, t);
+	uiBoxAppend(controls, uiControl(buttonSelectChecked), 0);
 
 	stats = newHorizontalBox();
 	uiBoxSetPadded(stats, 1);
