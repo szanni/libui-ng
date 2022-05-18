@@ -108,12 +108,9 @@ _UI_EXTERN void uiFreeText(char *text);
 
 
 /**
+ * Base class for GUI controls providing common methods.
  */
 typedef struct uiControl uiControl;
-/**
- * represents a GUI control.
- * It provdes methods common to all uiControl's.
- */
 struct uiControl {
 	uint32_t Signature;
 	uint32_t OSSignature;
@@ -134,93 +131,113 @@ struct uiControl {
 #define uiControl(this) ((uiControl *) (this))
 
 /**
+ * Dispose and free all allocated control's resources.
+ *
  * @memberof uiControl
- * dispose and free all allocated resources.
  */
 _UI_EXTERN void uiControlDestroy(uiControl *);
 
 /**
+ * Returns the control's OS-level handle.
+ *
  * @memberof uiControl
- * returns the OS-level handle associated with this uiControl.
  */
 _UI_EXTERN uintptr_t uiControlHandle(uiControl *);
 
 /**
+ * Returns the control's parent or `NULL` if detached.
+ *
  * @memberof uiControl
- * returns parent of the control or `NULL` for detached.
  */
 _UI_EXTERN uiControl *uiControlParent(uiControl *);
 
 /**
+ * Sets the control's parent.
+ *
  * @memberof uiControl
- * sets parent of the control.
  */
-_UI_EXTERN void uiControlSetParent(uiControl *, uiControl *);
+_UI_EXTERN void uiControlSetParent(uiControl *c, uiControl *parent);
 
 /**
+ * Returns whether or not the control is a top level control.
+ *
  * @memberof uiControl
- * returns whether the control is a top level one or not.
  */
 _UI_EXTERN int uiControlToplevel(uiControl *);
 
 /**
+ * Returns whether or not the control is visible.
+ *
  * @memberof uiControl
- * returns whether the control is visible.
  */
 _UI_EXTERN int uiControlVisible(uiControl *);
 
 /**
+ * Shows the control.
+ *
  * @memberof uiControl
- * shows the control.
  */
 _UI_EXTERN void uiControlShow(uiControl *);
 
 /**
- * @memberof uiControl
- * hides the control.
+ * Hides the control.
  *
- * Hidden controls do not participate in layout
- * (that is, uiBox, uiGridPane, etc. does not reserve space for hidden controls).
+ * @note Hidden controls do not take up space within the layout.
+ * @memberof uiControl
  */
 _UI_EXTERN void uiControlHide(uiControl *);
 
 /**
- * @memberof uiControl
- * returns whether the control is enabled.
+ * Returns whether or not the control is enabled.
  *
  * Defaults to `true`.
+ *
+ * @see uiControlEnabledToUser
+ * @memberof uiControl
  */
 _UI_EXTERN int uiControlEnabled(uiControl *);
 
 /**
+ * Enables the control.
+ *
  * @memberof uiControl
- * cnables the control.
  */
 _UI_EXTERN void uiControlEnable(uiControl *);
 
 /**
+ * Disables the control.
+ *
  * @memberof uiControl
- * disables the control.
  */
 _UI_EXTERN void uiControlDisable(uiControl *);
 
 /**
- * @static @memberof uiControl
+ * Allocates a uiControl.
  */
 _UI_EXTERN uiControl *uiAllocControl(size_t n, uint32_t OSsig, uint32_t typesig, const char *typenamestr);
 
 /**
+ * Frees the control.
+ *
  * @memberof uiControl
  */
 _UI_EXTERN void uiFreeControl(uiControl *);
 
-// TODO make sure all controls have these
 /**
+ * Makes sure the control's parent can be set to @p parent.
+ *
+ * @todo Make sure all controls have these
  * @memberof uiControl
  */
-_UI_EXTERN void uiControlVerifySetParent(uiControl *, uiControl *);
+_UI_EXTERN void uiControlVerifySetParent(uiControl *c, uiControl *parent);
 
 /**
+ * Returns whether or not the control can be interacted with by the user.
+ *
+ * Checks if the control and all it's parents are enabled to make sure it can
+ * be interacted with by the user.
+ *
+ * @see uiControlEnabled
  * @memberof uiControl
  */
 _UI_EXTERN int uiControlEnabledToUser(uiControl *);
