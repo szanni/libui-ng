@@ -401,38 +401,52 @@ _UI_EXTERN uiWindow *uiNewWindow(const char *title, int width, int height, int h
 
 
 /**
+ * A control that visually represents a button to be clicked by the user to trigger an action.
+ *
  * @struct uiButton
  * @extends uiControl
- * A uiControl that represents a button that the user can click to perform an action.
- *
- * A uiButton has a text label that should describe what the button does.
  */
 typedef struct uiButton uiButton;
 #define uiButton(this) ((uiButton *) (this))
 
 /**
+ * Returns the button label text.
+ *
+ * @returns The text of the label.
+ * @returns A `NUL` terminated UTF-8 string.
+ * @returns The data is owned by the caller and needs to be `uiFreeText()`'d.
  * @memberof uiButton
- * returns the button's text.
  */
 _UI_EXTERN char *uiButtonText(uiButton *b);
 
 /**
+ * Sets the button label text.
+ *
+ * @param text Label text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
+ *
  * @memberof uiButton
- * sets the button's text to @p text.
  */
 _UI_EXTERN void uiButtonSetText(uiButton *b, const char *text);
 
 /**
- * @memberof uiButton
- * registers @p f to be run when the user clicks the button.
+ * Register a callback for when the button is clicked.
  *
- * Only one function can be registered at a time.
+ * @param b uiButton instance.
+ * @param f Callback function.
+ * @param data User data to be passed to the callback.
+ * @todo document callback
+ *
+ * @note Only one callback can be registered at a time.
+ * @memberof uiButton
  */
 _UI_EXTERN void uiButtonOnClicked(uiButton *b, void (*f)(uiButton *b, void *data), void *data);
 
 /**
- * @static @memberof uiButton
- * creates a new uiButton with the given @p text as its label.
+ * Creates a new uiButton.
+ *
+ * @param text Label text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
+ * @returns A new uiButton instance.
+ * @memberof uiButton
  */
 _UI_EXTERN uiButton *uiNewButton(const char *text);
 
