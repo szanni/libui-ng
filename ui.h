@@ -59,26 +59,30 @@ _UI_EXTERN void uiMain(void);
 _UI_EXTERN void uiMainSteps(void);
 _UI_EXTERN int uiMainStep(int wait);
 
-/// queues a return from uiMain. It does not exit the program.
-/// It also does not immediately cause uiMain to return; uiMain will
-/// return when it next can. uiQuit must be called from the GUI thread.
+/**
+ * queues a return from uiMain. It does not exit the program.
+ * It also does not immediately cause uiMain to return; uiMain will
+ * return when it next can. uiQuit must be called from the GUI thread.
+ */
 _UI_EXTERN void uiQuit(void);
 
-/// queues @p f to be executed on the GUI thread when
-/// next possible. It returns immediately; that is, it does not wait
-/// for the function to actually be executed. uiQueueMain is the only
-/// function that can be called from other goroutines, and its
-/// primary purpose is to allow communication between other
-/// goroutines and the GUI thread. Calling QueueMain after Quit
-/// has been called results in undefined behavior.
-///
-/// If you start a goroutine in f, it also cannot call package ui
-/// functions. So for instance, the following will result in
-/// undefined behavior:
-///
-/// 	ui.QueueMain(func() {
-/// 		go ui.MsgBox(...)
-/// 	})
+/**
+ * queues @p f to be executed on the GUI thread when
+ * next possible. It returns immediately; that is, it does not wait
+ * for the function to actually be executed. uiQueueMain is the only
+ * function that can be called from other goroutines, and its
+ * primary purpose is to allow communication between other
+ * goroutines and the GUI thread. Calling QueueMain after Quit
+ * has been called results in undefined behavior.
+ *
+ * If you start a goroutine in f, it also cannot call package ui
+ * functions. So for instance, the following will result in
+ * undefined behavior:
+ *
+ * 	ui.QueueMain(func() {
+ * 		go ui.MsgBox(...)
+ * 	})
+ */
 _UI_EXTERN void uiQueueMain(void (*f)(void *data), void *data);
 
 // TODO standardize the looping behavior return type, either with some enum or something, and the test expressions throughout the code
@@ -90,21 +94,26 @@ _UI_EXTERN void uiQueueMain(void (*f)(void *data), void *data);
 
 _UI_EXTERN void uiTimer(int milliseconds, int (*f)(void *data), void *data);
 
-/// schedules @p f to be exeucted when the OS wants
-/// the program to quit or when a Quit menu item has been clicked.
-/// Only one function may be registered at a time. If the function
-/// returns true, uiQuit will be called. If the function returns false, or
-/// if uiOnShouldQuit is never called. uiQuit will not be called and the
-/// OS will be told that the program needs to continue running.
+/**
+ * schedules @p f to be exeucted when the OS wants
+ * the program to quit or when a Quit menu item has been clicked.
+ * Only one function may be registered at a time. If the function
+ * returns true, uiQuit will be called. If the function returns false, or
+ * if uiOnShouldQuit is never called. uiQuit will not be called and the
+ * OS will be told that the program needs to continue running.
+ */
 _UI_EXTERN void uiOnShouldQuit(int (*f)(void *data), void *data);
 
 _UI_EXTERN void uiFreeText(char *text);
 
 
-//////////////////////////////////////////////////////////////////
+/**
+ */
 typedef struct uiControl uiControl;
-/// represents a GUI control.
-/// It provdes methods common to all uiControl's.
+/**
+ * represents a GUI control.
+ * It provdes methods common to all uiControl's.
+ */
 struct uiControl {
 	uint32_t Signature;
 	uint32_t OSSignature;
@@ -124,401 +133,553 @@ struct uiControl {
 // TOOD add argument names to all arguments
 #define uiControl(this) ((uiControl *) (this))
 
-/// @memberof uiControl
-/// dispose and free all allocated resources.
+/**
+ * @memberof uiControl
+ * dispose and free all allocated resources.
+ */
 _UI_EXTERN void uiControlDestroy(uiControl *);
 
-/// @memberof uiControl
-/// returns the OS-level handle associated with this uiControl.
+/**
+ * @memberof uiControl
+ * returns the OS-level handle associated with this uiControl.
+ */
 _UI_EXTERN uintptr_t uiControlHandle(uiControl *);
 
-/// @memberof uiControl
-/// returns parent of the control or `NULL` for detached.
+/**
+ * @memberof uiControl
+ * returns parent of the control or `NULL` for detached.
+ */
 _UI_EXTERN uiControl *uiControlParent(uiControl *);
 
-/// @memberof uiControl
-/// sets parent of the control.
+/**
+ * @memberof uiControl
+ * sets parent of the control.
+ */
 _UI_EXTERN void uiControlSetParent(uiControl *, uiControl *);
 
-/// @memberof uiControl
-/// returns whether the control is a top level one or not.
+/**
+ * @memberof uiControl
+ * returns whether the control is a top level one or not.
+ */
 _UI_EXTERN int uiControlToplevel(uiControl *);
 
-/// @memberof uiControl
-/// returns whether the control is visible.
+/**
+ * @memberof uiControl
+ * returns whether the control is visible.
+ */
 _UI_EXTERN int uiControlVisible(uiControl *);
 
-/// @memberof uiControl
-/// shows the control.
+/**
+ * @memberof uiControl
+ * shows the control.
+ */
 _UI_EXTERN void uiControlShow(uiControl *);
 
-/// @memberof uiControl
-/// hides the control.
-///
-/// Hidden controls do not participate in layout
-/// (that is, uiBox, uiGridPane, etc. does not reserve space for hidden controls).
+/**
+ * @memberof uiControl
+ * hides the control.
+ *
+ * Hidden controls do not participate in layout
+ * (that is, uiBox, uiGridPane, etc. does not reserve space for hidden controls).
+ */
 _UI_EXTERN void uiControlHide(uiControl *);
 
-/// @memberof uiControl
-/// returns whether the control is enabled.
-///
-/// Defaults to `true`.
+/**
+ * @memberof uiControl
+ * returns whether the control is enabled.
+ *
+ * Defaults to `true`.
+ */
 _UI_EXTERN int uiControlEnabled(uiControl *);
 
-/// @memberof uiControl
-/// cnables the control.
+/**
+ * @memberof uiControl
+ * cnables the control.
+ */
 _UI_EXTERN void uiControlEnable(uiControl *);
 
-/// @memberof uiControl
-/// disables the control.
+/**
+ * @memberof uiControl
+ * disables the control.
+ */
 _UI_EXTERN void uiControlDisable(uiControl *);
 
-/// @static @memberof uiControl
+/**
+ * @static @memberof uiControl
+ */
 _UI_EXTERN uiControl *uiAllocControl(size_t n, uint32_t OSsig, uint32_t typesig, const char *typenamestr);
 
-/// @memberof uiControl
+/**
+ * @memberof uiControl
+ */
 _UI_EXTERN void uiFreeControl(uiControl *);
 
 // TODO make sure all controls have these
-/// @memberof uiControl
+/**
+ * @memberof uiControl
+ */
 _UI_EXTERN void uiControlVerifySetParent(uiControl *, uiControl *);
 
-/// @memberof uiControl
+/**
+ * @memberof uiControl
+ */
 _UI_EXTERN int uiControlEnabledToUser(uiControl *);
 
 _UI_EXTERN void uiUserBugCannotSetParentOnToplevel(const char *type);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiWindow
-/// @extends uiControl
-/// A uiControl that represents a top-level window.
-///
-/// A uiWindow contains one child uiControl that occupies the entirety of the window.\n
-/// Though a uiWindow is a uiControl, a uiWindow cannot be the child of another uiControl.
+/**
+ * @struct uiWindow
+ * @extends uiControl
+ * A uiControl that represents a top-level window.
+ *
+ * A uiWindow contains one child uiControl that occupies the entirety of the window.\n
+ * Though a uiWindow is a uiControl, a uiWindow cannot be the child of another uiControl.
+ */
 typedef struct uiWindow uiWindow;
 #define uiWindow(this) ((uiWindow *) (this))
 
-/// @memberof uiWindow
-/// returns the uiWindow's title.
+/**
+ * @memberof uiWindow
+ * returns the uiWindow's title.
+ */
 _UI_EXTERN char *uiWindowTitle(uiWindow *w);
 
-/// @memberof uiWindow
-/// sets the uiWindow's title to @p title.
+/**
+ * @memberof uiWindow
+ * sets the uiWindow's title to @p title.
+ */
 _UI_EXTERN void uiWindowSetTitle(uiWindow *w, const char *title);
 
-/// @memberof uiWindow
+/**
+ * @memberof uiWindow
+ */
 _UI_EXTERN void uiWindowContentSize(uiWindow *w, int *width, int *height);
 
-/// @memberof uiWindow
+/**
+ * @memberof uiWindow
+ */
 _UI_EXTERN void uiWindowSetContentSize(uiWindow *w, int width, int height);
 
-/// @memberof uiWindow
+/**
+ * @memberof uiWindow
+ */
 _UI_EXTERN int uiWindowFullscreen(uiWindow *w);
 
-/// @memberof uiWindow
+/**
+ * @memberof uiWindow
+ */
 _UI_EXTERN void uiWindowSetFullscreen(uiWindow *w, int fullscreen);
 
-/// @memberof uiWindow
+/**
+ * @memberof uiWindow
+ */
 _UI_EXTERN void uiWindowOnContentSizeChanged(uiWindow *w, void (*f)(uiWindow *, void *), void *data);
 
-/// @memberof uiWindow
-/// registers @p f to be run when the user clicks the uiWindow's close button.
-///
-/// Only one function can be registered at a time.\n
-/// If @p f returns true, the window is destroyed with the Destroy method.\n
-/// If @p f returns false, or if OnClosing is never called, the window is not
-/// destroyed and is kept visible.
+/**
+ * @memberof uiWindow
+ * registers @p f to be run when the user clicks the uiWindow's close button.
+ *
+ * Only one function can be registered at a time.\n
+ * If @p f returns true, the window is destroyed with the Destroy method.\n
+ * If @p f returns false, or if OnClosing is never called, the window is not
+ * destroyed and is kept visible.
+ */
 _UI_EXTERN void uiWindowOnClosing(uiWindow *w, int (*f)(uiWindow *w, void *data), void *data);
 
-/// @memberof uiWindow
-/// returns whether the uiWindow is borderless.
+/**
+ * @memberof uiWindow
+ * returns whether the uiWindow is borderless.
+ */
 _UI_EXTERN int uiWindowBorderless(uiWindow *w);
 
-/// @memberof uiWindow
-/// sets the uiWindow to be borderless or not.
+/**
+ * @memberof uiWindow
+ * sets the uiWindow to be borderless or not.
+ */
 _UI_EXTERN void uiWindowSetBorderless(uiWindow *w, int borderless);
 
-/// @memberof uiWindow
-/// sets the uiWindow's child to @p child.
-///
-/// If @p child is NULL, the uiWindow will not have a child.
+/**
+ * @memberof uiWindow
+ * sets the uiWindow's child to @p child.
+ *
+ * If @p child is NULL, the uiWindow will not have a child.
+ */
 _UI_EXTERN void uiWindowSetChild(uiWindow *w, uiControl *child);
 
-/// @memberof uiWindow
-/// returns whether the uiWindow has margins around its child.
+/**
+ * @memberof uiWindow
+ * returns whether the uiWindow has margins around its child.
+ */
 _UI_EXTERN int uiWindowMargined(uiWindow *w);
 
-/// @memberof uiWindow
-/// controls whether the uiWindow has margins around its child.
-///
-/// The size of the margins are determined by the OS and its best practices.
+/**
+ * @memberof uiWindow
+ * controls whether the uiWindow has margins around its child.
+ *
+ * The size of the margins are determined by the OS and its best practices.
+ */
 _UI_EXTERN void uiWindowSetMargined(uiWindow *w, int margined);
 
-/// @memberof uiWindow
+/**
+ * @memberof uiWindow
+ */
 _UI_EXTERN int uiWindowResizeable(uiWindow *w);
 
-/// @memberof uiWindow
+/**
+ * @memberof uiWindow
+ */
 _UI_EXTERN void uiWindowSetResizeable(uiWindow *w, int resizeable);
 
-/// @static @memberof uiWindow
-/// creates a new uiWindow.
+/**
+ * @static @memberof uiWindow
+ * creates a new uiWindow.
+ */
 _UI_EXTERN uiWindow *uiNewWindow(const char *title, int width, int height, int hasMenubar);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiButton
-/// @extends uiControl
-/// A uiControl that represents a button that the user can click to perform an action.
-///
-/// A uiButton has a text label that should describe what the button does.
+/**
+ * @struct uiButton
+ * @extends uiControl
+ * A uiControl that represents a button that the user can click to perform an action.
+ *
+ * A uiButton has a text label that should describe what the button does.
+ */
 typedef struct uiButton uiButton;
 #define uiButton(this) ((uiButton *) (this))
 
-/// @memberof uiButton
-/// returns the button's text.
+/**
+ * @memberof uiButton
+ * returns the button's text.
+ */
 _UI_EXTERN char *uiButtonText(uiButton *b);
 
-/// @memberof uiButton
-/// sets the button's text to @p text.
+/**
+ * @memberof uiButton
+ * sets the button's text to @p text.
+ */
 _UI_EXTERN void uiButtonSetText(uiButton *b, const char *text);
 
-/// @memberof uiButton
-/// registers @p f to be run when the user clicks the button.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiButton
+ * registers @p f to be run when the user clicks the button.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiButtonOnClicked(uiButton *b, void (*f)(uiButton *b, void *data), void *data);
 
-/// @static @memberof uiButton
-/// creates a new uiButton with the given @p text as its label.
+/**
+ * @static @memberof uiButton
+ * creates a new uiButton with the given @p text as its label.
+ */
 _UI_EXTERN uiButton *uiNewButton(const char *text);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiBox
-/// @extends uiControl
-/// A uiControl that holds a group of uiControl's horizontally or vertically.
-///
-/// If horizontally, then all controls have the same
-/// height. If vertically, then all controls have the same width.
-/// By default, each control has its preferred width (horizontal)
-/// or height (vertical); if a control is marked "stretchy", it will
-/// take whatever space is left over. If multiple controls are marked
-/// stretchy, they will be given equal shares of the leftover space.
-/// There can also be space between each control ("padding").
+/**
+ * @struct uiBox
+ * @extends uiControl
+ * A uiControl that holds a group of uiControl's horizontally or vertically.
+ *
+ * If horizontally, then all controls have the same
+ * height. If vertically, then all controls have the same width.
+ * By default, each control has its preferred width (horizontal)
+ * or height (vertical); if a control is marked "stretchy", it will
+ * take whatever space is left over. If multiple controls are marked
+ * stretchy, they will be given equal shares of the leftover space.
+ * There can also be space between each control ("padding").
+ */
 typedef struct uiBox uiBox;
 #define uiBox(this) ((uiBox *) (this))
 
-/// @memberof uiBox
-/// adds the given control to the end of the box.
+/**
+ * @memberof uiBox
+ * adds the given control to the end of the box.
+ */
 _UI_EXTERN void uiBoxAppend(uiBox *b, uiControl *child, int stretchy);
 
-/// @memberof uiBox
+/**
+ * @memberof uiBox
+ */
 _UI_EXTERN int uiBoxNumChildren(uiBox *b);
 
-/// @memberof uiBox
-/// deletes the @p index's control of the uiBox.
+/**
+ * @memberof uiBox
+ * deletes the @p index's control of the uiBox.
+ */
 _UI_EXTERN void uiBoxDelete(uiBox *b, int index);
 
-/// @memberof uiBox
-/// returns whether there is space between each control of the box.
+/**
+ * @memberof uiBox
+ * returns whether there is space between each control of the box.
+ */
 _UI_EXTERN int uiBoxPadded(uiBox *b);
 
-/// @memberof uiBox
-/// controls whether there is space between each control of the uiBox.
-///
-/// The size of the padding is determined by the OS and its best practices.
+/**
+ * @memberof uiBox
+ * controls whether there is space between each control of the uiBox.
+ *
+ * The size of the padding is determined by the OS and its best practices.
+ */
 _UI_EXTERN void uiBoxSetPadded(uiBox *b, int padded);
 
-/// @static @memberof uiBox
-/// creates a new horizontal box.
+/**
+ * @static @memberof uiBox
+ * creates a new horizontal box.
+ */
 _UI_EXTERN uiBox *uiNewHorizontalBox(void);
 
-/// @static @memberof uiBox
-/// creates a new vertical box.
+/**
+ * @static @memberof uiBox
+ * creates a new vertical box.
+ */
 _UI_EXTERN uiBox *uiNewVerticalBox(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiCheckbox
-/// @extends uiControl
-/// A uiControl that represents a box with a text label at its side.
-///
-/// When the user clicks the checkbox, a check mark will appear
-/// in the box; clicking it again removes the check.
+/**
+ * @struct uiCheckbox
+ * @extends uiControl
+ * A uiControl that represents a box with a text label at its side.
+ *
+ * When the user clicks the checkbox, a check mark will appear
+ * in the box; clicking it again removes the check.
+ */
 typedef struct uiCheckbox uiCheckbox;
 #define uiCheckbox(this) ((uiCheckbox *) (this))
 
-/// @memberof uiCheckbox
-/// returns the checkbox's text.
+/**
+ * @memberof uiCheckbox
+ * returns the checkbox's text.
+ */
 _UI_EXTERN char *uiCheckboxText(uiCheckbox *c);
 
-/// @memberof uiCheckbox
-/// sets the checkbox's text to @p text.
+/**
+ * @memberof uiCheckbox
+ * sets the checkbox's text to @p text.
+ */
 _UI_EXTERN void uiCheckboxSetText(uiCheckbox *c, const char *text);
 
-/// @memberof uiCheckbox
-/// registers @p f to be run when the user clicks the checkbox.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiCheckbox
+ * registers @p f to be run when the user clicks the checkbox.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiCheckboxOnToggled(uiCheckbox *c, void (*f)(uiCheckbox *c, void *data), void *data);
 
-/// @memberof uiCheckbox
-/// returns whether the checkbox is checked.
+/**
+ * @memberof uiCheckbox
+ * returns whether the checkbox is checked.
+ */
 _UI_EXTERN int uiCheckboxChecked(uiCheckbox *c);
 
-/// @memberof uiCheckbox
-/// sets whether the checkbox is checked or not.
+/**
+ * @memberof uiCheckbox
+ * sets whether the checkbox is checked or not.
+ */
 _UI_EXTERN void uiCheckboxSetChecked(uiCheckbox *c, int checked);
 
-/// @static @memberof uiCheckbox
-/// creates a new checkbox with the given @p text as its label.
+/**
+ * @static @memberof uiCheckbox
+ * creates a new checkbox with the given @p text as its label.
+ */
 _UI_EXTERN uiCheckbox *uiNewCheckbox(const char *text);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiEntry
-/// @extends uiControl
-/// A uiControl that represents a space that the user can type a single line of text into.
+/**
+ * @struct uiEntry
+ * @extends uiControl
+ * A uiControl that represents a space that the user can type a single line of text into.
+ */
 typedef struct uiEntry uiEntry;
 #define uiEntry(this) ((uiEntry *) (this))
 
-/// @memberof uiEntry
-/// returns the entry's text.
+/**
+ * @memberof uiEntry
+ * returns the entry's text.
+ */
 _UI_EXTERN char *uiEntryText(uiEntry *e);
 
-/// @memberof uiEntry
-/// sets the entry's text to @p text.
+/**
+ * @memberof uiEntry
+ * sets the entry's text to @p text.
+ */
 _UI_EXTERN void uiEntrySetText(uiEntry *e, const char *text);
 
-/// @memberof uiEntry
-/// registers @p f to be run when the user makes a change to the entry.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiEntry
+ * registers @p f to be run when the user makes a change to the entry.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiEntryOnChanged(uiEntry *e, void (*f)(uiEntry *e, void *data), void *data);
 
-/// @memberof uiEntry
-/// returns whether the entry can be changed.
+/**
+ * @memberof uiEntry
+ * returns whether the entry can be changed.
+ */
 _UI_EXTERN int uiEntryReadOnly(uiEntry *e);
 
-/// @memberof uiEntry
-/// sets whether the entry can be changed or not.
+/**
+ * @memberof uiEntry
+ * sets whether the entry can be changed or not.
+ */
 _UI_EXTERN void uiEntrySetReadOnly(uiEntry *e, int readonly);
 
-/// @static @memberof uiEntry
-/// creates a new entry.
+/**
+ * @static @memberof uiEntry
+ * creates a new entry.
+ */
 _UI_EXTERN uiEntry *uiNewEntry(void);
 
-/// @static @memberof uiEntry
-/// creates a new entry whose contents are visibly obfuscated, suitable for passwords.
+/**
+ * @static @memberof uiEntry
+ * creates a new entry whose contents are visibly obfuscated, suitable for passwords.
+ */
 _UI_EXTERN uiEntry *uiNewPasswordEntry(void);
 
-/// @static @memberof uiEntry
-/// creates a new entry suitable for searching with.
-///
-/// Changed events may, depending on the system, be delayed
-/// with a search entry, to produce a smoother user experience.
+/**
+ * @static @memberof uiEntry
+ * creates a new entry suitable for searching with.
+ *
+ * Changed events may, depending on the system, be delayed
+ * with a search entry, to produce a smoother user experience.
+ */
 _UI_EXTERN uiEntry *uiNewSearchEntry(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiLabel
-/// @extends uiControl
-/// A uiControl that represents a line of text that cannot be interacted with.
+/**
+ * @struct uiLabel
+ * @extends uiControl
+ * A uiControl that represents a line of text that cannot be interacted with.
+ */
 typedef struct uiLabel uiLabel;
 #define uiLabel(this) ((uiLabel *) (this))
 
-/// @memberof uiLabel
-/// returns the uiLabel's text.
+/**
+ * @memberof uiLabel
+ * returns the uiLabel's text.
+ */
 _UI_EXTERN char *uiLabelText(uiLabel *l);
 
-/// @memberof uiLabel
-/// sets the uiLabel's text to @p text.
+/**
+ * @memberof uiLabel
+ * sets the uiLabel's text to @p text.
+ */
 _UI_EXTERN void uiLabelSetText(uiLabel *l, const char *text);
 
-/// @static @memberof uiLabel
-/// creates a new uiLabel with the given @p text.
+/**
+ * @static @memberof uiLabel
+ * creates a new uiLabel with the given @p text.
+ */
 _UI_EXTERN uiLabel *uiNewLabel(const char *text);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiTab
-/// @extends uiControl
-/// A uiControl that holds tabbed pages of uiControl's.
-///
-/// Each tab has a label.
-/// The user can click on the tabs themselves to switch pages.
-/// Individual pages can also have margins.
+/**
+ * @struct uiTab
+ * @extends uiControl
+ * A uiControl that holds tabbed pages of uiControl's.
+ *
+ * Each tab has a label.
+ * The user can click on the tabs themselves to switch pages.
+ * Individual pages can also have margins.
+ */
 typedef struct uiTab uiTab;
 #define uiTab(this) ((uiTab *) (this))
 
-/// @memberof uiTab
-/// adds the given page to the end of the uiTab.
+/**
+ * @memberof uiTab
+ * adds the given page to the end of the uiTab.
+ */
 _UI_EXTERN void uiTabAppend(uiTab *t, const char *name, uiControl *c);
 
-/// @memberof uiTab
-/// adds the given page to the uiTab such that it is the @p before's page of the uiTab (starting at 0).
+/**
+ * @memberof uiTab
+ * adds the given page to the uiTab such that it is the @p before's page of the uiTab (starting at 0).
+ */
 _UI_EXTERN void uiTabInsertAt(uiTab *t, const char *name, int before, uiControl *c);
 
-/// @memberof uiTab
-/// deletes the @p index's page of the uiTab.
+/**
+ * @memberof uiTab
+ * deletes the @p index's page of the uiTab.
+ */
 _UI_EXTERN void uiTabDelete(uiTab *t, int index);
 
-/// @memberof uiTab
-/// returns the number of pages in the uiTab.
+/**
+ * @memberof uiTab
+ * returns the number of pages in the uiTab.
+ */
 _UI_EXTERN int uiTabNumPages(uiTab *t);
 
-/// @memberof uiTab
-/// returns whether page @p page (starting at 0) of the uiTab has margins around its child.
+/**
+ * @memberof uiTab
+ * returns whether page @p page (starting at 0) of the uiTab has margins around its child.
+ */
 _UI_EXTERN int uiTabMargined(uiTab *t, int page);
 
-/// @memberof uiTab
-/// whether page @p page (starting at 0) of the uiTab has margins around its child.
-///
-/// The size of the margins are determined by the OS and its best practices.
+/**
+ * @memberof uiTab
+ * whether page @p page (starting at 0) of the uiTab has margins around its child.
+ *
+ * The size of the margins are determined by the OS and its best practices.
+ */
 _UI_EXTERN void uiTabSetMargined(uiTab *t, int page, int margined);
 
-/// @static @memberof uiTab
-/// creates a new uiTab.
+/**
+ * @static @memberof uiTab
+ * creates a new uiTab.
+ */
 _UI_EXTERN uiTab *uiNewTab(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiGroup
-/// @extends uiControl
-/// A uiControl that holds another uiControl and wraps it around a labelled box
-///
-/// (though some systems make this box invisible).
-/// You can use this to group related controls together.
+/**
+ * @struct uiGroup
+ * @extends uiControl
+ * A uiControl that holds another uiControl and wraps it around a labelled box
+ *
+ * (though some systems make this box invisible).
+ * You can use this to group related controls together.
+ */
 typedef struct uiGroup uiGroup;
 #define uiGroup(this) ((uiGroup *) (this))
 
-/// @memberof uiGroup
-/// returns the uiGroup's title.
+/**
+ * @memberof uiGroup
+ * returns the uiGroup's title.
+ */
 _UI_EXTERN char *uiGroupTitle(uiGroup *g);
 
-/// @memberof uiGroup
-/// sets the uiGroup's title to @p title.
+/**
+ * @memberof uiGroup
+ * sets the uiGroup's title to @p title.
+ */
 _UI_EXTERN void uiGroupSetTitle(uiGroup *g, const char *title);
 
-/// @memberof uiGroup
-/// sets the uiGroup's child to @p c.
-///
-/// If @p c is NULL, the uiGroup will not have a child.
+/**
+ * @memberof uiGroup
+ * sets the uiGroup's child to @p c.
+ *
+ * If @p c is NULL, the uiGroup will not have a child.
+ */
 _UI_EXTERN void uiGroupSetChild(uiGroup *g, uiControl *c);
 
-/// @memberof uiGroup
-/// returns whether the uiGroup has margins around its child.
+/**
+ * @memberof uiGroup
+ * returns whether the uiGroup has margins around its child.
+ */
 _UI_EXTERN int uiGroupMargined(uiGroup *g);
 
-/// @memberof uiGroup
-/// controls whether the uiGroup has margins around its child.
-///
-/// The size of the margins are determined by the OS and its best practices.
+/**
+ * @memberof uiGroup
+ * controls whether the uiGroup has margins around its child.
+ *
+ * The size of the margins are determined by the OS and its best practices.
+ */
 _UI_EXTERN void uiGroupSetMargined(uiGroup *g, int margined);
 
-/// @static @memberof uiGroup
-/// creates a new uiGroup.
+/**
+ * @static @memberof uiGroup
+ * creates a new uiGroup.
+ */
 _UI_EXTERN uiGroup *uiNewGroup(const char *title);
 
 
@@ -526,228 +687,306 @@ _UI_EXTERN uiGroup *uiNewGroup(const char *title);
 // setting value outside of range will automatically clamp
 // initial value is minimum
 // complaint if min >= max?
-//////////////////////////////////////////////////////////////////
-/// @struct uiSpinbox
-/// @extends uiControl
-/// A uiControl that represents a space where the user can enter integers.
-///
-/// The space also comes with buttons to add or subtract 1 from the integer.
+/**
+ * @struct uiSpinbox
+ * @extends uiControl
+ * A uiControl that represents a space where the user can enter integers.
+ *
+ * The space also comes with buttons to add or subtract 1 from the integer.
+ */
 typedef struct uiSpinbox uiSpinbox;
 #define uiSpinbox(this) ((uiSpinbox *) (this))
 
-/// @memberof uiSpinbox
-/// returns the uiSpinbox's current value.
+/**
+ * @memberof uiSpinbox
+ * returns the uiSpinbox's current value.
+ */
 _UI_EXTERN int uiSpinboxValue(uiSpinbox *s);
 
-/// @memberof uiSpinbox
-/// sets the uiSpinbox's current value to @p value.
+/**
+ * @memberof uiSpinbox
+ * sets the uiSpinbox's current value to @p value.
+ */
 _UI_EXTERN void uiSpinboxSetValue(uiSpinbox *s, int value);
 
-/// @memberof uiSpinbox
-/// registers @p f to be run when the user changes the value of the uiSpinbox.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiSpinbox
+ * registers @p f to be run when the user changes the value of the uiSpinbox.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiSpinboxOnChanged(uiSpinbox *s, void (*f)(uiSpinbox *s, void *data), void *data);
 
-/// @static @memberof uiSpinbox
-/// creates a new uiSpinbox.
-///
-/// If min >= max, they are swapped.
+/**
+ * @static @memberof uiSpinbox
+ * creates a new uiSpinbox.
+ *
+ * If min >= max, they are swapped.
+ */
 _UI_EXTERN uiSpinbox *uiNewSpinbox(int min, int max);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiSlider
-/// @extends uiControl
-/// A uiControl that represents a horizontal bar that represents a range of integers.
-///
-/// The user can drag a pointer on the bar to select an integer.
+/**
+ * @struct uiSlider
+ * @extends uiControl
+ * A uiControl that represents a horizontal bar that represents a range of integers.
+ *
+ * The user can drag a pointer on the bar to select an integer.
+ */
 typedef struct uiSlider uiSlider;
 #define uiSlider(this) ((uiSlider *) (this))
 
-/// @memberof uiSlider
-/// returns the uiSlider's current value.
+/**
+ * @memberof uiSlider
+ * returns the uiSlider's current value.
+ */
 _UI_EXTERN int uiSliderValue(uiSlider *s);
 
-/// @memberof uiSlider
-/// sets the uiSlider's current value to @p value.
+/**
+ * @memberof uiSlider
+ * sets the uiSlider's current value to @p value.
+ */
 _UI_EXTERN void uiSliderSetValue(uiSlider *s, int value);
 
-/// @memberof uiSlider
+/**
+ * @memberof uiSlider
+ */
 _UI_EXTERN int uiSliderHasToolTip(uiSlider *s);
 
-/// @memberof uiSlider
+/**
+ * @memberof uiSlider
+ */
 _UI_EXTERN void uiSliderSetHasToolTip(uiSlider *s, int hasToolTip);
 
-/// @memberof uiSlider
-/// registers @p f to be run when the user changes the value of the uiSlider.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiSlider
+ * registers @p f to be run when the user changes the value of the uiSlider.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiSliderOnChanged(uiSlider *s, void (*f)(uiSlider *s, void *data), void *data);
 
-/// @memberof uiSlider
+/**
+ * @memberof uiSlider
+ */
 _UI_EXTERN void uiSliderSetRange(uiSlider *s, int min, int max);
 
-/// @static @memberof uiSlider
-/// creates a new uiSlider.
-///
-/// If min >= max, they are swapped.
+/**
+ * @static @memberof uiSlider
+ * creates a new uiSlider.
+ *
+ * If min >= max, they are swapped.
+ */
 _UI_EXTERN uiSlider *uiNewSlider(int min, int max);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiProgressBar
-/// @extends uiControl
-/// A uiControl that represents a horizontal bar that is filled in progressively over time as a process completes.
+/**
+ * @struct uiProgressBar
+ * @extends uiControl
+ * A uiControl that represents a horizontal bar that is filled in progressively over time as a process completes.
+ */
 typedef struct uiProgressBar uiProgressBar;
 #define uiProgressBar(this) ((uiProgressBar *) (this))
 
-/// @memberof uiProgressBar
-/// returns the value currently shown in the uiProgressBar.
+/**
+ * @memberof uiProgressBar
+ * returns the value currently shown in the uiProgressBar.
+ */
 _UI_EXTERN int uiProgressBarValue(uiProgressBar *p);
 
-/// @memberof uiProgressBar
-/// sets the uiProgressBar's currently displayed percentage to value.
-///
-/// value must be between 0 and 100 inclusive, or -1 for an indeterminate progressbar.
+/**
+ * @memberof uiProgressBar
+ * sets the uiProgressBar's currently displayed percentage to value.
+ *
+ * value must be between 0 and 100 inclusive, or -1 for an indeterminate progressbar.
+ */
 _UI_EXTERN void uiProgressBarSetValue(uiProgressBar *p, int n);
 
-/// @static @memberof uiProgressBar
-/// creates a new uiProgressBar.
+/**
+ * @static @memberof uiProgressBar
+ * creates a new uiProgressBar.
+ */
 _UI_EXTERN uiProgressBar *uiNewProgressBar(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiSeparator
-/// @extends uiControl
-/// A uiControl that represents a horizontal line that visually separates controls.
+/**
+ * @struct uiSeparator
+ * @extends uiControl
+ * A uiControl that represents a horizontal line that visually separates controls.
+ */
 typedef struct uiSeparator uiSeparator;
 #define uiSeparator(this) ((uiSeparator *) (this))
 
-/// @static @memberof uiSeparator
-/// creates a new horizontal uiSeparator.
+/**
+ * @static @memberof uiSeparator
+ * creates a new horizontal uiSeparator.
+ */
 _UI_EXTERN uiSeparator *uiNewHorizontalSeparator(void);
 
-/// @static @memberof uiSeparator
-/// creates a new vertical uiSeparator.
+/**
+ * @static @memberof uiSeparator
+ * creates a new vertical uiSeparator.
+ */
 _UI_EXTERN uiSeparator *uiNewVerticalSeparator(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiCombobox
-/// @extends uiControl
-/// A uiControl that represents a drop-down list of strings that the user can choose one of at any time.
-///
-/// For a uiCombobox that users can type values into, see uiEditableCombobox.
+/**
+ * @struct uiCombobox
+ * @extends uiControl
+ * A uiControl that represents a drop-down list of strings that the user can choose one of at any time.
+ *
+ * For a uiCombobox that users can type values into, see uiEditableCombobox.
+ */
 typedef struct uiCombobox uiCombobox;
 #define uiCombobox(this) ((uiCombobox *) (this))
 
-/// @memberof uiCombobox
-/// adds the named item to the end of the uiCombobox.
+/**
+ * @memberof uiCombobox
+ * adds the named item to the end of the uiCombobox.
+ */
 _UI_EXTERN void uiComboboxAppend(uiCombobox *c, const char *text);
 
-/// @memberof uiCombobox
+/**
+ * @memberof uiCombobox
+ */
 _UI_EXTERN void uiComboboxInsertAt(uiCombobox *c, int n, const char *text);
 
-/// @memberof uiCombobox
+/**
+ * @memberof uiCombobox
+ */
 _UI_EXTERN void uiComboboxDelete(uiCombobox *c, int n);
 
-/// @memberof uiCombobox
+/**
+ * @memberof uiCombobox
+ */
 _UI_EXTERN void uiComboboxClear(uiCombobox *c);
 
-/// @memberof uiCombobox
+/**
+ * @memberof uiCombobox
+ */
 _UI_EXTERN int uiComboboxNumItems(uiCombobox *c);
 
-/// @memberof uiCombobox
-/// returns the index of the currently selected item in the uiCombobox, or -1 if nothing is selected.
+/**
+ * @memberof uiCombobox
+ * returns the index of the currently selected item in the uiCombobox, or -1 if nothing is selected.
+ */
 _UI_EXTERN int uiComboboxSelected(uiCombobox *c);
 
-/// @memberof uiCombobox
-/// sets the currently selected item in the uiCombobox to @p n.
-///
-/// If index is -1 no item will be selected.
+/**
+ * @memberof uiCombobox
+ * sets the currently selected item in the uiCombobox to @p n.
+ *
+ * If index is -1 no item will be selected.
+ */
 _UI_EXTERN void uiComboboxSetSelected(uiCombobox *c, int n);
 
-/// @memberof uiCombobox
-/// registers @p f to be run when the user selects an item in the uiCombobox.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiCombobox
+ * registers @p f to be run when the user selects an item in the uiCombobox.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiComboboxOnSelected(uiCombobox *c, void (*f)(uiCombobox *c, void *data), void *data);
 
-/// @static @memberof uiCombobox
-/// creates a new uiCombobox.
+/**
+ * @static @memberof uiCombobox
+ * creates a new uiCombobox.
+ */
 _UI_EXTERN uiCombobox *uiNewCombobox(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiEditableCombobox
-/// @extends uiControl
-/// A uiControl that represents a drop-down list of strings that the user can choose one of at any time.
-/// It also has an entry field that the user can type an alternate choice into.
+/**
+ * @struct uiEditableCombobox
+ * @extends uiControl
+ * A uiControl that represents a drop-down list of strings that the user can choose one of at any time.
+ * It also has an entry field that the user can type an alternate choice into.
+ */
 typedef struct uiEditableCombobox uiEditableCombobox;
 #define uiEditableCombobox(this) ((uiEditableCombobox *) (this))
 
-/// @memberof uiEditableCombobox
-/// adds the named item to the end of the uiEditableCombobox.
+/**
+ * @memberof uiEditableCombobox
+ * adds the named item to the end of the uiEditableCombobox.
+ */
 _UI_EXTERN void uiEditableComboboxAppend(uiEditableCombobox *c, const char *text);
 
-/// @memberof uiEditableCombobox
-/// returns the text in the entry of the uiEditableCombobox,
-/// which could be one of the choices in the list if the user has selected one.
+/**
+ * @memberof uiEditableCombobox
+ * returns the text in the entry of the uiEditableCombobox,
+ * which could be one of the choices in the list if the user has selected one.
+ */
 _UI_EXTERN char *uiEditableComboboxText(uiEditableCombobox *c);
 
-/// @memberof uiEditableCombobox
-/// sets the text in the entry of the uiEditableCombobox.
+/**
+ * @memberof uiEditableCombobox
+ * sets the text in the entry of the uiEditableCombobox.
+ */
 _UI_EXTERN void uiEditableComboboxSetText(uiEditableCombobox *c, const char *text);
 // TODO what do we call a function that sets the currently selected item and fills the text field with it?
 // editable comboboxes have no consistent concept of selected item
 
-/// @memberof uiEditableCombobox
-/// registers @p f to be run when the user either selects an item or changes the text in the uiEditableCombobox.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiEditableCombobox
+ * registers @p f to be run when the user either selects an item or changes the text in the uiEditableCombobox.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiEditableComboboxOnChanged(uiEditableCombobox *c, void (*f)(uiEditableCombobox *c, void *data), void *data);
 
-/// @static @memberof uiEditableCombobox
-/// creates a new uiEditableCombobox.
+/**
+ * @static @memberof uiEditableCombobox
+ * creates a new uiEditableCombobox.
+ */
 _UI_EXTERN uiEditableCombobox *uiNewEditableCombobox(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiRadioButtons
-/// @extends uiControl
-/// A uiControl that represents a set of checkable buttons from which exactly one may be chosen by the user.
+/**
+ * @struct uiRadioButtons
+ * @extends uiControl
+ * A uiControl that represents a set of checkable buttons from which exactly one may be chosen by the user.
+ */
 typedef struct uiRadioButtons uiRadioButtons;
 #define uiRadioButtons(this) ((uiRadioButtons *) (this))
 
-/// @memberof uiRadioButtons
-/// adds the named button to the end of the uiRadioButtons.
+/**
+ * @memberof uiRadioButtons
+ * adds the named button to the end of the uiRadioButtons.
+ */
 _UI_EXTERN void uiRadioButtonsAppend(uiRadioButtons *r, const char *text);
 
-/// @memberof uiRadioButtons
-/// returns the index of the currently selected option in the uiRadioButtons, or -1 if no item is selected.
+/**
+ * @memberof uiRadioButtons
+ * returns the index of the currently selected option in the uiRadioButtons, or -1 if no item is selected.
+ */
 _UI_EXTERN int uiRadioButtonsSelected(uiRadioButtons *r);
 
-/// @memberof uiRadioButtons
-/// sets the currently selected option in the uiRadioButtons to index.
+/**
+ * @memberof uiRadioButtons
+ * sets the currently selected option in the uiRadioButtons to index.
+ */
 _UI_EXTERN void uiRadioButtonsSetSelected(uiRadioButtons *r, int n);
 
-/// @memberof uiRadioButtons
-/// registers @p f to be run when the user selects an option in the uiRadioButtons.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiRadioButtons
+ * registers @p f to be run when the user selects an option in the uiRadioButtons.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiRadioButtonsOnSelected(uiRadioButtons *r, void (*f)(uiRadioButtons *, void *), void *data);
 
-/// @static @memberof uiRadioButtons
-/// creates a new uiRadioButtons.
+/**
+ * @static @memberof uiRadioButtons
+ * creates a new uiRadioButtons.
+ */
 _UI_EXTERN uiRadioButtons *uiNewRadioButtons(void);
 
 
 struct tm;
-//////////////////////////////////////////////////////////////////
-/// @struct uiDateTimePicker
-/// @extends uiControl
-/// A uiControl that represents a field where the user can enter a date and/or a time.
+/**
+ * @struct uiDateTimePicker
+ * @extends uiControl
+ * A uiControl that represents a field where the user can enter a date and/or a time.
+ */
 typedef struct uiDateTimePicker uiDateTimePicker;
 #define uiDateTimePicker(this) ((uiDateTimePicker *) (this))
 
@@ -756,133 +995,189 @@ typedef struct uiDateTimePicker uiDateTimePicker;
 // TODO document time zone conversions or lack thereof
 // TODO for Time: define what values are returned when a part is missing
 
-/// @memberof uiDateTimePicker
-/// returns the time stored in the uiDateTimePicker.
-///
-/// The time is assumed to be local time.
+/**
+ * @memberof uiDateTimePicker
+ * returns the time stored in the uiDateTimePicker.
+ *
+ * The time is assumed to be local time.
+ */
 _UI_EXTERN void uiDateTimePickerTime(uiDateTimePicker *d, struct tm *time);
 
-/// @memberof uiDateTimePicker
-/// sets the time in the uiDateTimePicker to @p time.
-///
-/// no time zone manipulations are done.
+/**
+ * @memberof uiDateTimePicker
+ * sets the time in the uiDateTimePicker to @p time.
+ *
+ * no time zone manipulations are done.
+ */
 _UI_EXTERN void uiDateTimePickerSetTime(uiDateTimePicker *d, const struct tm *time);
 
-/// @memberof uiDateTimePicker
-/// registers @p f to be run when the user changes the time in the uiDateTimePicker.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiDateTimePicker
+ * registers @p f to be run when the user changes the time in the uiDateTimePicker.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiDateTimePickerOnChanged(uiDateTimePicker *d, void (*f)(uiDateTimePicker *, void *), void *data);
 
-/// @static @memberof uiDateTimePicker
-/// creates a new uiDateTimePicker that shows only a date.
+/**
+ * @static @memberof uiDateTimePicker
+ * creates a new uiDateTimePicker that shows only a date.
+ */
 _UI_EXTERN uiDateTimePicker *uiNewDateTimePicker(void);
 
-/// @static @memberof uiDateTimePicker
-/// creates a new uiDateTimePicker that shows only a time.
+/**
+ * @static @memberof uiDateTimePicker
+ * creates a new uiDateTimePicker that shows only a time.
+ */
 _UI_EXTERN uiDateTimePicker *uiNewDatePicker(void);
 
-/// @static @memberof uiDateTimePicker
-/// creates a new uiDateTimePicker that shows both a date and a time.
+/**
+ * @static @memberof uiDateTimePicker
+ * creates a new uiDateTimePicker that shows both a date and a time.
+ */
 _UI_EXTERN uiDateTimePicker *uiNewTimePicker(void);
 
 // TODO provide a facility for entering tab stops?
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiMultilineEntry
-/// @extends uiControl
-/// A uiControl that represents a space that the user can type multiple lines of text into.
+/**
+ * @struct uiMultilineEntry
+ * @extends uiControl
+ * A uiControl that represents a space that the user can type multiple lines of text into.
+ */
 typedef struct uiMultilineEntry uiMultilineEntry;
 #define uiMultilineEntry(this) ((uiMultilineEntry *) (this))
 
-/// @memberof uiMultilineEntry
-/// returns the uiMultilineEntry's text.
+/**
+ * @memberof uiMultilineEntry
+ * returns the uiMultilineEntry's text.
+ */
 _UI_EXTERN char *uiMultilineEntryText(uiMultilineEntry *e);
 
-/// @memberof uiMultilineEntry
-/// sets the uiMultilineEntry's text to @p text.
+/**
+ * @memberof uiMultilineEntry
+ * sets the uiMultilineEntry's text to @p text.
+ */
 _UI_EXTERN void uiMultilineEntrySetText(uiMultilineEntry *e, const char *text);
 
-/// @memberof uiMultilineEntry
-/// adds @p text to the end of the uiMultilineEntry's text.
+/**
+ * @memberof uiMultilineEntry
+ * adds @p text to the end of the uiMultilineEntry's text.
+ */
 // TODO selection and scroll behavior
 _UI_EXTERN void uiMultilineEntryAppend(uiMultilineEntry *e, const char *text);
 
-/// @memberof uiMultilineEntry
-/// registers @p f to be run when the user makes a change to the uiMultilineEntry.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiMultilineEntry
+ * registers @p f to be run when the user makes a change to the uiMultilineEntry.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiMultilineEntryOnChanged(uiMultilineEntry *e, void (*f)(uiMultilineEntry *e, void *data), void *data);
 
-/// @memberof uiMultilineEntry
-/// returns whether the uiMultilineEntry can be changed.
+/**
+ * @memberof uiMultilineEntry
+ * returns whether the uiMultilineEntry can be changed.
+ */
 _UI_EXTERN int uiMultilineEntryReadOnly(uiMultilineEntry *e);
 
-/// @memberof uiMultilineEntry
-/// sets whether the uiMultilineEntry can be changed.
+/**
+ * @memberof uiMultilineEntry
+ * sets whether the uiMultilineEntry can be changed.
+ */
 _UI_EXTERN void uiMultilineEntrySetReadOnly(uiMultilineEntry *e, int readonly);
 
-/// @static @memberof uiMultilineEntry
-/// creates a new uiMultilineEntry.
-/// The uiMultilineEntry soft-word-wraps and has no horizontal scrollbar.
+/**
+ * @static @memberof uiMultilineEntry
+ * creates a new uiMultilineEntry.
+ * The uiMultilineEntry soft-word-wraps and has no horizontal scrollbar.
+ */
 _UI_EXTERN uiMultilineEntry *uiNewMultilineEntry(void);
 
-/// @static @memberof uiMultilineEntry
-/// creates a new uiMultilineEntry.
-/// The uiMultilineEntry does not word-wrap and thus has horizontal scrollbar.
+/**
+ * @static @memberof uiMultilineEntry
+ * creates a new uiMultilineEntry.
+ * The uiMultilineEntry does not word-wrap and thus has horizontal scrollbar.
+ */
 _UI_EXTERN uiMultilineEntry *uiNewNonWrappingMultilineEntry(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiMenuItem
+/**
+ * @struct uiMenuItem
+ */
 typedef struct uiMenuItem uiMenuItem;
 #define uiMenuItem(this) ((uiMenuItem *) (this))
 
-/// @memberof uiMenuItem
+/**
+ * @memberof uiMenuItem
+ */
 _UI_EXTERN void uiMenuItemEnable(uiMenuItem *m);
 
-/// @memberof uiMenuItem
+/**
+ * @memberof uiMenuItem
+ */
 _UI_EXTERN void uiMenuItemDisable(uiMenuItem *m);
 
-/// @memberof uiMenuItem
+/**
+ * @memberof uiMenuItem
+ */
 _UI_EXTERN void uiMenuItemOnClicked(uiMenuItem *m, void (*f)(uiMenuItem *sender, uiWindow *window, void *data), void *data);
 
-/// @memberof uiMenuItem
+/**
+ * @memberof uiMenuItem
+ */
 _UI_EXTERN int uiMenuItemChecked(uiMenuItem *m);
 
-/// @memberof uiMenuItem
+/**
+ * @memberof uiMenuItem
+ */
 _UI_EXTERN void uiMenuItemSetChecked(uiMenuItem *m, int checked);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiMenu
+/**
+ * @struct uiMenu
+ */
 typedef struct uiMenu uiMenu;
 #define uiMenu(this) ((uiMenu *) (this))
 
-/// @memberof uiMenu
+/**
+ * @memberof uiMenu
+ */
 _UI_EXTERN uiMenuItem *uiMenuAppendItem(uiMenu *m, const char *name);
 
-/// @memberof uiMenu
+/**
+ * @memberof uiMenu
+ */
 _UI_EXTERN uiMenuItem *uiMenuAppendCheckItem(uiMenu *m, const char *name);
 
-/// @memberof uiMenu
+/**
+ * @memberof uiMenu
+ */
 _UI_EXTERN uiMenuItem *uiMenuAppendQuitItem(uiMenu *m);
 
-/// @memberof uiMenu
+/**
+ * @memberof uiMenu
+ */
 _UI_EXTERN uiMenuItem *uiMenuAppendPreferencesItem(uiMenu *m);
 
-/// @memberof uiMenu
+/**
+ * @memberof uiMenu
+ */
 _UI_EXTERN uiMenuItem *uiMenuAppendAboutItem(uiMenu *m);
 
-/// @memberof uiMenu
+/**
+ * @memberof uiMenu
+ */
 _UI_EXTERN void uiMenuAppendSeparator(uiMenu *m);
 
-/// @static @memberof uiMenu
+/**
+ * @static @memberof uiMenu
+ */
 _UI_EXTERN uiMenu *uiNewMenu(const char *name);
 
 
-//////////////////////////////////////////////////////////////////
+/**
+ */
 _UI_EXTERN char *uiOpenFile(uiWindow *parent);
 _UI_EXTERN char *uiOpenFolder(uiWindow *parent);
 _UI_EXTERN char *uiSaveFile(uiWindow *parent);
@@ -890,76 +1185,80 @@ _UI_EXTERN void uiMsgBox(uiWindow *parent, const char *title, const char *descri
 _UI_EXTERN void uiMsgBoxError(uiWindow *parent, const char *title, const char *description);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiArea
-/// @extends uiControl
-/// A uiControl that represents a blank canvas that a program
-/// can draw on as it wishes.
-///
-/// Areas also receive keyboard and mouse
-/// events, and programs can react to those as they see fit. Drawing
-/// and event handling are handled through an instance of a type
-/// that implements uiAreaHandler that every uiArea has; see uiAreaHandler
-/// for details.
-///
-/// There are two types of areas. Non-scrolling areas are rectangular
-/// and have no scrollbars. Programs can draw on and get mouse
-/// events from any point in the uiArea, and the size of the uiArea is
-/// decided by package ui itself, according to the layout of controls
-/// in the uiWindow the uiArea is located in and the size of said uiWindow.
-/// There is no way to query the uiArea's size or be notified when its
-/// size changes; instead, you are given the area size as part of the
-/// draw and mouse event handlers, for use solely within those
-/// handlers.
-///
-/// Scrolling areas have horziontal and vertical scrollbars. The amount
-/// that can be scrolled is determined by the area's size, which is
-/// decided by the programmer (both when creating the uiArea and by
-/// a call to SetSize). Only a portion of the uiArea is visible at any time;
-/// drawing and mouse events are automatically adjusted to match
-/// what portion is visible, so you do not have to worry about scrolling
-/// in your event handlers. uiAreaHandler has more information.
-///
-/// The internal coordinate system of an uiArea is points, which are
-/// floating-point and device-independent. For more details, see
-/// uiAreaHandler. The size of a scrolling uiArea must be an exact integer
-/// number of points (that is, you cannot have an uiArea that is 32.5
-/// points tall) and thus the parameters to uiNewScrollingArea and
-/// SetSize are ints. All other instances of points in parameters and
-/// structures (including sizes of drawn objects) are float64s.
+/**
+ * @struct uiArea
+ * @extends uiControl
+ * A uiControl that represents a blank canvas that a program
+ * can draw on as it wishes.
+ *
+ * Areas also receive keyboard and mouse
+ * events, and programs can react to those as they see fit. Drawing
+ * and event handling are handled through an instance of a type
+ * that implements uiAreaHandler that every uiArea has; see uiAreaHandler
+ * for details.
+ *
+ * There are two types of areas. Non-scrolling areas are rectangular
+ * and have no scrollbars. Programs can draw on and get mouse
+ * events from any point in the uiArea, and the size of the uiArea is
+ * decided by package ui itself, according to the layout of controls
+ * in the uiWindow the uiArea is located in and the size of said uiWindow.
+ * There is no way to query the uiArea's size or be notified when its
+ * size changes; instead, you are given the area size as part of the
+ * draw and mouse event handlers, for use solely within those
+ * handlers.
+ *
+ * Scrolling areas have horziontal and vertical scrollbars. The amount
+ * that can be scrolled is determined by the area's size, which is
+ * decided by the programmer (both when creating the uiArea and by
+ * a call to SetSize). Only a portion of the uiArea is visible at any time;
+ * drawing and mouse events are automatically adjusted to match
+ * what portion is visible, so you do not have to worry about scrolling
+ * in your event handlers. uiAreaHandler has more information.
+ *
+ * The internal coordinate system of an uiArea is points, which are
+ * floating-point and device-independent. For more details, see
+ * uiAreaHandler. The size of a scrolling uiArea must be an exact integer
+ * number of points (that is, you cannot have an uiArea that is 32.5
+ * points tall) and thus the parameters to uiNewScrollingArea and
+ * SetSize are ints. All other instances of points in parameters and
+ * structures (including sizes of drawn objects) are float64s.
+ */
 typedef struct uiArea uiArea;
 typedef struct uiAreaHandler uiAreaHandler;
 typedef struct uiAreaDrawParams uiAreaDrawParams;
 typedef struct uiAreaMouseEvent uiAreaMouseEvent;
 typedef struct uiAreaKeyEvent uiAreaKeyEvent;
 
-/// @struct uiDrawContext
+/**
+ * @struct uiDrawContext
+ */
 typedef struct uiDrawContext uiDrawContext;
 
-//////////////////////////////////////////////////////////////////
-/// defines the functionality needed for handling events from an uiArea.
-///
-/// Each of the methods on uiAreaHandler is called from
-/// the GUI thread, and every parameter (other than the uiArea itself)
-/// should be assumed to only be valid during the life of the method
-/// call (so for instance, do not save uiAreaDrawParams.AreaWidth, as
-/// that might change without generating an event).
-///
-/// Coordinates to Draw and MouseEvent are given in points. Points
-/// are generic, floating-point, device-independent coordinates with
-/// (0,0) at the top left corner. You never have to worry about the
-/// mapping between points and pixels; simply draw everything using
-/// points and you get nice effects like looking sharp on high-DPI
-/// monitors for free. Proper documentation on the matter is being
-/// written. In the meantime, there are several referenes to this kind of
-/// drawing, most notably on Apple's website:
-/// https://developer.apple.com/library/mac/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/Explained/Explained.html#//apple_ref/doc/uid/TP40012302-CH4-SW1
-///
-/// For a scrolling uiArea, points are automatically offset by the scroll
-/// position. So if the mouse moves to position (5,5) while the
-/// horizontal scrollbar is at position 10 and the horizontal scrollbar is
-/// at position 20, the coordinate stored in the uiAreaMouseEvent
-/// structure is (15,25). The same applies to drawing.
+/**
+ * defines the functionality needed for handling events from an uiArea.
+ *
+ * Each of the methods on uiAreaHandler is called from
+ * the GUI thread, and every parameter (other than the uiArea itself)
+ * should be assumed to only be valid during the life of the method
+ * call (so for instance, do not save uiAreaDrawParams.AreaWidth, as
+ * that might change without generating an event).
+ *
+ * Coordinates to Draw and MouseEvent are given in points. Points
+ * are generic, floating-point, device-independent coordinates with
+ * (0,0) at the top left corner. You never have to worry about the
+ * mapping between points and pixels; simply draw everything using
+ * points and you get nice effects like looking sharp on high-DPI
+ * monitors for free. Proper documentation on the matter is being
+ * written. In the meantime, there are several referenes to this kind of
+ * drawing, most notably on Apple's website:
+ * https://developer.apple.com/library/mac/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/Explained/Explained.html#//apple_ref/doc/uid/TP40012302-CH4-SW1
+ *
+ * For a scrolling uiArea, points are automatically offset by the scroll
+ * position. So if the mouse moves to position (5,5) while the
+ * horizontal scrollbar is at position 10 and the horizontal scrollbar is
+ * at position 20, the coordinate stored in the uiAreaMouseEvent
+ * structure is (15,25). The same applies to drawing.
+ */
 struct uiAreaHandler {
 
 	/// sent when a part of the uiArea needs to be drawn.
@@ -1054,29 +1353,35 @@ _UI_ENUM(uiWindowResizeEdge) {
 // TODO give a better name
 // TODO document the types of width and height
 
-/// @memberof uiArea
-/// sets the size of a scrolling uiArea to the given size, in points.
-///
-/// panics if called on a non-scrolling uiArea.
+/**
+ * @memberof uiArea
+ * sets the size of a scrolling uiArea to the given size, in points.
+ *
+ * panics if called on a non-scrolling uiArea.
+ */
 _UI_EXTERN void uiAreaSetSize(uiArea *a, int width, int height);
 
 // TODO uiAreaQueueRedraw()
 
-/// @memberof uiArea
-/// queues the entire uiArea for redraw.
-///
-/// The uiArea is not redrawn before this function returns; it is
-/// redrawn when next possible.
+/**
+ * @memberof uiArea
+ * queues the entire uiArea for redraw.
+ *
+ * The uiArea is not redrawn before this function returns; it is
+ * redrawn when next possible.
+ */
 _UI_EXTERN void uiAreaQueueRedrawAll(uiArea *a);
 
-/// @memberof uiArea
-/// scrolls the uiArea to show the given rectangle
-///
-/// what this means is implementation-defined, but you can safely assume
-/// that as much of the given rectangle as possible will be visible after this call.
-/// (TODO verify this on OS X)
-///
-/// panics if called on a non-scrolling uiArea.
+/**
+ * @memberof uiArea
+ * scrolls the uiArea to show the given rectangle
+ *
+ * what this means is implementation-defined, but you can safely assume
+ * that as much of the given rectangle as possible will be visible after this call.
+ * (TODO verify this on OS X)
+ *
+ * panics if called on a non-scrolling uiArea.
+ */
 _UI_EXTERN void uiAreaScrollTo(uiArea *a, double x, double y, double width, double height);
 
 // TODO document these can only be called within Mouse() handlers
@@ -1085,23 +1390,33 @@ _UI_EXTERN void uiAreaScrollTo(uiArea *a, double x, double y, double width, doub
 // TODO what happens to events after calling this up to and including the next mouse up?
 // TODO release capture?
 
-/// @memberof uiArea
+/**
+ * @memberof uiArea
+ */
 _UI_EXTERN void uiAreaBeginUserWindowMove(uiArea *a);
 
-/// @memberof uiArea
+/**
+ * @memberof uiArea
+ */
 _UI_EXTERN void uiAreaBeginUserWindowResize(uiArea *a, uiWindowResizeEdge edge);
 
-/// @static @memberof uiArea
-/// creates a new non-scrolling uiArea.
+/**
+ * @static @memberof uiArea
+ * creates a new non-scrolling uiArea.
+ */
 _UI_EXTERN uiArea *uiNewArea(uiAreaHandler *ah);
 
-/// @static @memberof uiArea
-/// creates a new scrolling uiArea of the given size, in points.
+/**
+ * @static @memberof uiArea
+ * creates a new scrolling uiArea of the given size, in points.
+ */
 _UI_EXTERN uiArea *uiNewScrollingArea(uiAreaHandler *ah, int width, int height);
 
-/// provides a drawing context that can be used
-/// to draw on an uiArea and tells you where to draw. See uiAreaHandler
-/// for introductory information.
+/**
+ * provides a drawing context that can be used
+ * to draw on an uiArea and tells you where to draw. See uiAreaHandler
+ * for introductory information.
+ */
 struct uiAreaDrawParams {
 
 	/// the drawing context to draw on. See uiDrawContext for how to draw.
@@ -1131,21 +1446,22 @@ struct uiAreaDrawParams {
 	///@}
 };
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiDrawPath
-/// represents a geometric path in a drawing context.
-///
-/// This is the basic unit of drawing: all drawing operations consist of
-/// forming a path, then stroking, filling, or clipping to that path.
-/// A path is an OS resource; you must explicitly free it when finished.
-/// Paths consist of multiple figures. Once you have added all the
-/// figures to a path, you must "end" the path to make it ready to draw
-/// with.
-/// TODO rewrite all that
-///
-/// A uiDrawPath also defines its fill mode. (This should ideally be a fill
-/// parameter, but some implementations prevent it.)
-/// TODO talk about fill modes
+/**
+ * @struct uiDrawPath
+ * represents a geometric path in a drawing context.
+ *
+ * This is the basic unit of drawing: all drawing operations consist of
+ * forming a path, then stroking, filling, or clipping to that path.
+ * A path is an OS resource; you must explicitly free it when finished.
+ * Paths consist of multiple figures. Once you have added all the
+ * figures to a path, you must "end" the path to make it ready to draw
+ * with.
+ * TODO rewrite all that
+ *
+ * A uiDrawPath also defines its fill mode. (This should ideally be a fill
+ * parameter, but some implementations prevent it.)
+ * TODO talk about fill modes
+ */
 typedef struct uiDrawPath uiDrawPath;
 typedef struct uiDrawBrush uiDrawBrush;
 typedef struct uiDrawStrokeParams uiDrawStrokeParams;
@@ -1240,89 +1556,115 @@ struct uiDrawStrokeParams {
 	double DashPhase;
 };
 
-/// @static @memberof uiDrawPath
-/// creates a new uiDrawPath with the given fill mode.
+/**
+ * @static @memberof uiDrawPath
+ * creates a new uiDrawPath with the given fill mode.
+ */
 _UI_EXTERN uiDrawPath *uiDrawNewPath(uiDrawFillMode fillMode);
 
-/// @memberof uiDrawPath
-/// destroys a uiDrawPath. After calling the uiDrawPath cannot be used.
+/**
+ * @memberof uiDrawPath
+ * destroys a uiDrawPath. After calling the uiDrawPath cannot be used.
+ */
 _UI_EXTERN void uiDrawFreePath(uiDrawPath *p);
 
-/// @memberof uiDrawPath
-/// starts a new figure in the uiDrawPath. The current point is set to the given point.
+/**
+ * @memberof uiDrawPath
+ * starts a new figure in the uiDrawPath. The current point is set to the given point.
+ */
 _UI_EXTERN void uiDrawPathNewFigure(uiDrawPath *p, double x, double y);
 
-/// @memberof uiDrawPath
-/// starts a new figure in the uiDrawPath and adds
-/// an arc as the first element of the figure. Unlike ArcTo,
-/// NewFigureWithArc does not draw an initial line segment.
-/// Otherwise, see ArcTo.
+/**
+ * @memberof uiDrawPath
+ * starts a new figure in the uiDrawPath and adds
+ * an arc as the first element of the figure. Unlike ArcTo,
+ * NewFigureWithArc does not draw an initial line segment.
+ * Otherwise, see ArcTo.
+ */
 _UI_EXTERN void uiDrawPathNewFigureWithArc(uiDrawPath *p, double xCenter, double yCenter, double radius, double startAngle, double sweep, int negative);
 
-/// @memberof uiDrawPath
-/// adds a line to the current figure of the DrawPath starting
-/// from the current point and ending at the given point. The current
-/// point is set to the ending point.
+/**
+ * @memberof uiDrawPath
+ * adds a line to the current figure of the DrawPath starting
+ * from the current point and ending at the given point. The current
+ * point is set to the ending point.
+ */
 _UI_EXTERN void uiDrawPathLineTo(uiDrawPath *p, double x, double y);
 
 // notes: angles are both relative to 0 and go counterclockwise
 // TODO is the initial line segment on cairo and OS X a proper join?
 // TODO what if sweep < 0?
 
-/// @memberof uiDrawPath
-/// adds a circular arc to the current figure of the uiDrawPath.
-///
-/// You pass it the center of the arc, its radius in radians, the starting
-/// angle (couterclockwise) in radians, and the number of radians the
-/// arc should sweep (counterclockwise). A line segment is drawn from
-/// the current point to the start of the arc. The current point is set to
-/// the end of the arc.
+/**
+ * @memberof uiDrawPath
+ * adds a circular arc to the current figure of the uiDrawPath.
+ *
+ * You pass it the center of the arc, its radius in radians, the starting
+ * angle (couterclockwise) in radians, and the number of radians the
+ * arc should sweep (counterclockwise). A line segment is drawn from
+ * the current point to the start of the arc. The current point is set to
+ * the end of the arc.
+ */
 _UI_EXTERN void uiDrawPathArcTo(uiDrawPath *p, double xCenter, double yCenter, double radius, double startAngle, double sweep, int negative);
 
-/// @memberof uiDrawPath
-/// adds a cubic Bezier curve to the current figure of the uiDrawPath.
-///
-/// Its start point is the current point. c1x and c1y are the
-/// first control point. c2x and c2y are the second control point. endX
-/// and endY are the end point. The current point is set to the end
-/// point.
+/**
+ * @memberof uiDrawPath
+ * adds a cubic Bezier curve to the current figure of the uiDrawPath.
+ *
+ * Its start point is the current point. c1x and c1y are the
+ * first control point. c2x and c2y are the second control point. endX
+ * and endY are the end point. The current point is set to the end
+ * point.
+ */
 _UI_EXTERN void uiDrawPathBezierTo(uiDrawPath *p, double c1x, double c1y, double c2x, double c2y, double endX, double endY);
 
 // TODO quadratic bezier
 
-/// @memberof uiDrawPath
-/// draws a line segment from the current point of the
-/// current figure of the uiDrawPath back to its initial point. After calling
-/// this, the current figure is over and you must either start a new
-/// figure or end the uiDrawPath. If this is not called and you start a
-/// new figure or end the uiDrawPath, then the current figure will not
-/// have this closing line segment added to it (but the figure will still
-/// be over).
+/**
+ * @memberof uiDrawPath
+ * draws a line segment from the current point of the
+ * current figure of the uiDrawPath back to its initial point. After calling
+ * this, the current figure is over and you must either start a new
+ * figure or end the uiDrawPath. If this is not called and you start a
+ * new figure or end the uiDrawPath, then the current figure will not
+ * have this closing line segment added to it (but the figure will still
+ * be over).
+ */
 _UI_EXTERN void uiDrawPathCloseFigure(uiDrawPath *p);
 
 // TODO effect of these when a figure is already started
 
-/// @memberof uiDrawPath
-/// creates a new figure in the uiDrawPath that consists
-/// entirely of a rectangle whose top-left corner is at the given point
-/// and whose size is the given size. The rectangle is a closed figure;
-/// you must either start a new figure or end the Path after calling
-/// this method.
+/**
+ * @memberof uiDrawPath
+ * creates a new figure in the uiDrawPath that consists
+ * entirely of a rectangle whose top-left corner is at the given point
+ * and whose size is the given size. The rectangle is a closed figure;
+ * you must either start a new figure or end the Path after calling
+ * this method.
+ */
 _UI_EXTERN void uiDrawPathAddRectangle(uiDrawPath *p, double x, double y, double width, double height);
 
-/// @memberof uiDrawPath
+/**
+ * @memberof uiDrawPath
+ */
 _UI_EXTERN int uiDrawPathEnded(uiDrawPath *p);
 
-/// @memberof uiDrawPath
-/// ends the current uiDrawPath. You cannot add figures to a
-/// uiDrawPath that has been ended. You cannot draw with a
-/// uiDrawPath that has not been ended.
+/**
+ * @memberof uiDrawPath
+ * ends the current uiDrawPath. You cannot add figures to a
+ * uiDrawPath that has been ended. You cannot draw with a
+ * uiDrawPath that has not been ended.
+ */
 _UI_EXTERN void uiDrawPathEnd(uiDrawPath *p);
 
-/// @memberof uiDrawContext
+/**
+ * @memberof uiDrawContext
+ */
 _UI_EXTERN void uiDrawStroke(uiDrawContext *c, uiDrawPath *path, uiDrawBrush *b, uiDrawStrokeParams *p);
 
-/// @memberof uiDrawContext
+/**
+ * @memberof uiDrawContext
+ */
 _UI_EXTERN void uiDrawFill(uiDrawContext *c, uiDrawPath *path, uiDrawBrush *b);
 
 // TODO primitives:
@@ -1330,77 +1672,110 @@ _UI_EXTERN void uiDrawFill(uiDrawContext *c, uiDrawPath *path, uiDrawBrush *b);
 // - elliptical arcs
 // - quadratic bezier curves
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN void uiDrawMatrixSetIdentity(uiDrawMatrix *m);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN void uiDrawMatrixTranslate(uiDrawMatrix *m, double x, double y);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN void uiDrawMatrixScale(uiDrawMatrix *m, double xCenter, double yCenter, double x, double y);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN void uiDrawMatrixRotate(uiDrawMatrix *m, double x, double y, double amount);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN void uiDrawMatrixSkew(uiDrawMatrix *m, double x, double y, double xamount, double yamount);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN void uiDrawMatrixMultiply(uiDrawMatrix *dest, uiDrawMatrix *src);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN int uiDrawMatrixInvertible(uiDrawMatrix *m);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN int uiDrawMatrixInvert(uiDrawMatrix *m);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN void uiDrawMatrixTransformPoint(uiDrawMatrix *m, double *x, double *y);
 
-/// @memberof uiDrawMatrix
+/**
+ * @memberof uiDrawMatrix
+ */
 _UI_EXTERN void uiDrawMatrixTransformSize(uiDrawMatrix *m, double *x, double *y);
 
-/// @memberof uiDrawContext
+/**
+ * @memberof uiDrawContext
+ */
 _UI_EXTERN void uiDrawTransform(uiDrawContext *c, uiDrawMatrix *m);
 
 // TODO add a uiDrawPathStrokeToFill() or something like that
 
-/// @memberof uiDrawContext
+/**
+ * @memberof uiDrawContext
+ */
 _UI_EXTERN void uiDrawClip(uiDrawContext *c, uiDrawPath *path);
 
-/// @memberof uiDrawContext
+/**
+ * @memberof uiDrawContext
+ */
 _UI_EXTERN void uiDrawSave(uiDrawContext *c);
 
-/// @memberof uiDrawContext
+/**
+ * @memberof uiDrawContext
+ */
 _UI_EXTERN void uiDrawRestore(uiDrawContext *c);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiAttribute
-/// stores information about an attribute in a uiAttributedString.
-///
-/// You do not create uiAttributes directly; instead, you create a
-/// uiAttribute of a given type using the specialized constructor
-/// functions. For every Unicode codepoint in the uiAttributedString,
-/// at most one value of each attribute type can be applied.
-///
-/// uiAttributes are immutable and the uiAttributedString takes
-/// ownership of the uiAttribute object once assigned, copying its
-/// contents as necessary.
+/**
+ * @struct uiAttribute
+ * stores information about an attribute in a uiAttributedString.
+ *
+ * You do not create uiAttributes directly; instead, you create a
+ * uiAttribute of a given type using the specialized constructor
+ * functions. For every Unicode codepoint in the uiAttributedString,
+ * at most one value of each attribute type can be applied.
+ *
+ * uiAttributes are immutable and the uiAttributedString takes
+ * ownership of the uiAttribute object once assigned, copying its
+ * contents as necessary.
+ */
 typedef struct uiAttribute uiAttribute;
 
-/// @memberof uiAttribute
-/// frees a uiAttribute. You generally do not need to call this yourself,
-/// as uiAttributedString does this for you.
-///
-/// In fact, it is an error to call this function on a uiAttribute that has been
-/// given to a uiAttributedString. You can call this, however, if you
-/// created a uiAttribute that you aren't going to use later.
+/**
+ * @memberof uiAttribute
+ * frees a uiAttribute. You generally do not need to call this yourself,
+ * as uiAttributedString does this for you.
+ *
+ * In fact, it is an error to call this function on a uiAttribute that has been
+ * given to a uiAttributedString. You can call this, however, if you
+ * created a uiAttribute that you aren't going to use later.
+ */
 _UI_EXTERN void uiFreeAttribute(uiAttribute *a);
 
-/// holds the possible uiAttribute types that may be
-/// returned by uiAttributeGetType(). Refer to the documentation for
-/// each type's constructor function for details on each type.
+/**
+ * holds the possible uiAttribute types that may be
+ * returned by uiAttributeGetType(). Refer to the documentation for
+ * each type's constructor function for details on each type.
+ */
 _UI_ENUM(uiAttributeType) {
 	uiAttributeTypeFamily,
 	uiAttributeTypeSize,
@@ -1414,49 +1789,61 @@ _UI_ENUM(uiAttributeType) {
 	uiAttributeTypeFeatures,
 };
 
-/// @memberof uiAttribute
-/// returns the type of a.
+/**
+ * @memberof uiAttribute
+ * returns the type of a.
+ */
 // TODO I don't like this name
 _UI_EXTERN uiAttributeType uiAttributeGetType(const uiAttribute *a);
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the font family of the text it is applied to.
-///
-/// family is copied; you do not need to keep it alive after uiNewFamilyAttribute() returns.
-/// Font family names are case-insensitive.
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the font family of the text it is applied to.
+ *
+ * family is copied; you do not need to keep it alive after uiNewFamilyAttribute() returns.
+ * Font family names are case-insensitive.
+ */
 _UI_EXTERN uiAttribute *uiNewFamilyAttribute(const char *family);
 
-/// @memberof uiAttribute
-/// returns the font family stored in a.
-///
-/// The returned string is owned by a.
-/// It is an error to call this on a uiAttribute that does not hold a font family.
+/**
+ * @memberof uiAttribute
+ * returns the font family stored in a.
+ *
+ * The returned string is owned by a.
+ * It is an error to call this on a uiAttribute that does not hold a font family.
+ */
 _UI_EXTERN const char *uiAttributeFamily(const uiAttribute *a);
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the size of the text it is applied to, in typographical points.
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the size of the text it is applied to, in typographical points.
+ */
 _UI_EXTERN uiAttribute *uiNewSizeAttribute(double size);
 
-/// @memberof uiAttribute
-/// returns the font size stored in a.
-///
-/// It is an error to call this on a uiAttribute that does not hold a font size.
+/**
+ * @memberof uiAttribute
+ * returns the font size stored in a.
+ *
+ * It is an error to call this on a uiAttribute that does not hold a font size.
+ */
 _UI_EXTERN double uiAttributeSize(const uiAttribute *a);
 
-/// represents possible text weights. These roughly
-/// map to the OS/2 text weight field of TrueType and OpenType
-/// fonts, or to CSS weight numbers. The named constants are
-/// nominal values; the actual values may vary by font and by OS,
-/// though this isn't particularly likely. Any value between
-/// uiTextWeightMinimum and uiTextWeightMaximum, inclusive,
-/// is allowed.
-///
-/// Note that due to restrictions in early versions of Windows, some
-/// fonts have "special" weights be exposed in many programs as
-/// separate font families. This is perhaps most notable with
-/// Arial Black. libui does not do this, even on Windows (because the
-/// DirectWrite API libui uses on Windows does not do this); to
-/// specify Arial Black, use family Arial and weight uiTextWeightBlack.
+/**
+ * represents possible text weights. These roughly
+ * map to the OS/2 text weight field of TrueType and OpenType
+ * fonts, or to CSS weight numbers. The named constants are
+ * nominal values; the actual values may vary by font and by OS,
+ * though this isn't particularly likely. Any value between
+ * uiTextWeightMinimum and uiTextWeightMaximum, inclusive,
+ * is allowed.
+ *
+ * Note that due to restrictions in early versions of Windows, some
+ * fonts have "special" weights be exposed in many programs as
+ * separate font families. This is perhaps most notable with
+ * Arial Black. libui does not do this, even on Windows (because the
+ * DirectWrite API libui uses on Windows does not do this); to
+ * specify Arial Black, use family Arial and weight uiTextWeightBlack.
+ */
 _UI_ENUM(uiTextWeight) {
 	uiTextWeightMinimum = 0,
 	uiTextWeightThin = 100,
@@ -1473,50 +1860,62 @@ _UI_ENUM(uiTextWeight) {
 	uiTextWeightMaximum = 1000,
 };
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the weight of the text it is applied to.
-///
-/// It is an error to specify a weight outside the range [uiTextWeightMinimum, uiTextWeightMaximum].
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the weight of the text it is applied to.
+ *
+ * It is an error to specify a weight outside the range [uiTextWeightMinimum, uiTextWeightMaximum].
+ */
 _UI_EXTERN uiAttribute *uiNewWeightAttribute(uiTextWeight weight);
 
-/// @memberof uiAttribute
-/// returns the font weight stored in a.
-///
-/// It is an error to call this on a uiAttribute that does not hold a font weight.
+/**
+ * @memberof uiAttribute
+ * returns the font weight stored in a.
+ *
+ * It is an error to call this on a uiAttribute that does not hold a font weight.
+ */
 _UI_EXTERN uiTextWeight uiAttributeWeight(const uiAttribute *a);
 
-/// represents possible italic modes for a font. Italic
-/// represents "true" italics where the slanted glyphs have custom
-/// shapes, whereas oblique represents italics that are merely slanted
-/// versions of the normal glyphs. Most fonts usually have one or the
-/// other.
+/**
+ * represents possible italic modes for a font. Italic
+ * represents "true" italics where the slanted glyphs have custom
+ * shapes, whereas oblique represents italics that are merely slanted
+ * versions of the normal glyphs. Most fonts usually have one or the
+ * other.
+ */
 _UI_ENUM(uiTextItalic) {
 	uiTextItalicNormal,
 	uiTextItalicOblique,
 	uiTextItalicItalic,
 };
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the italic mode of the text it is applied to.
-///
-/// It is an error to specify an italic mode not specified in uiTextItalic.
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the italic mode of the text it is applied to.
+ *
+ * It is an error to specify an italic mode not specified in uiTextItalic.
+ */
 _UI_EXTERN uiAttribute *uiNewItalicAttribute(uiTextItalic italic);
 
-/// @memberof uiAttribute
-/// returns the font italic mode stored in a.
-///
-/// It is an error to call this on a uiAttribute that does not hold a font italic mode.
+/**
+ * @memberof uiAttribute
+ * returns the font italic mode stored in a.
+ *
+ * It is an error to call this on a uiAttribute that does not hold a font italic mode.
+ */
 _UI_EXTERN uiTextItalic uiAttributeItalic(const uiAttribute *a);
 
-/// represents possible stretches (also called "widths") of a font.
-///
-/// Note that due to restrictions in early versions of Windows, some
-/// fonts have "special" stretches be exposed in many programs as
-/// separate font families. This is perhaps most notable with
-/// Arial Condensed. libui does not do this, even on Windows (because
-/// the DirectWrite API libui uses on Windows does not do this); to
-/// specify Arial Condensed, use family Arial and stretch
-/// uiTextStretchCondensed.
+/**
+ * represents possible stretches (also called "widths") of a font.
+ *
+ * Note that due to restrictions in early versions of Windows, some
+ * fonts have "special" stretches be exposed in many programs as
+ * separate font families. This is perhaps most notable with
+ * Arial Condensed. libui does not do this, even on Windows (because
+ * the DirectWrite API libui uses on Windows does not do this); to
+ * specify Arial Condensed, use family Arial and stretch
+ * uiTextStretchCondensed.
+ */
 _UI_ENUM(uiTextStretch) {
 	uiTextStretchUltraCondensed,
 	uiTextStretchExtraCondensed,
@@ -1529,39 +1928,51 @@ _UI_ENUM(uiTextStretch) {
 	uiTextStretchUltraExpanded,
 };
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the stretch of the text it is applied to.
-///
-/// It is an error to specify a strech not specified in uiTextStretch.
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the stretch of the text it is applied to.
+ *
+ * It is an error to specify a strech not specified in uiTextStretch.
+ */
 _UI_EXTERN uiAttribute *uiNewStretchAttribute(uiTextStretch stretch);
 
-/// @memberof uiAttribute
-/// returns the font stretch stored in a.
-///
-/// It is an error to call this on a uiAttribute that does not hold a font stretch.
+/**
+ * @memberof uiAttribute
+ * returns the font stretch stored in a.
+ *
+ * It is an error to call this on a uiAttribute that does not hold a font stretch.
+ */
 _UI_EXTERN uiTextStretch uiAttributeStretch(const uiAttribute *a);
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the color of the text it is applied to.
-///
-/// It is an error to specify an invalid color.
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the color of the text it is applied to.
+ *
+ * It is an error to specify an invalid color.
+ */
 _UI_EXTERN uiAttribute *uiNewColorAttribute(double r, double g, double b, double a);
 
-/// @memberof uiAttribute
-/// returns the text color stored in a.
-///
-/// It is an error to call this on a uiAttribute that does not hold a text color.
+/**
+ * @memberof uiAttribute
+ * returns the text color stored in a.
+ *
+ * It is an error to call this on a uiAttribute that does not hold a text color.
+ */
 _UI_EXTERN void uiAttributeColor(const uiAttribute *a, double *r, double *g, double *b, double *alpha);
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the background color of the text it is applied to.
-///
-/// It is an error to specify an invalid color.
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the background color of the text it is applied to.
+ *
+ * It is an error to specify an invalid color.
+ */
 _UI_EXTERN uiAttribute *uiNewBackgroundAttribute(double r, double g, double b, double a);
 
 // TODO reuse uiAttributeColor() for background colors, or make a new function...
 
-/// specifies a type of underline to use on text.
+/**
+ * specifies a type of underline to use on text.
+ */
 _UI_ENUM(uiUnderline) {
 	uiUnderlineNone,
 	uiUnderlineSingle,
@@ -1569,29 +1980,35 @@ _UI_ENUM(uiUnderline) {
 	uiUnderlineSuggestion,		// wavy or dotted underlines used for spelling/grammar checkers
 };
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the type of underline on the text it is applied to.
-///
-/// It is an error to specify an underline type not specified in uiUnderline.
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the type of underline on the text it is applied to.
+ *
+ * It is an error to specify an underline type not specified in uiUnderline.
+ */
 _UI_EXTERN uiAttribute *uiNewUnderlineAttribute(uiUnderline u);
 
-/// @memberof uiAttribute
-/// returns the underline type stored in a.
-///
-/// It is an error to call this on a uiAttribute that does not hold an underline style.
+/**
+ * @memberof uiAttribute
+ * returns the underline type stored in a.
+ *
+ * It is an error to call this on a uiAttribute that does not hold an underline style.
+ */
 _UI_EXTERN uiUnderline uiAttributeUnderline(const uiAttribute *a);
 
-/// specifies the color of any underline on the text it
-/// is applied to, regardless of the type of underline. In addition to
-/// being able to specify a custom color, you can explicitly specify
-/// platform-specific colors for suggestion underlines; to use them
-/// correctly, pair them with uiUnderlineSuggestion (though they can
-/// be used on other types of underline as well).
-///
-/// If an underline type is applied but no underline color is
-/// specified, the text color is used instead. If an underline color
-/// is specified without an underline type, the underline color
-/// attribute is ignored, but not removed from the uiAttributedString.
+/**
+ * specifies the color of any underline on the text it
+ * is applied to, regardless of the type of underline. In addition to
+ * being able to specify a custom color, you can explicitly specify
+ * platform-specific colors for suggestion underlines; to use them
+ * correctly, pair them with uiUnderlineSuggestion (though they can
+ * be used on other types of underline as well).
+ *
+ * If an underline type is applied but no underline color is
+ * specified, the text color is used instead. If an underline color
+ * is specified without an underline type, the underline color
+ * attribute is ignored, but not removed from the uiAttributedString.
+ */
 _UI_ENUM(uiUnderlineColor) {
 	uiUnderlineColorCustom,
 	uiUnderlineColorSpelling,
@@ -1599,234 +2016,289 @@ _UI_ENUM(uiUnderlineColor) {
 	uiUnderlineColorAuxiliary,		// for instance, the color used by smart replacements on macOS or in Microsoft Office
 };
 
-/// @static @memberof uiAttribute
-/// creates a new uiAttribute that changes the color of the underline on the text it is applied to.
-///
-/// It is an error to specify an underline color not specified in uiUnderlineColor.
-///
-/// If the specified color type is uiUnderlineColorCustom, it is an
-/// error to specify an invalid color value. Otherwise, the color values
-/// are ignored and should be specified as zero.
+/**
+ * @static @memberof uiAttribute
+ * creates a new uiAttribute that changes the color of the underline on the text it is applied to.
+ *
+ * It is an error to specify an underline color not specified in uiUnderlineColor.
+ *
+ * If the specified color type is uiUnderlineColorCustom, it is an
+ * error to specify an invalid color value. Otherwise, the color values
+ * are ignored and should be specified as zero.
+ */
 _UI_EXTERN uiAttribute *uiNewUnderlineColorAttribute(uiUnderlineColor u, double r, double g, double b, double a);
 
-/// @memberof uiAttribute
-/// returns the underline color stored in a.
-/// It is an error to call this on a uiAttribute that does not hold an underline color.
+/**
+ * @memberof uiAttribute
+ * returns the underline color stored in a.
+ * It is an error to call this on a uiAttribute that does not hold an underline color.
+ */
 _UI_EXTERN void uiAttributeUnderlineColor(const uiAttribute *a, uiUnderlineColor *u, double *r, double *g, double *b, double *alpha);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiOpenTypeFeatures
-/// represents a set of OpenType feature
-/// tag-value pairs, for applying OpenType features to text.
-/// OpenType feature tags are four-character codes defined by
-/// OpenType that cover things from design features like small
-/// caps and swashes to language-specific glyph shapes and
-/// beyond. Each tag may only appear once in any given
-/// uiOpenTypeFeatures instance. Each value is a 32-bit integer,
-/// often used as a Boolean flag, but sometimes as an index to choose
-/// a glyph shape to use.
-///
-/// If a font does not support a certain feature, that feature will be
-/// ignored. (TODO verify this on all OSs)
-///
-/// See the OpenType specification at
-/// https://www.microsoft.com/typography/otspec/featuretags.htm
-/// for the complete list of available features, information on specific
-/// features, and how to use them.
-/// TODO invalid features
+/**
+ * @struct uiOpenTypeFeatures
+ * represents a set of OpenType feature
+ * tag-value pairs, for applying OpenType features to text.
+ * OpenType feature tags are four-character codes defined by
+ * OpenType that cover things from design features like small
+ * caps and swashes to language-specific glyph shapes and
+ * beyond. Each tag may only appear once in any given
+ * uiOpenTypeFeatures instance. Each value is a 32-bit integer,
+ * often used as a Boolean flag, but sometimes as an index to choose
+ * a glyph shape to use.
+ *
+ * If a font does not support a certain feature, that feature will be
+ * ignored. (TODO verify this on all OSs)
+ *
+ * See the OpenType specification at
+ * https://www.microsoft.com/typography/otspec/featuretags.htm
+ * for the complete list of available features, information on specific
+ * features, and how to use them.
+ * TODO invalid features
+ */
 typedef struct uiOpenTypeFeatures uiOpenTypeFeatures;
 
-/// @memberof uiOpenTypeFeatures
-/// the type of the function invoked by uiOpenTypeFeaturesForEach() for every OpenType
-/// feature in otf. Refer to that function's documentation for more
-/// details.
+/**
+ * @memberof uiOpenTypeFeatures
+ * the type of the function invoked by uiOpenTypeFeaturesForEach() for every OpenType
+ * feature in otf. Refer to that function's documentation for more
+ * details.
+ */
 typedef uiForEach (*uiOpenTypeFeaturesForEachFunc)(const uiOpenTypeFeatures *otf, char a, char b, char c, char d, uint32_t value, void *data);
 
-/// @static @memberof uiOpenTypeFeatures
-/// returns a new uiOpenTypeFeatures instance, with no tags yet added.
+/**
+ * @static @memberof uiOpenTypeFeatures
+ * returns a new uiOpenTypeFeatures instance, with no tags yet added.
+ */
 _UI_EXTERN uiOpenTypeFeatures *uiNewOpenTypeFeatures(void);
 
-/// @memberof uiOpenTypeFeatures
-/// frees otf.
+/**
+ * @memberof uiOpenTypeFeatures
+ * frees otf.
+ */
 _UI_EXTERN void uiFreeOpenTypeFeatures(uiOpenTypeFeatures *otf);
 
-/// @memberof uiOpenTypeFeatures
-/// makes a copy of otf and returns it.
-///
-/// Changing one will not affect the other.
+/**
+ * @memberof uiOpenTypeFeatures
+ * makes a copy of otf and returns it.
+ *
+ * Changing one will not affect the other.
+ */
 _UI_EXTERN uiOpenTypeFeatures *uiOpenTypeFeaturesClone(const uiOpenTypeFeatures *otf);
 
-/// @memberof uiOpenTypeFeatures
-/// adds the given feature tag and value to otf.
-///
-/// The feature tag is specified by a, b, c, and d.
-/// If there is already a value associated with the specified tag in otf, the old value is removed.
+/**
+ * @memberof uiOpenTypeFeatures
+ * adds the given feature tag and value to otf.
+ *
+ * The feature tag is specified by a, b, c, and d.
+ * If there is already a value associated with the specified tag in otf, the old value is removed.
+ */
 _UI_EXTERN void uiOpenTypeFeaturesAdd(uiOpenTypeFeatures *otf, char a, char b, char c, char d, uint32_t value);
 
-/// @memberof uiOpenTypeFeatures
-/// removes the given feature tag and value from otf.
-/// If the tag is not present in otf, uiOpenTypeFeaturesRemove() does nothing.
+/**
+ * @memberof uiOpenTypeFeatures
+ * removes the given feature tag and value from otf.
+ * If the tag is not present in otf, uiOpenTypeFeaturesRemove() does nothing.
+ */
 _UI_EXTERN void uiOpenTypeFeaturesRemove(uiOpenTypeFeatures *otf, char a, char b, char c, char d);
 
-/// @memberof uiOpenTypeFeatures
-/// determines whether the given feature tag is present in otf.
-/// If it is, *value is set to the tag's value and nonzero is returned. Otherwise, zero is returned.
-///
-/// Note that if uiOpenTypeFeaturesGet() returns zero, value isn't
-/// changed. This is important: if a feature is not present in a
-/// uiOpenTypeFeatures, the feature is NOT treated as if its
-/// value was zero anyway. Script-specific font shaping rules and
-/// font-specific feature settings may use a different default value
-/// for a feature. You should likewise not treat a missing feature as
-/// having a value of zero either. Instead, a missing feature should
-/// be treated as having some unspecified default value.
+/**
+ * @memberof uiOpenTypeFeatures
+ * determines whether the given feature tag is present in otf.
+ * If it is, *value is set to the tag's value and nonzero is returned. Otherwise, zero is returned.
+ *
+ * Note that if uiOpenTypeFeaturesGet() returns zero, value isn't
+ * changed. This is important: if a feature is not present in a
+ * uiOpenTypeFeatures, the feature is NOT treated as if its
+ * value was zero anyway. Script-specific font shaping rules and
+ * font-specific feature settings may use a different default value
+ * for a feature. You should likewise not treat a missing feature as
+ * having a value of zero either. Instead, a missing feature should
+ * be treated as having some unspecified default value.
+ */
 _UI_EXTERN int uiOpenTypeFeaturesGet(const uiOpenTypeFeatures *otf, char a, char b, char c, char d, uint32_t *value);
 
-/// @memberof uiOpenTypeFeatures
-/// executes @p f for every tag-value pair in otf.
-///
-/// The enumeration order is unspecified.
-/// You cannot modify otf while uiOpenTypeFeaturesForEach() is running.
+/**
+ * @memberof uiOpenTypeFeatures
+ * executes @p f for every tag-value pair in otf.
+ *
+ * The enumeration order is unspecified.
+ * You cannot modify otf while uiOpenTypeFeaturesForEach() is running.
+ */
 _UI_EXTERN void uiOpenTypeFeaturesForEach(const uiOpenTypeFeatures *otf, uiOpenTypeFeaturesForEachFunc f, void *data);
 
-/// @memberof uiOpenTypeFeatures
-/// creates a new uiAttribute that changes the font family of the text it is applied to.
-/// otf is copied; you may free it after uiNewFeaturesAttribute() returns.
+/**
+ * @memberof uiOpenTypeFeatures
+ * creates a new uiAttribute that changes the font family of the text it is applied to.
+ * otf is copied; you may free it after uiNewFeaturesAttribute() returns.
+ */
 _UI_EXTERN uiAttribute *uiNewFeaturesAttribute(const uiOpenTypeFeatures *otf);
 
-/// @memberof uiOpenTypeFeatures
-/// returns the OpenType features stored in a.
-///
-/// The returned uiOpenTypeFeatures object is owned by a. It is an
-/// error to call this on a uiAttribute that does not hold OpenType
-/// features.
+/**
+ * @memberof uiOpenTypeFeatures
+ * returns the OpenType features stored in a.
+ *
+ * The returned uiOpenTypeFeatures object is owned by a. It is an
+ * error to call this on a uiAttribute that does not hold OpenType
+ * features.
+ */
 _UI_EXTERN const uiOpenTypeFeatures *uiAttributeFeatures(const uiAttribute *a);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiAttributedString
-/// represents a string of UTF-8 text that can
-/// optionally be embellished with formatting attributes. libui
-/// provides the list of formatting attributes, which cover common
-/// formatting traits like boldface and color as well as advanced
-/// typographical features provided by OpenType like superscripts
-/// and small caps. These attributes can be combined in a variety of
-/// ways.
-///
-/// Attributes are applied to runs of Unicode codepoints in the string.
-/// Zero-length runs are elided. Consecutive runs that have the same
-/// attribute type and value are merged. Each attribute is independent
-/// of each other attribute; overlapping attributes of different types
-/// do not split each other apart, but different values of the same
-/// attribute type do.
-///
-/// The empty string can also be represented by uiAttributedString,
-/// but because of the no-zero-length-attribute rule, it will not have
-/// attributes.
-///
-/// A uiAttributedString takes ownership of all attributes given to
-/// it, as it may need to duplicate or delete uiAttribute objects at
-/// any time. By extension, when you free a uiAttributedString,
-/// all uiAttributes within will also be freed. Each method will
-/// describe its own rules in more details.
-///
-/// In addition, uiAttributedString provides facilities for moving
-/// between grapheme clusters, which represent a character
-/// from the point of view of the end user. The cursor of a text editor
-/// is always placed on a grapheme boundary, so you can use these
-/// features to move the cursor left or right by one "character".
-/// TODO does uiAttributedString itself need this
-///
-/// uiAttributedString does not provide enough information to be able
-/// to draw itself onto a uiDrawContext or respond to user actions.
-/// In order to do that, you'll need to use a uiDrawTextLayout, which
-/// is built from the combination of a uiAttributedString and a set of
-/// layout-specific properties.
+/**
+ * @struct uiAttributedString
+ * represents a string of UTF-8 text that can
+ * optionally be embellished with formatting attributes. libui
+ * provides the list of formatting attributes, which cover common
+ * formatting traits like boldface and color as well as advanced
+ * typographical features provided by OpenType like superscripts
+ * and small caps. These attributes can be combined in a variety of
+ * ways.
+ *
+ * Attributes are applied to runs of Unicode codepoints in the string.
+ * Zero-length runs are elided. Consecutive runs that have the same
+ * attribute type and value are merged. Each attribute is independent
+ * of each other attribute; overlapping attributes of different types
+ * do not split each other apart, but different values of the same
+ * attribute type do.
+ *
+ * The empty string can also be represented by uiAttributedString,
+ * but because of the no-zero-length-attribute rule, it will not have
+ * attributes.
+ *
+ * A uiAttributedString takes ownership of all attributes given to
+ * it, as it may need to duplicate or delete uiAttribute objects at
+ * any time. By extension, when you free a uiAttributedString,
+ * all uiAttributes within will also be freed. Each method will
+ * describe its own rules in more details.
+ *
+ * In addition, uiAttributedString provides facilities for moving
+ * between grapheme clusters, which represent a character
+ * from the point of view of the end user. The cursor of a text editor
+ * is always placed on a grapheme boundary, so you can use these
+ * features to move the cursor left or right by one "character".
+ * TODO does uiAttributedString itself need this
+ *
+ * uiAttributedString does not provide enough information to be able
+ * to draw itself onto a uiDrawContext or respond to user actions.
+ * In order to do that, you'll need to use a uiDrawTextLayout, which
+ * is built from the combination of a uiAttributedString and a set of
+ * layout-specific properties.
+ */
 typedef struct uiAttributedString uiAttributedString;
 
-/// @memberof uiAttributedString
-/// the type of the function invoked by uiAttributedStringForEachAttribute() for every
-/// attribute in s. Refer to that function's documentation for more
-/// details.
+/**
+ * @memberof uiAttributedString
+ * the type of the function invoked by uiAttributedStringForEachAttribute() for every
+ * attribute in s. Refer to that function's documentation for more
+ * details.
+ */
 typedef uiForEach (*uiAttributedStringForEachAttributeFunc)(const uiAttributedString *s, const uiAttribute *a, size_t start, size_t end, void *data);
 
-/// @static @memberof uiAttributedString
-/// creates a new uiAttributedString from initialString. The string will be entirely unattributed.
+/**
+ * @static @memberof uiAttributedString
+ * creates a new uiAttributedString from initialString. The string will be entirely unattributed.
+ */
 _UI_EXTERN uiAttributedString *uiNewAttributedString(const char *initialString);
 
-/// @memberof uiAttributedString
-/// destroys the uiAttributedString s.
-///
-/// It will also free all uiAttributes within.
+/**
+ * @memberof uiAttributedString
+ * destroys the uiAttributedString s.
+ *
+ * It will also free all uiAttributes within.
+ */
 _UI_EXTERN void uiFreeAttributedString(uiAttributedString *s);
 
-/// @memberof uiAttributedString
-/// returns the textual content of s as a '\0'-terminated UTF-8 string.
-///
-/// The returned pointer is valid until the next change to the textual content of s.
+/**
+ * @memberof uiAttributedString
+ * returns the textual content of s as a '\0'-terminated UTF-8 string.
+ *
+ * The returned pointer is valid until the next change to the textual content of s.
+ */
 _UI_EXTERN const char *uiAttributedStringString(const uiAttributedString *s);
 
-/// @memberof uiAttributedString
-/// returns the number of UTF-8 bytes in the textual content of s, excluding the terminating '\0'.
+/**
+ * @memberof uiAttributedString
+ * returns the number of UTF-8 bytes in the textual content of s, excluding the terminating '\0'.
+ */
 _UI_EXTERN size_t uiAttributedStringLen(const uiAttributedString *s);
 
-/// @memberof uiAttributedString
-/// adds the '\0'-terminated UTF-8 string str to the end of s.
-///
-/// The new substring will be unattributed.
+/**
+ * @memberof uiAttributedString
+ * adds the '\0'-terminated UTF-8 string str to the end of s.
+ *
+ * The new substring will be unattributed.
+ */
 _UI_EXTERN void uiAttributedStringAppendUnattributed(uiAttributedString *s, const char *str);
 
-/// @memberof uiAttributedString
-/// adds the '\0'-terminated UTF-8 string str to s at the byte position specified by at.
-///
-/// The new substring will be unattributed; existing attributes will be moved along with their text.
+/**
+ * @memberof uiAttributedString
+ * adds the '\0'-terminated UTF-8 string str to s at the byte position specified by at.
+ *
+ * The new substring will be unattributed; existing attributes will be moved along with their text.
+ */
 _UI_EXTERN void uiAttributedStringInsertAtUnattributed(uiAttributedString *s, const char *str, size_t at);
 
 // TODO add the Append and InsertAtExtendingAttributes functions
 // TODO and add functions that take a string + length
 
-/// @memberof uiAttributedString
-/// deletes the characters and attributes of s in the byte range [start, end).
+/**
+ * @memberof uiAttributedString
+ * deletes the characters and attributes of s in the byte range [start, end).
+ */
 _UI_EXTERN void uiAttributedStringDelete(uiAttributedString *s, size_t start, size_t end);
 
 // TODO add a function to uiAttributedString to get an attribute's value at a specific index or in a specific range, so we can edit
 
-/// @memberof uiAttributedString
-/// sets a in the byte range [start, end) of s.
-///
-/// Any existing attributes in that byte range of the same type are
-/// removed. s takes ownership of a; you should not use it after
-/// uiAttributedStringSetAttribute() returns.
+/**
+ * @memberof uiAttributedString
+ * sets a in the byte range [start, end) of s.
+ *
+ * Any existing attributes in that byte range of the same type are
+ * removed. s takes ownership of a; you should not use it after
+ * uiAttributedStringSetAttribute() returns.
+ */
 _UI_EXTERN void uiAttributedStringSetAttribute(uiAttributedString *s, uiAttribute *a, size_t start, size_t end);
 
-/// @memberof uiAttributedString
-/// enumerates all the uiAttributes in s.
-///
-/// It is an error to modify s in f. Within f, s still owns the attribute;
-/// you can neither free it nor save it for later use.
+/**
+ * @memberof uiAttributedString
+ * enumerates all the uiAttributes in s.
+ *
+ * It is an error to modify s in f. Within f, s still owns the attribute;
+ * you can neither free it nor save it for later use.
+ */
 // TODO reword the above for consistency (TODO and find out what I meant by that)
 // TODO define an enumeration order (or mark it as undefined); also define how consecutive runs of identical attributes are handled here and sync with the definition of uiAttributedString itself
 _UI_EXTERN void uiAttributedStringForEachAttribute(const uiAttributedString *s, uiAttributedStringForEachAttributeFunc f, void *data);
 
-/// @memberof uiAttributedString
+/**
+ * @memberof uiAttributedString
+ */
 // TODO const correct this somehow (the implementation needs to mutate the structure)
 _UI_EXTERN size_t uiAttributedStringNumGraphemes(uiAttributedString *s);
 
-/// @memberof uiAttributedString
+/**
+ * @memberof uiAttributedString
+ */
 // TODO const correct this somehow (the implementation needs to mutate the structure)
 _UI_EXTERN size_t uiAttributedStringByteIndexToGrapheme(uiAttributedString *s, size_t pos);
 
-/// @memberof uiAttributedString
+/**
+ * @memberof uiAttributedString
+ */
 // TODO const correct this somehow (the implementation needs to mutate the structure)
 _UI_EXTERN size_t uiAttributedStringGraphemeToByteIndex(uiAttributedString *s, size_t pos);
 
-//////////////////////////////////////////////////////////////////
+/**
+ */
 typedef struct uiFontDescriptor uiFontDescriptor;
-/// provides a complete description of a font where
-/// one is needed. Currently, this means as the default font of a
-/// uiDrawTextLayout and as the data returned by uiFontButton.
-/// All the members operate like the respective uiAttributes.
+/**
+ * provides a complete description of a font where
+ * one is needed. Currently, this means as the default font of a
+ * uiDrawTextLayout and as the data returned by uiFontButton.
+ * All the members operate like the respective uiAttributes.
+ */
 struct uiFontDescriptor {
 	// TODO const-correct this or figure out how to deal with this when getting a value
 	char *Family;
@@ -1839,35 +2311,41 @@ struct uiFontDescriptor {
 _UI_EXTERN void uiLoadControlFont(uiFontDescriptor *f);
 _UI_EXTERN void uiFreeFontDescriptor(uiFontDescriptor *desc);
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiDrawTextLayout
-/// a concrete representation of a uiAttributedString that can be displayed in a uiDrawContext.
-///
-/// It includes information important for the drawing of a block of
-/// text, including the bounding box to wrap the text within, the
-/// alignment of lines of text within that box, areas to mark as
-/// being selected, and other things.
-///
-/// Unlike uiAttributedString, the content of a uiDrawTextLayout is
-/// immutable once it has been created.
-///
-/// TODO talk about OS-specific differences with text drawing that libui can't account for...
+/**
+ * @struct uiDrawTextLayout
+ * a concrete representation of a uiAttributedString that can be displayed in a uiDrawContext.
+ *
+ * It includes information important for the drawing of a block of
+ * text, including the bounding box to wrap the text within, the
+ * alignment of lines of text within that box, areas to mark as
+ * being selected, and other things.
+ *
+ * Unlike uiAttributedString, the content of a uiDrawTextLayout is
+ * immutable once it has been created.
+ *
+ * TODO talk about OS-specific differences with text drawing that libui can't account for...
+ */
 typedef struct uiDrawTextLayout uiDrawTextLayout;
 
-/// uiDrawTextAlign specifies the alignment of lines of text in a uiDrawTextLayout.
-/// TODO should this really have Draw in the name?
+/**
+ * uiDrawTextAlign specifies the alignment of lines of text in a uiDrawTextLayout.
+ * TODO should this really have Draw in the name?
+ */
 _UI_ENUM(uiDrawTextAlign) {
 	uiDrawTextAlignLeft,
 	uiDrawTextAlignCenter,
 	uiDrawTextAlignRight,
 };
 
-//////////////////////////////////////////////////////////////////
+/**
+ */
 typedef struct uiDrawTextLayoutParams uiDrawTextLayoutParams;
-/// uiDrawTextLayoutParams describes a uiDrawTextLayout.
-/// DefaultFont is used to render any text that is not attributed
-/// sufficiently in String. Width determines the width of the bounding
-/// box of the text; the height is determined automatically.
+/**
+ * uiDrawTextLayoutParams describes a uiDrawTextLayout.
+ * DefaultFont is used to render any text that is not attributed
+ * sufficiently in String. Width determines the width of the bounding
+ * box of the text; the height is determined automatically.
+ */
 // TODO const-correct this somehow
 struct uiDrawTextLayoutParams {
 	uiAttributedString *String;
@@ -1876,34 +2354,42 @@ struct uiDrawTextLayoutParams {
 	uiDrawTextAlign Align;
 };
 
-/// @static @memberof uiDrawTextLayout
-/// creates a new uiDrawTextLayout from the given parameters.
-///
-/// TODO
-/// - allow creating a layout out of a substring
-/// - allow marking compositon strings
-/// - allow marking selections, even after creation
-/// - add the following functions:
-/// 	- uiDrawTextLayoutHeightForWidth() (returns the height that a layout would need to be to display the entire string at a given width)
-/// 	- uiDrawTextLayoutRangeForSize() (returns what substring would fit in a given size)
-/// 	- uiDrawTextLayoutNewWithHeight() (limits amount of string used by the height)
-/// - some function to fix up a range (for text editing)
+/**
+ * @static @memberof uiDrawTextLayout
+ * creates a new uiDrawTextLayout from the given parameters.
+ *
+ * TODO
+ * - allow creating a layout out of a substring
+ * - allow marking compositon strings
+ * - allow marking selections, even after creation
+ * - add the following functions:
+ * 	- uiDrawTextLayoutHeightForWidth() (returns the height that a layout would need to be to display the entire string at a given width)
+ * 	- uiDrawTextLayoutRangeForSize() (returns what substring would fit in a given size)
+ * 	- uiDrawTextLayoutNewWithHeight() (limits amount of string used by the height)
+ * - some function to fix up a range (for text editing)
+ */
 _UI_EXTERN uiDrawTextLayout *uiDrawNewTextLayout(uiDrawTextLayoutParams *params);
 
-/// @memberof uiDrawTextLayout
-/// frees tl. The underlying uiAttributedString is not freed.
+/**
+ * @memberof uiDrawTextLayout
+ * frees tl. The underlying uiAttributedString is not freed.
+ */
 _UI_EXTERN void uiDrawFreeTextLayout(uiDrawTextLayout *tl);
 
-/// @memberof uiDrawContext
-/// draws tl in c with the top-left point of tl at (x, y).
+/**
+ * @memberof uiDrawContext
+ * draws tl in c with the top-left point of tl at (x, y).
+ */
 _UI_EXTERN void uiDrawText(uiDrawContext *c, uiDrawTextLayout *tl, double x, double y);
 
-/// @memberof uiDrawTextLayout
-/// returns the width and height of tl in width and height.
-///
-/// The returned width may be smaller than the width passed into uiDrawNewTextLayout()
-/// depending on how the text in tl is wrapped.
-/// Therefore, you can use this function to get the actual size of the text layout.
+/**
+ * @memberof uiDrawTextLayout
+ * returns the width and height of tl in width and height.
+ *
+ * The returned width may be smaller than the width passed into uiDrawNewTextLayout()
+ * depending on how the text in tl is wrapped.
+ * Therefore, you can use this function to get the actual size of the text layout.
+ */
 _UI_EXTERN void uiDrawTextLayoutExtents(uiDrawTextLayout *tl, double *width, double *height);
 
 // TODO metrics functions
@@ -1911,10 +2397,11 @@ _UI_EXTERN void uiDrawTextLayoutExtents(uiDrawTextLayout *tl, double *width, dou
 // TODO number of lines visible for clipping rect, range visible for clipping rect?
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiFontButton
-/// @extends uiControl
-/// A uiControl that represents a button that the user can click to select a font.
+/**
+ * @struct uiFontButton
+ * @extends uiControl
+ * A uiControl that represents a button that the user can click to select a font.
+ */
 typedef struct uiFontButton uiFontButton;
 #define uiFontButton(this) ((uiFontButton *) (this))
 
@@ -1923,31 +2410,39 @@ typedef struct uiFontButton uiFontButton;
 // uiFontButtonFont() does not allocate desc itself; you must do so.
 // TODO have a function that sets an entire font descriptor to a range in a uiAttributedString at once, for SetFont?
 
-/// @memberof uiFontButton
-/// returns the font currently selected in the uiFontButton.
+/**
+ * @memberof uiFontButton
+ * returns the font currently selected in the uiFontButton.
+ */
 _UI_EXTERN void uiFontButtonFont(uiFontButton *b, uiFontDescriptor *desc);
 
 // TOOD SetFont, mechanics
 
-/// @memberof uiFontButton
-/// registers @p f to be run when the user changes the currently selected font in the uiFontButton.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiFontButton
+ * registers @p f to be run when the user changes the currently selected font in the uiFontButton.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiFontButtonOnChanged(uiFontButton *b, void (*f)(uiFontButton *, void *), void *data);
 
-/// @static @memberof uiFontButton
-/// creates a new uiFontButton.
-///
-/// The default font selected into the uiFontButton is OS-defined.
+/**
+ * @static @memberof uiFontButton
+ * creates a new uiFontButton.
+ *
+ * The default font selected into the uiFontButton is OS-defined.
+ */
 _UI_EXTERN uiFontButton *uiNewFontButton(void);
 
-/// @memberof uiFontButton
-/// frees resources allocated in desc by uiFontButtonFont().
-///
-/// After calling uiFreeFontButtonFont(), the contents of desc should be assumed to be undefined
-/// (though since you allocate desc itself, you can safely reuse desc for other font descriptors).
-/// Calling uiFreeFontButtonFont() on a uiFontDescriptor not returned by uiFontButtonFont()
-/// results in undefined behavior.
+/**
+ * @memberof uiFontButton
+ * frees resources allocated in desc by uiFontButtonFont().
+ *
+ * After calling uiFreeFontButtonFont(), the contents of desc should be assumed to be undefined
+ * (though since you allocate desc itself, you can safely reuse desc for other font descriptors).
+ * Calling uiFreeFontButtonFont() on a uiFontDescriptor not returned by uiFontButtonFont()
+ * results in undefined behavior.
+ */
 _UI_EXTERN void uiFreeFontButtonFont(uiFontDescriptor *desc);
 
 _UI_ENUM(uiModifiers) {
@@ -2036,77 +2531,100 @@ struct uiAreaKeyEvent {
 	int Up;
 };
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiColorButton
-/// @extends uiControl
-/// A uiControl that represents a button that the user can click to select a color.
+/**
+ * @struct uiColorButton
+ * @extends uiControl
+ * A uiControl that represents a button that the user can click to select a color.
+ */
 typedef struct uiColorButton uiColorButton;
 #define uiColorButton(this) ((uiColorButton *) (this))
 
-/// @memberof uiColorButton
-/// returns the color currently selected in the uiColorButton.
-///
-/// Colors are not alpha-premultiplied.
+/**
+ * @memberof uiColorButton
+ * returns the color currently selected in the uiColorButton.
+ *
+ * Colors are not alpha-premultiplied.
+ */
 _UI_EXTERN void uiColorButtonColor(uiColorButton *b, double *r, double *g, double *bl, double *a);
 
-/// @memberof uiColorButton
-/// sets the currently selected color in the uiColorButton.
-///
-/// Colors are not alpha-premultiplied.
+/**
+ * @memberof uiColorButton
+ * sets the currently selected color in the uiColorButton.
+ *
+ * Colors are not alpha-premultiplied.
+ */
 _UI_EXTERN void uiColorButtonSetColor(uiColorButton *b, double r, double g, double bl, double a);
 
-/// @memberof uiColorButton
-/// registers @p f to be run when the user changes the currently selected color in the uiColorButton.
-///
-/// Only one function can be registered at a time.
+/**
+ * @memberof uiColorButton
+ * registers @p f to be run when the user changes the currently selected color in the uiColorButton.
+ *
+ * Only one function can be registered at a time.
+ */
 _UI_EXTERN void uiColorButtonOnChanged(uiColorButton *b, void (*f)(uiColorButton *, void *), void *data);
 
-/// @static @memberof uiColorButton
-/// creates a new uiColorButton.
+/**
+ * @static @memberof uiColorButton
+ * creates a new uiColorButton.
+ */
 _UI_EXTERN uiColorButton *uiNewColorButton(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiForm
-/// @extends uiControl
-/// A uiControl that holds a group of uiControl's vertically with labels next to each.
-///
-/// By default, each control has its
-/// preferred height; if a control is marked "stretchy", it will take
-/// whatever space is left over. If multiple controls are marked
-/// stretchy, they will be given equal shares of the leftover space.
-/// There can also be space between each control ("padding").
+/**
+ * @struct uiForm
+ * @extends uiControl
+ * A uiControl that holds a group of uiControl's vertically with labels next to each.
+ *
+ * By default, each control has its
+ * preferred height; if a control is marked "stretchy", it will take
+ * whatever space is left over. If multiple controls are marked
+ * stretchy, they will be given equal shares of the leftover space.
+ * There can also be space between each control ("padding").
+ */
 typedef struct uiForm uiForm;
 #define uiForm(this) ((uiForm *) (this))
 
-/// @memberof uiForm
-/// adds the given control to the end of the uiForm.
+/**
+ * @memberof uiForm
+ * adds the given control to the end of the uiForm.
+ */
 _UI_EXTERN void uiFormAppend(uiForm *f, const char *label, uiControl *c, int stretchy);
 
-/// @memberof uiForm
+/**
+ * @memberof uiForm
+ */
 _UI_EXTERN int uiFormNumChildren(uiForm *f);
 
-/// @memberof uiForm
-/// deletes the nth control of the uiForm.
+/**
+ * @memberof uiForm
+ * deletes the nth control of the uiForm.
+ */
 _UI_EXTERN void uiFormDelete(uiForm *f, int index);
 
-/// @memberof uiForm
-/// returns whether there is space between each control of the uiForm.
+/**
+ * @memberof uiForm
+ * returns whether there is space between each control of the uiForm.
+ */
 _UI_EXTERN int uiFormPadded(uiForm *f);
 
-/// @memberof uiForm
-/// controls whether there is space between each control of the uiForm.
-///
-/// The size of the padding is determined by the OS and its best practices.
+/**
+ * @memberof uiForm
+ * controls whether there is space between each control of the uiForm.
+ *
+ * The size of the padding is determined by the OS and its best practices.
+ */
 _UI_EXTERN void uiFormSetPadded(uiForm *f, int padded);
 
-/// @static @memberof uiForm
-/// creates a new horizontal uiForm.
+/**
+ * @static @memberof uiForm
+ * creates a new horizontal uiForm.
+ */
 _UI_EXTERN uiForm *uiNewForm(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// represents the alignment of a uiControl in its cell of a uiGrid.
+/**
+ * represents the alignment of a uiControl in its cell of a uiGrid.
+ */
 _UI_ENUM(uiAlign) {
 	uiAlignFill,
 	uiAlignStart,
@@ -2114,7 +2632,9 @@ _UI_ENUM(uiAlign) {
 	uiAlignEnd,
 };
 
-/// represents a side of a uiControl to add other uiControl's to a uiGrid to.
+/**
+ * represents a side of a uiControl to add other uiControl's to a uiGrid to.
+ */
 _UI_ENUM(uiAt) {
 	uiAtLeading,
 	uiAtTop,
@@ -2122,127 +2642,151 @@ _UI_ENUM(uiAt) {
 	uiAtBottom,
 };
 
-/// @struct uiGrid
-/// @extends uiControl
-/// A uiControl that arranges other uiControl's in a grid.
-///
-/// Grid is a very powerful container: it can position and size each
-/// Control in several ways and can (and must) have Controls added
-/// to it in any direction. It can also have Controls spanning multiple
-/// rows and columns.
-///
-/// Each Control in a Grid has associated "expansion" and
-/// "alignment" values in both the X and Y direction.
-/// Expansion determines whether all cells in the same row/column
-/// are given whatever space is left over after figuring out how big
-/// the rest of the uiGrid should be. Alignment determines the position
-/// of a uiControl relative to its cell after computing the above. The
-/// special alignment Fill can be used to grow a uiControl to fit its cell.
-/// Note that expansion and alignment are independent variables.
-/// For more information on expansion and alignment, read
-/// https://developer.gnome.org/gtk3/unstable/ch28s02.html.
+/**
+ * @struct uiGrid
+ * @extends uiControl
+ * A uiControl that arranges other uiControl's in a grid.
+ *
+ * Grid is a very powerful container: it can position and size each
+ * Control in several ways and can (and must) have Controls added
+ * to it in any direction. It can also have Controls spanning multiple
+ * rows and columns.
+ *
+ * Each Control in a Grid has associated "expansion" and
+ * "alignment" values in both the X and Y direction.
+ * Expansion determines whether all cells in the same row/column
+ * are given whatever space is left over after figuring out how big
+ * the rest of the uiGrid should be. Alignment determines the position
+ * of a uiControl relative to its cell after computing the above. The
+ * special alignment Fill can be used to grow a uiControl to fit its cell.
+ * Note that expansion and alignment are independent variables.
+ * For more information on expansion and alignment, read
+ * https://developer.gnome.org/gtk3/unstable/ch28s02.html.
+ */
 typedef struct uiGrid uiGrid;
 #define uiGrid(this) ((uiGrid *) (this))
 
-/// @memberof uiGrid
-/// adds the given control to the uiGrid, at the given coordinate.
+/**
+ * @memberof uiGrid
+ * adds the given control to the uiGrid, at the given coordinate.
+ */
 _UI_EXTERN void uiGridAppend(uiGrid *g, uiControl *c, int left, int top, int xspan, int yspan, int hexpand, uiAlign halign, int vexpand, uiAlign valign);
 
-/// @memberof uiGrid
-/// adds the given control to the uiGrid relative to an existing control.
+/**
+ * @memberof uiGrid
+ * adds the given control to the uiGrid relative to an existing control.
+ */
 _UI_EXTERN void uiGridInsertAt(uiGrid *g, uiControl *c, uiControl *existing, uiAt at, int xspan, int yspan, int hexpand, uiAlign halign, int vexpand, uiAlign valign);
 
-/// @memberof uiGrid
-/// returns whether there is space between each control of the uiGrid.
+/**
+ * @memberof uiGrid
+ * returns whether there is space between each control of the uiGrid.
+ */
 _UI_EXTERN int uiGridPadded(uiGrid *g);
 
-/// @memberof uiGrid
-/// controls whether there is space between each control of the uiGrid.
-///
-/// The size of the padding is determined by the OS and its best practices.
+/**
+ * @memberof uiGrid
+ * controls whether there is space between each control of the uiGrid.
+ *
+ * The size of the padding is determined by the OS and its best practices.
+ */
 _UI_EXTERN void uiGridSetPadded(uiGrid *g, int padded);
 
-/// @static @memberof uiGrid
-/// creates a new uiGrid.
+/**
+ * @static @memberof uiGrid
+ * creates a new uiGrid.
+ */
 _UI_EXTERN uiGrid *uiNewGrid(void);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiImage
-/// uiImage stores an image for display on screen.
-///
-/// Images are built from one or more representations, each with the
-/// same aspect ratio but a different pixel size. libui automatically
-/// selects the most appropriate representation for drawing the image
-/// when it comes time to draw the image; what this means depends
-/// on the pixel density of the target context. Therefore, one can use
-/// uiImage to draw higher-detailed images on higher-density
-/// displays. The typical use cases are either:
-///
-/// 	- have just a single representation, at which point all screens
-/// 	  use the same image, and thus uiImage acts like a simple
-/// 	  bitmap image, or
-/// 	- have two images, one at normal resolution and one at 2x
-/// 	  resolution; this matches the current expectations of some
-/// 	  desktop systems at the time of writing (mid-2018)
-///
-/// uiImage is very simple: it only supports premultiplied 32-bit
-/// RGBA images, and libui does not provide any image file loading
-/// or image format conversion utilities on top of that.
+/**
+ * @struct uiImage
+ * uiImage stores an image for display on screen.
+ *
+ * Images are built from one or more representations, each with the
+ * same aspect ratio but a different pixel size. libui automatically
+ * selects the most appropriate representation for drawing the image
+ * when it comes time to draw the image; what this means depends
+ * on the pixel density of the target context. Therefore, one can use
+ * uiImage to draw higher-detailed images on higher-density
+ * displays. The typical use cases are either:
+ *
+ * 	- have just a single representation, at which point all screens
+ * 	  use the same image, and thus uiImage acts like a simple
+ * 	  bitmap image, or
+ * 	- have two images, one at normal resolution and one at 2x
+ * 	  resolution; this matches the current expectations of some
+ * 	  desktop systems at the time of writing (mid-2018)
+ *
+ * uiImage is very simple: it only supports premultiplied 32-bit
+ * RGBA images, and libui does not provide any image file loading
+ * or image format conversion utilities on top of that.
+ */
 typedef struct uiImage uiImage;
 
-/// @static @memberof uiImage
-/// creates a new uiImage with the given width and height.
-///
-/// This width and height should be the size in points of the
-/// image in the device-independent case; typically this is the 1x size.
-/// TODO for all uiImage functions: use const void * for const correctness
+/**
+ * @static @memberof uiImage
+ * creates a new uiImage with the given width and height.
+ *
+ * This width and height should be the size in points of the
+ * image in the device-independent case; typically this is the 1x size.
+ * TODO for all uiImage functions: use const void * for const correctness
+ */
 _UI_EXTERN uiImage *uiNewImage(double width, double height);
 
-/// @memberof uiImage
-/// frees the given image and all associated resources.
+/**
+ * @memberof uiImage
+ * frees the given image and all associated resources.
+ */
 _UI_EXTERN void uiFreeImage(uiImage *i);
 
-/// @memberof uiImage
-/// adds a representation to the uiImage.
-///
-/// pixels should point to a byte array of premultiplied pixels
-/// stored in [R G B A] order (so ((uint8_t *) pixels)[0] is the R of the
-/// first pixel and [3] is the A of the first pixel). pixelWidth and
-/// pixelHeight is the size *in pixels* of the image, and pixelStride is
-/// the number *of bytes* per row of the pixels array. Therefore,
-/// pixels itself must be at least byteStride * pixelHeight bytes long.
+/**
+ * @memberof uiImage
+ * adds a representation to the uiImage.
+ *
+ * pixels should point to a byte array of premultiplied pixels
+ * stored in [R G B A] order (so ((uint8_t *) pixels)[0] is the R of the
+ * first pixel and [3] is the A of the first pixel). pixelWidth and
+ * pixelHeight is the size *in pixels* of the image, and pixelStride is
+ * the number *of bytes* per row of the pixels array. Therefore,
+ * pixels itself must be at least byteStride * pixelHeight bytes long.
+ */
 // TODO see if we either need the stride or can provide a way to get the OS-preferred stride (in cairo we do)
 _UI_EXTERN void uiImageAppend(uiImage *i, void *pixels, int pixelWidth, int pixelHeight, int byteStride);
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiTableValue
-/// stores a value to be passed along uiTable and uiTableModel.
-///
-/// You do not create uiTableValues directly; instead, you create a
-/// uiTableValue of a given type using the specialized constructor
-/// functions.
-///
-/// uiTableValues are immutable and the uiTableModel and uiTable
-/// take ownership of the uiTableValue object once returned, copying
-/// its contents as necessary.
+/**
+ * @struct uiTableValue
+ * stores a value to be passed along uiTable and uiTableModel.
+ *
+ * You do not create uiTableValues directly; instead, you create a
+ * uiTableValue of a given type using the specialized constructor
+ * functions.
+ *
+ * uiTableValues are immutable and the uiTableModel and uiTable
+ * take ownership of the uiTableValue object once returned, copying
+ * its contents as necessary.
+ */
 typedef struct uiTableValue uiTableValue;
 
-/// @memberof uiTableValue
-/// frees a uiTableValue.
-///
-/// You generally do not need to call this yourself, as uiTable and uiTableModel
-/// do this for you. In fact, it is an error to call this function on a uiTableValue
-/// that has been given to a uiTable or uiTableModel. You can call this,
-/// however, if you created a uiTableValue that you aren't going to
-/// use later, or if you called a uiTableModelHandler method directly
-/// and thus never transferred ownership of the uiTableValue.
+/**
+ * @memberof uiTableValue
+ * frees a uiTableValue.
+ *
+ * You generally do not need to call this yourself, as uiTable and uiTableModel
+ * do this for you. In fact, it is an error to call this function on a uiTableValue
+ * that has been given to a uiTable or uiTableModel. You can call this,
+ * however, if you created a uiTableValue that you aren't going to
+ * use later, or if you called a uiTableModelHandler method directly
+ * and thus never transferred ownership of the uiTableValue.
+ */
 _UI_EXTERN void uiFreeTableValue(uiTableValue *v);
 
-/// holds the possible uiTableValue types that may
-/// be returned by uiTableValueGetType(). Refer to the documentation
-/// for each type's constructor function for details on each type.
+/**
+ * holds the possible uiTableValue types that may
+ * be returned by uiTableValueGetType(). Refer to the documentation
+ * for each type's constructor function for details on each type.
+ */
 // TODO actually validate these
 _UI_ENUM(uiTableValueType) {
 	uiTableValueTypeString,
@@ -2251,67 +2795,85 @@ _UI_ENUM(uiTableValueType) {
 	uiTableValueTypeColor,
 };
 
-/// @memberof uiTableValue
-/// returns the type of v.
+/**
+ * @memberof uiTableValue
+ * returns the type of v.
+ */
 // TODO I don't like this name
 _UI_EXTERN uiTableValueType uiTableValueGetType(const uiTableValue *v);
 
-/// @static @memberof uiTableValue
-/// returns a new uiTableValue that contains str.
-///
-/// str is copied; you do not need to keep it alive after it returns.
+/**
+ * @static @memberof uiTableValue
+ * returns a new uiTableValue that contains str.
+ *
+ * str is copied; you do not need to keep it alive after it returns.
+ */
 _UI_EXTERN uiTableValue *uiNewTableValueString(const char *str);
 
-/// @memberof uiTableValue
-/// returns the string stored in v.
-///
-/// The returned string is owned by v.
-/// It is an error to call this on a uiTableValue that does not hold a string.
+/**
+ * @memberof uiTableValue
+ * returns the string stored in v.
+ *
+ * The returned string is owned by v.
+ * It is an error to call this on a uiTableValue that does not hold a string.
+ */
 _UI_EXTERN const char *uiTableValueString(const uiTableValue *v);
 
-/// @static @memberof uiTableValue
-/// returns a new uiTableValue that contains the given uiImage.
-///
-/// Unlike other similar constructors, uiNewTableValueImage() does
-/// NOT copy the image. This is because images are comparatively
-/// larger than the other objects in question. Therefore, you MUST
-/// keep the image alive as long as the returned uiTableValue is alive.
-/// As a general rule, if libui calls a uiTableModelHandler method, the
-/// uiImage is safe to free once any of your code is once again
-/// executed.
+/**
+ * @static @memberof uiTableValue
+ * returns a new uiTableValue that contains the given uiImage.
+ *
+ * Unlike other similar constructors, uiNewTableValueImage() does
+ * NOT copy the image. This is because images are comparatively
+ * larger than the other objects in question. Therefore, you MUST
+ * keep the image alive as long as the returned uiTableValue is alive.
+ * As a general rule, if libui calls a uiTableModelHandler method, the
+ * uiImage is safe to free once any of your code is once again
+ * executed.
+ */
 _UI_EXTERN uiTableValue *uiNewTableValueImage(uiImage *img);
 
-/// @memberof uiTableValue
-/// returns the uiImage stored in v.
-///
-/// As these images are not owned by v, you should not assume anything
-/// about the lifetime of the image (unless you created the image,
-/// and thus control its lifetime). It is an error to call this on a
-/// uiTableValue that does not hold an image.
+/**
+ * @memberof uiTableValue
+ * returns the uiImage stored in v.
+ *
+ * As these images are not owned by v, you should not assume anything
+ * about the lifetime of the image (unless you created the image,
+ * and thus control its lifetime). It is an error to call this on a
+ * uiTableValue that does not hold an image.
+ */
 _UI_EXTERN uiImage *uiTableValueImage(const uiTableValue *v);
 
-/// @static @memberof uiTableValue
-/// returns a uiTableValue that stores the given int.
-///
-/// This can be used both for boolean values (nonzero is true, as
-/// in C) or progresses (in which case the valid range is -1..100
-/// inclusive).
+/**
+ * @static @memberof uiTableValue
+ * returns a uiTableValue that stores the given int.
+ *
+ * This can be used both for boolean values (nonzero is true, as
+ * in C) or progresses (in which case the valid range is -1..100
+ * inclusive).
+ */
 _UI_EXTERN uiTableValue *uiNewTableValueInt(int i);
 
-/// @memberof uiTableValue
-/// returns the int stored in v.
-///
-/// It is an error to call this on a uiTableValue that does not store an int.
+/**
+ * @memberof uiTableValue
+ * returns the int stored in v.
+ *
+ * It is an error to call this on a uiTableValue that does not store an int.
+ */
 _UI_EXTERN int uiTableValueInt(const uiTableValue *v);
 
-/// @static @memberof uiTableValue
-/// returns a uiTableValue that stores the given color.
+/**
+ * @static @memberof uiTableValue
+ * returns a uiTableValue that stores the given color.
+ */
 _UI_EXTERN uiTableValue *uiNewTableValueColor(double r, double g, double b, double a);
 
-/// @memberof uiTableValue
-/// returns the color stored in v.
-///
-/// It is an error to call this on a uiTableValue that does not store a color.
+/**
+ * @memberof uiTableValue
+ * returns the color stored in v.
+ *
+ * It is an error to call this on a uiTableValue that does not store a color.
+ */
 // TODO define whether all this, for both uiTableValue and uiAttribute, is undefined behavior or a caught error
 _UI_EXTERN void uiTableValueColor(const uiTableValue *v, double *r, double *g, double *b, double *a);
 
@@ -2322,32 +2884,36 @@ _UI_ENUM(uiSortIndicator) {
 };
 
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiTableModel
-/// an object that provides the data for a uiTable.
-///
-/// This data is returned via methods you provide in the
-/// uiTableModelHandler struct.
-///
-/// uiTableModel represents data using a table, but this table does
-/// not map directly to uiTable itself. Instead, you can have data
-/// columns which provide instructions for how to render a given
-/// uiTable's column — for instance, one model column can be used
-/// to give certain rows of a uiTable a different background color.
-/// Row numbers DO match with uiTable row numbers.
-///
-/// Once created, the number and data types of columns of a
-/// uiTableModel cannot change.
-///
-/// Row and column numbers start at 0. A uiTableModel can be
-/// associated with more than one uiTable at a time.
+/**
+ * @struct uiTableModel
+ * an object that provides the data for a uiTable.
+ *
+ * This data is returned via methods you provide in the
+ * uiTableModelHandler struct.
+ *
+ * uiTableModel represents data using a table, but this table does
+ * not map directly to uiTable itself. Instead, you can have data
+ * columns which provide instructions for how to render a given
+ * uiTable's column — for instance, one model column can be used
+ * to give certain rows of a uiTable a different background color.
+ * Row numbers DO match with uiTable row numbers.
+ *
+ * Once created, the number and data types of columns of a
+ * uiTableModel cannot change.
+ *
+ * Row and column numbers start at 0. A uiTableModel can be
+ * associated with more than one uiTable at a time.
+ */
 typedef struct uiTableModel uiTableModel;
 
-//////////////////////////////////////////////////////////////////
+/**
+ */
 typedef struct uiTableModelHandler uiTableModelHandler;
-/// defines the methods that uiTableModel calls when it needs data.
-///
-/// Once a uiTableModel is created, these methods cannot change.
+/**
+ * defines the methods that uiTableModel calls when it needs data.
+ *
+ * Once a uiTableModel is created, these methods cannot change.
+ */
 // TODO validate ranges; validate types on each getter/setter call (? table columns only?)
 struct uiTableModelHandler {
 	/// returns the number of model columns in the uiTableModel.
@@ -2392,38 +2958,48 @@ struct uiTableModelHandler {
 	void (*SetCellValue)(uiTableModelHandler *, uiTableModel *, int, int, const uiTableValue *);
 };
 
-/// @static @memberof uiTableModel
-/// creates a new uiTableModel with the given handler methods.
+/**
+ * @static @memberof uiTableModel
+ * creates a new uiTableModel with the given handler methods.
+ */
 _UI_EXTERN uiTableModel *uiNewTableModel(uiTableModelHandler *mh);
 
-/// @memberof uiTableModel
-/// frees the given table model. It is an error to free table models currently associated with a uiTable.
+/**
+ * @memberof uiTableModel
+ * frees the given table model. It is an error to free table models currently associated with a uiTable.
+ */
 _UI_EXTERN void uiFreeTableModel(uiTableModel *m);
 
-/// @memberof uiTableModel
-/// tell all uiTables associated with the uiTableModel m that a new row has been added to m at
-/// index @p newIndex.
-///
-/// You must insert the row data in your model before calling this
-/// function.
-/// NumRows() must represent the new row count before you call
-/// this function.
+/**
+ * @memberof uiTableModel
+ * tell all uiTables associated with the uiTableModel m that a new row has been added to m at
+ * index @p newIndex.
+ *
+ * You must insert the row data in your model before calling this
+ * function.
+ * NumRows() must represent the new row count before you call
+ * this function.
+ */
 _UI_EXTERN void uiTableModelRowInserted(uiTableModel *m, int newIndex);
 
-/// @memberof uiTableModel
-/// tells any uiTable associated with m that the data in the row at index has changed.
-///
-/// You do not need to call this in your SetCellValue() handlers, but you do need to call
-/// this if your data changes at some other point.
+/**
+ * @memberof uiTableModel
+ * tells any uiTable associated with m that the data in the row at index has changed.
+ *
+ * You do not need to call this in your SetCellValue() handlers, but you do need to call
+ * this if your data changes at some other point.
+ */
 _UI_EXTERN void uiTableModelRowChanged(uiTableModel *m, int index);
 
-/// @memberof uiTableModel
-/// tells all uiTables associated with the uiTableModel m that the row at index oldIndex has been
-/// deleted.
-///
-/// You must delete the row from your model before you call this function.
-/// NumRows() must represent the new row count before you call
-/// this function.
+/**
+ * @memberof uiTableModel
+ * tells all uiTables associated with the uiTableModel m that the row at index oldIndex has been
+ * deleted.
+ *
+ * You must delete the row from your model before you call this function.
+ * NumRows() must represent the new row count before you call
+ * this function.
+ */
 _UI_EXTERN void uiTableModelRowDeleted(uiTableModel *m, int oldIndex);
 // TODO reordering/moving
 
@@ -2466,37 +3042,44 @@ struct uiTableParams {
 	int RowBackgroundColorModelColumn;
 };
 
-//////////////////////////////////////////////////////////////////
-/// @struct uiTable
-/// @extends uiControl
-/// A uiControl that shows tabular data, allowing users to manipulate rows of such data at a time.
+/**
+ * @struct uiTable
+ * @extends uiControl
+ * A uiControl that shows tabular data, allowing users to manipulate rows of such data at a time.
+ */
 typedef struct uiTable uiTable;
 #define uiTable(this) ((uiTable *) (this))
 
-/// @memberof uiTable
-/// appends a text column.
-///
-/// name is displayed in the table header.
-/// textModelColumn is where the text comes from.
-/// If a row is editable according to textEditableModelColumn,
-/// SetCellValue() is called with textModelColumn as the column.
+/**
+ * @memberof uiTable
+ * appends a text column.
+ *
+ * name is displayed in the table header.
+ * textModelColumn is where the text comes from.
+ * If a row is editable according to textEditableModelColumn,
+ * SetCellValue() is called with textModelColumn as the column.
+ */
 _UI_EXTERN void uiTableAppendTextColumn(uiTable *t,
 	const char *name,
 	int textModelColumn,
 	int textEditableModelColumn,
 	uiTableTextColumnOptionalParams *textParams);
 
-/// @memberof uiTable
-/// appends an image column.
-///
-/// Images are drawn at icon size, appropriate to the pixel density
-/// of the screen showing the uiTable.
+/**
+ * @memberof uiTable
+ * appends an image column.
+ *
+ * Images are drawn at icon size, appropriate to the pixel density
+ * of the screen showing the uiTable.
+ */
 _UI_EXTERN void uiTableAppendImageColumn(uiTable *t,
 	const char *name,
 	int imageModelColumn);
 
-/// @memberof uiTable
-/// appends a column that shows both an image and text.
+/**
+ * @memberof uiTable
+ * appends a column that shows both an image and text.
+ */
 _UI_EXTERN void uiTableAppendImageTextColumn(uiTable *t,
 	const char *name,
 	int imageModelColumn,
@@ -2504,19 +3087,23 @@ _UI_EXTERN void uiTableAppendImageTextColumn(uiTable *t,
 	int textEditableModelColumn,
 	uiTableTextColumnOptionalParams *textParams);
 
-/// @memberof uiTable
-/// appends a column that contains a checkbox that the user can interact with (assuming the
-/// checkbox is editable).
-///
-/// SetCellValue() will be called with
-/// checkboxModelColumn as the column in this case.
+/**
+ * @memberof uiTable
+ * appends a column that contains a checkbox that the user can interact with (assuming the
+ * checkbox is editable).
+ *
+ * SetCellValue() will be called with
+ * checkboxModelColumn as the column in this case.
+ */
 _UI_EXTERN void uiTableAppendCheckboxColumn(uiTable *t,
 	const char *name,
 	int checkboxModelColumn,
 	int checkboxEditableModelColumn);
 
-/// @memberof uiTable
-/// appends a column that contains both a checkbox and text.
+/**
+ * @memberof uiTable
+ * appends a column that contains both a checkbox and text.
+ */
 _UI_EXTERN void uiTableAppendCheckboxTextColumn(uiTable *t,
 	const char *name,
 	int checkboxModelColumn,
@@ -2525,52 +3112,68 @@ _UI_EXTERN void uiTableAppendCheckboxTextColumn(uiTable *t,
 	int textEditableModelColumn,
 	uiTableTextColumnOptionalParams *textParams);
 
-/// @memberof uiTable
-/// appends a column that displays a progress bar.
-///
-/// These columns work like
-/// uiProgressBar: a cell value of 0..100 displays that percentage, and
-/// a cell value of -1 displays an indeterminate progress bar.
+/**
+ * @memberof uiTable
+ * appends a column that displays a progress bar.
+ *
+ * These columns work like
+ * uiProgressBar: a cell value of 0..100 displays that percentage, and
+ * a cell value of -1 displays an indeterminate progress bar.
+ */
 _UI_EXTERN void uiTableAppendProgressBarColumn(uiTable *t,
 	const char *name,
 	int progressModelColumn);
 
-/// @memberof uiTable
-/// appends a column that shows a button that the user can click on.
-///
-/// When the user does click on the button, SetCellValue() is called with a NULL
-/// value and buttonModelColumn as the column.
-/// CellValue() on buttonModelColumn should return the text to show
-/// in the button.
+/**
+ * @memberof uiTable
+ * appends a column that shows a button that the user can click on.
+ *
+ * When the user does click on the button, SetCellValue() is called with a NULL
+ * value and buttonModelColumn as the column.
+ * CellValue() on buttonModelColumn should return the text to show
+ * in the button.
+ */
 _UI_EXTERN void uiTableAppendButtonColumn(uiTable *t,
 	const char *name,
 	int buttonModelColumn,
 	int buttonClickableModelColumn);
 
-/// @memberof uiTable
-/// returns whether the table header is visible or not.
+/**
+ * @memberof uiTable
+ * returns whether the table header is visible or not.
+ */
 _UI_EXTERN int uiTableHeaderVisible(uiTable *t);
 
-/// @memberof uiTable
-/// sets the visibility of the table header.
+/**
+ * @memberof uiTable
+ * sets the visibility of the table header.
+ */
 _UI_EXTERN void uiTableHeaderSetVisible(uiTable *t, int visible);
 
-/// @static @memberof uiTable
-/// creates a new uiTable with the specified parameters.
+/**
+ * @static @memberof uiTable
+ * creates a new uiTable with the specified parameters.
+ */
 _UI_EXTERN uiTable *uiNewTable(uiTableParams *params);
 
-/// @memberof uiTable
-/// sets the sort indicator of the table header to display an appropriate arrow on the column header
+/**
+ * @memberof uiTable
+ * sets the sort indicator of the table header to display an appropriate arrow on the column header
+ */
 _UI_EXTERN void uiTableHeaderSetSortIndicator(uiTable *t,
 	int column,
 	uiSortIndicator indicator);
 
-/// @memberof uiTable
-/// returns the sort indicator of the specified column
+/**
+ * @memberof uiTable
+ * returns the sort indicator of the specified column
+ */
 _UI_EXTERN uiSortIndicator uiTableHeaderSortIndicator(uiTable *t, int column);
 
-/// @memberof uiTable
-/// sets a callback function to be called when a table column header is clicked
+/**
+ * @memberof uiTable
+ * sets a callback function to be called when a table column header is clicked
+ */
 _UI_EXTERN void uiTableHeaderOnClicked(uiTable *t,
 	void (*f)(uiTable *t, int column, void *data),
 	void *data);
