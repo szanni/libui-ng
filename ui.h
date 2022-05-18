@@ -242,6 +242,7 @@ _UI_EXTERN void uiControlVerifySetParent(uiControl *c, uiControl *parent);
  */
 _UI_EXTERN int uiControlEnabledToUser(uiControl *);
 
+// TODO Move this to private API? According to old/new.md this should be used by toplevel controls.
 _UI_EXTERN void uiUserBugCannotSetParentOnToplevel(const char *type);
 
 
