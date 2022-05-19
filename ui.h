@@ -863,45 +863,67 @@ _UI_EXTERN void uiGroupSetMargined(uiGroup *g, int margined);
 _UI_EXTERN uiGroup *uiNewGroup(const char *title);
 
 
-// spinbox/slider rules:
-// setting value outside of range will automatically clamp
-// initial value is minimum
-// complaint if min >= max?
 /**
- * @struct uiSpinbox
- * @extends uiControl
- * A uiControl that represents a space where the user can enter integers.
+ * A control to display and modify integer values via a text field or +/- buttons.
  *
- * The space also comes with buttons to add or subtract 1 from the integer.
+ * This is a convenient control for having the user enter integer values.
+ * Values are guaranteed to be within the specified range.
+ *
+ * The + button increases the held value by 1.\n
+ * The - button decreased the held value by 1.
+ *
+ * Entering a value out of range will clamp to the nearest value in range.
+ *
+ * @struct uiSpinbox
  */
 typedef struct uiSpinbox uiSpinbox;
 #define uiSpinbox(this) ((uiSpinbox *) (this))
 
 /**
+ * Returns the spinbox value.
+ *
+ * @param s uiSpinbox instance.
+ * @returns Spinbox value.
  * @memberof uiSpinbox
- * returns the uiSpinbox's current value.
  */
 _UI_EXTERN int uiSpinboxValue(uiSpinbox *s);
 
 /**
+ * Sets the spinbox value.
+ *
+ * @param s uiSpinbox instance.
+ * @param value Value to set.
  * @memberof uiSpinbox
- * sets the uiSpinbox's current value to @p value.
  */
 _UI_EXTERN void uiSpinboxSetValue(uiSpinbox *s, int value);
 
 /**
- * @memberof uiSpinbox
- * registers @p f to be run when the user changes the value of the uiSpinbox.
+ * Registers a callback for when the spinbox value is changed by the user.
  *
- * Only one function can be registered at a time.
+ * @param s uiSpinbox instance.
+ * @param f Callback function.
+ * @param data User data to be passed to the callback.
+ * @todo document callback
+ *
+ * @note The callback is not triggered when calling uiSpinboxSetValue().
+ * @note Only one callback can be registered at a time.
+ * @memberof uiSpinbox
  */
 _UI_EXTERN void uiSpinboxOnChanged(uiSpinbox *s, void (*f)(uiSpinbox *s, void *data), void *data);
 
 /**
- * @static @memberof uiSpinbox
- * creates a new uiSpinbox.
+ * Creates a new spinbox.
  *
- * If min >= max, they are swapped.
+ * The initial spinbox value equals the minimum value.
+ *
+ * In the current implementation @p min and @p max are swapped if `min>max`.
+ * This may change in the future though. See TODO.
+ *
+ * @param min Minimum value.
+ * @param max Maximum value.
+ * @returns A new uiSpinbox instance.
+ * @todo complain or disallow min>max?
+ * @memberof uiSpinbox
  */
 _UI_EXTERN uiSpinbox *uiNewSpinbox(int min, int max);
 
