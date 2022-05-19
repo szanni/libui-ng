@@ -719,58 +719,77 @@ _UI_EXTERN uiLabel *uiNewLabel(const char *text);
 
 
 /**
+ * A multi page control interface that displays one page at a time.
+ *
+ * Each page/tab has an associated label that can be selected to switch
+ * between pages/tabs.
+ *
  * @struct uiTab
  * @extends uiControl
- * A uiControl that holds tabbed pages of uiControl's.
- *
- * Each tab has a label.
- * The user can click on the tabs themselves to switch pages.
- * Individual pages can also have margins.
  */
 typedef struct uiTab uiTab;
 #define uiTab(this) ((uiTab *) (this))
 
 /**
+ * Appends a control in form of a page/tab with label.
+ *
+ * @param t uiTab instance.
+ * @param text Label text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
+ * @param c Control to append.
  * @memberof uiTab
- * adds the given page to the end of the uiTab.
  */
 _UI_EXTERN void uiTabAppend(uiTab *t, const char *name, uiControl *c);
 
 /**
+ * Inserts a control in form of a page/tab with label at @p index.
+ *
+ * @param t uiTab instance.
+ * @param text Label text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
+ * @param index Index at which to insert the control.
+ * @param c Control to insert.
  * @memberof uiTab
- * adds the given page to the uiTab such that it is the @p before's page of the uiTab (starting at 0).
  */
-_UI_EXTERN void uiTabInsertAt(uiTab *t, const char *name, int before, uiControl *c);
+_UI_EXTERN void uiTabInsertAt(uiTab *t, const char *name, int index, uiControl *c);
 
 /**
+ * Removes the control at @p index.
+ *
+ * @param t uiTab instance.
+ * @param index Index of the control to be removed.
+ * @note The control is neither destroyed nor feed.
  * @memberof uiTab
- * deletes the @p index's page of the uiTab.
  */
 _UI_EXTERN void uiTabDelete(uiTab *t, int index);
 
 /**
+ * Returns the number of pages contained.
+ *
+ * @param t uiTab instance.
  * @memberof uiTab
- * returns the number of pages in the uiTab.
  */
 _UI_EXTERN int uiTabNumPages(uiTab *t);
 
 /**
- * @memberof uiTab
- * returns whether page @p page (starting at 0) of the uiTab has margins around its child.
- */
-_UI_EXTERN int uiTabMargined(uiTab *t, int page);
-
-/**
- * @memberof uiTab
- * whether page @p page (starting at 0) of the uiTab has margins around its child.
+ * Returns whether or not the page/tab at @p index has a margin.
  *
- * The size of the margins are determined by the OS and its best practices.
+ * @memberof uiTab
  */
-_UI_EXTERN void uiTabSetMargined(uiTab *t, int page, int margined);
+_UI_EXTERN int uiTabMargined(uiTab *t, int index);
 
 /**
- * @static @memberof uiTab
- * creates a new uiTab.
+ * Sets whether or not the page/tab at @p index has a margin.
+ *
+ * The margin size is determined by the OS defaults.
+ *
+ * @memberof uiTab
+ */
+_UI_EXTERN void uiTabSetMargined(uiTab *t, int index, int margined);
+
+/**
+ * Creates a new tab container.
+ *
+ * @return A new uiTab instance.
+ * @memberof uiTab
  */
 _UI_EXTERN uiTab *uiNewTab(void);
 
