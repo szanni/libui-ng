@@ -795,53 +795,70 @@ _UI_EXTERN uiTab *uiNewTab(void);
 
 
 /**
+ * A control container that adds a label to the contained child control.
+ *
+ * This control is a great way of grouping related controls in combination with
+ * uiBox.
+ *
+ * A visual box will or will not be drawn around the child control dependent
+ * on the underlying OS implementation.
+ *
  * @struct uiGroup
  * @extends uiControl
- * A uiControl that holds another uiControl and wraps it around a labelled box
- *
- * (though some systems make this box invisible).
- * You can use this to group related controls together.
  */
 typedef struct uiGroup uiGroup;
 #define uiGroup(this) ((uiGroup *) (this))
 
 /**
+ * Returns the group title.
+ *
+ * @returns The group title text.
+ * @returns A `NUL` terminated UTF-8 string.
+ * @returns The data is owned by the caller and needs to be `uiFreeText()`'d.
  * @memberof uiGroup
- * returns the uiGroup's title.
  */
 _UI_EXTERN char *uiGroupTitle(uiGroup *g);
 
 /**
+ * Sets the group title.
+ *
+ * @param g uiGroup instance.
+ * @param title Group title text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
  * @memberof uiGroup
- * sets the uiGroup's title to @p title.
  */
 _UI_EXTERN void uiGroupSetTitle(uiGroup *g, const char *title);
 
 /**
- * @memberof uiGroup
- * sets the uiGroup's child to @p c.
+ * Sets the group's child.
  *
- * If @p c is NULL, the uiGroup will not have a child.
+ * @param g uiGroup instance.
+ * @param c uiControl child instance, or `NULL`.
+ * @memberof uiGroup
  */
 _UI_EXTERN void uiGroupSetChild(uiGroup *g, uiControl *c);
 
 /**
+ * Returns whether or not the group has a margin.
+ *
  * @memberof uiGroup
- * returns whether the uiGroup has margins around its child.
  */
 _UI_EXTERN int uiGroupMargined(uiGroup *g);
 
 /**
- * @memberof uiGroup
- * controls whether the uiGroup has margins around its child.
+ * Sets whether or not the group has a margin.
  *
- * The size of the margins are determined by the OS and its best practices.
+ * The margin size is determined by the OS defaults.
+ *
+ * @memberof uiGroup
  */
 _UI_EXTERN void uiGroupSetMargined(uiGroup *g, int margined);
 
 /**
- * @static @memberof uiGroup
- * creates a new uiGroup.
+ * Creates a new group.
+ *
+ * @param title Group title text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
+ * @returns A new uiGroup instance.
+ * @memberof uiGroup
  */
 _UI_EXTERN uiGroup *uiNewGroup(const char *title);
 
