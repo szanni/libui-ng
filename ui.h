@@ -452,61 +452,82 @@ _UI_EXTERN uiButton *uiNewButton(const char *text);
 
 
 /**
+ * A boxlike container that holds a group of controls.
+ *
+ * The contained controls are arranged to be displayed either horizontally or
+ * vertically next to each other.
+ *
  * @struct uiBox
  * @extends uiControl
- * A uiControl that holds a group of uiControl's horizontally or vertically.
- *
- * If horizontally, then all controls have the same
- * height. If vertically, then all controls have the same width.
- * By default, each control has its preferred width (horizontal)
- * or height (vertical); if a control is marked "stretchy", it will
- * take whatever space is left over. If multiple controls are marked
- * stretchy, they will be given equal shares of the leftover space.
- * There can also be space between each control ("padding").
  */
 typedef struct uiBox uiBox;
 #define uiBox(this) ((uiBox *) (this))
 
 /**
  * @memberof uiBox
- * adds the given control to the end of the box.
+ * Appends a control to the box.
+ *
+ * Stretchy items expand to use the remaining space within the box.
+ * In the case of multiple stretchy items the space is shared equally.
+ *
+ * @param b uiBox instance.
+ * @param child Control instance to append.
+ * @param stretchy Whether or not to stretch the control.
  */
 _UI_EXTERN void uiBoxAppend(uiBox *b, uiControl *child, int stretchy);
 
 /**
+ * Returns the number of controls contained within the box.
+ *
  * @memberof uiBox
  */
 _UI_EXTERN int uiBoxNumChildren(uiBox *b);
 
 /**
+ * Removes the control at @p index from the box.
+ *
+ * @param index Index of control to be removed.
+ * @note The control neither destroyed nor feed.
  * @memberof uiBox
- * deletes the @p index's control of the uiBox.
  */
 _UI_EXTERN void uiBoxDelete(uiBox *b, int index);
 
 /**
+ * Returns whether or not controls within the box are padded.
+ *
+ * Padding is defined as space between individual controls.
+ *
  * @memberof uiBox
- * returns whether there is space between each control of the box.
  */
 _UI_EXTERN int uiBoxPadded(uiBox *b);
 
 /**
- * @memberof uiBox
- * controls whether there is space between each control of the uiBox.
+ * Sets whether or not controls within the box are padded.
  *
- * The size of the padding is determined by the OS and its best practices.
+ * Padding is defined as space between individual controls.
+ * The padding size is determined by the OS defaults.
+ *
+ * @memberof uiBox
  */
 _UI_EXTERN void uiBoxSetPadded(uiBox *b, int padded);
 
 /**
- * @static @memberof uiBox
- * creates a new horizontal box.
+ * Creates a new horizontal box.
+ *
+ * Controls within the box are placed next to each other horizontally.
+ *
+ * @returns A new uiBox instance.
+ * @memberof uiBox
  */
 _UI_EXTERN uiBox *uiNewHorizontalBox(void);
 
 /**
- * @static @memberof uiBox
- * creates a new vertical box.
+ * Creates a new vertical box.
+ *
+ * Controls within the box are placed next to each other vertically.
+ *
+ * @returns A new uiBox instance.
+ * @memberof uiBox
  */
 _UI_EXTERN uiBox *uiNewVerticalBox(void);
 
