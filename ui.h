@@ -533,51 +533,65 @@ _UI_EXTERN uiBox *uiNewVerticalBox(void);
 
 
 /**
+ * A control with a user checkable box accompanied by a text label.
+ *
  * @struct uiCheckbox
  * @extends uiControl
- * A uiControl that represents a box with a text label at its side.
- *
- * When the user clicks the checkbox, a check mark will appear
- * in the box; clicking it again removes the check.
  */
 typedef struct uiCheckbox uiCheckbox;
 #define uiCheckbox(this) ((uiCheckbox *) (this))
 
 /**
+ * Returns the checkbox label text.
+ *
+ * @returns The text of the label.
+ * @returns A `NUL` terminated UTF-8 string.
+ * @returns The data is owned by the caller and needs to be `uiFreeText()`'d.
  * @memberof uiCheckbox
- * returns the checkbox's text.
  */
 _UI_EXTERN char *uiCheckboxText(uiCheckbox *c);
 
 /**
+ * Sets the checkbox label text.
+ *
+ * @param text Label text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
  * @memberof uiCheckbox
- * sets the checkbox's text to @p text.
  */
 _UI_EXTERN void uiCheckboxSetText(uiCheckbox *c, const char *text);
 
 /**
- * @memberof uiCheckbox
- * registers @p f to be run when the user clicks the checkbox.
+ * Register a callback for when the checkbox is toggled by the user.
  *
- * Only one function can be registered at a time.
+ * @param c uiCheckbox instance.
+ * @param f Callback function
+ * @param data User data to be passed to the callback.
+ * @todo document callback
+ *
+ * @note The callback is not triggered when calling uiCheckboxSetChecked().
+ * @memberof uiCheckbox
  */
 _UI_EXTERN void uiCheckboxOnToggled(uiCheckbox *c, void (*f)(uiCheckbox *c, void *data), void *data);
 
 /**
+ * Returns whether or the checkbox is checked.
+ *
  * @memberof uiCheckbox
- * returns whether the checkbox is checked.
  */
 _UI_EXTERN int uiCheckboxChecked(uiCheckbox *c);
 
 /**
+ * Sets whether or not the checkbox is checked.
+ *
  * @memberof uiCheckbox
- * sets whether the checkbox is checked or not.
  */
 _UI_EXTERN void uiCheckboxSetChecked(uiCheckbox *c, int checked);
 
 /**
- * @static @memberof uiCheckbox
- * creates a new checkbox with the given @p text as its label.
+ * Creates a new uiCheckbox.
+ *
+ * @param text Label text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
+ * @returns A new uiCheckbox instance.
+ * @memberof uiCheckbox
  */
 _UI_EXTERN uiCheckbox *uiNewCheckbox(const char *text);
 
