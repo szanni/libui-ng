@@ -1024,30 +1024,43 @@ _UI_EXTERN uiSlider *uiNewSlider(int min, int max);
 
 
 /**
+ * A control that visualizes the progress of a task via the fill level of a horizontal bar.
+ *
+ * Indeterminate values are supported via an animated bar.
+ *
  * @struct uiProgressBar
  * @extends uiControl
- * A uiControl that represents a horizontal bar that is filled in progressively over time as a process completes.
  */
 typedef struct uiProgressBar uiProgressBar;
 #define uiProgressBar(this) ((uiProgressBar *) (this))
 
 /**
+ * Returns the progress bar value.
+ *
  * @memberof uiProgressBar
- * returns the value currently shown in the uiProgressBar.
  */
 _UI_EXTERN int uiProgressBarValue(uiProgressBar *p);
 
 /**
- * @memberof uiProgressBar
- * sets the uiProgressBar's currently displayed percentage to value.
+ * Sets the progress bar value.
  *
- * value must be between 0 and 100 inclusive, or -1 for an indeterminate progressbar.
+ * Valid values are `[0, 100]` for displaying a solid bar imitating a percent
+ * value.
+ *
+ * Use a value of `-1` to render an animated bar to convey an indeterminate
+ * value.
+ *
+ * @param p uiProgressBar instance.
+ * @param n Value to set. Integer in the range of `[-1, 100]`.
+ * @memberof uiProgressBar
  */
 _UI_EXTERN void uiProgressBarSetValue(uiProgressBar *p, int n);
 
 /**
- * @static @memberof uiProgressBar
- * creates a new uiProgressBar.
+ * Creates a new progress bar.
+ *
+ * @returns A new uiProgressBar instance.
+ * @memberof uiProgressBar
  */
 _UI_EXTERN uiProgressBar *uiNewProgressBar(void);
 
