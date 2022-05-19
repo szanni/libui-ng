@@ -929,55 +929,96 @@ _UI_EXTERN uiSpinbox *uiNewSpinbox(int min, int max);
 
 
 /**
+ * A control to display and modify integer values via a user draggable slider.
+ *
+ * Values are guaranteed to be within the specified range.
+ *
+ * Sliders by default display a tool tip showing the current value when being
+ * dragged.
+ *
+ * Sliders are horizontal only.
+ *
  * @struct uiSlider
  * @extends uiControl
- * A uiControl that represents a horizontal bar that represents a range of integers.
- *
- * The user can drag a pointer on the bar to select an integer.
  */
 typedef struct uiSlider uiSlider;
 #define uiSlider(this) ((uiSlider *) (this))
 
 /**
+ * Returns the slider value.
+ *
+ * @param s uiSlider instance.
+ * @returns Slider value.
  * @memberof uiSlider
- * returns the uiSlider's current value.
  */
 _UI_EXTERN int uiSliderValue(uiSlider *s);
 
 /**
+ * Sets the slider value.
+ *
+ * @param s uiSlider intance.
+ * @param value Value to set.
  * @memberof uiSlider
- * sets the uiSlider's current value to @p value.
  */
 _UI_EXTERN void uiSliderSetValue(uiSlider *s, int value);
 
 /**
+ * Returns whether or not the slider has a tool tip.
+ *
+ * @param s uiSlider instance.
+ * @returns `TRUE` if a tool tip is present, `FALSE` if not.
  * @memberof uiSlider
  */
 _UI_EXTERN int uiSliderHasToolTip(uiSlider *s);
 
 /**
+ * Sets whether or not the slider has a tool tip.
+ *
+ * @param s uiSlider instance.
+ * @param hasToolTip `TRUE` to display a tool tip, `FALSE` to display no tool tip.
  * @memberof uiSlider
  */
 _UI_EXTERN void uiSliderSetHasToolTip(uiSlider *s, int hasToolTip);
 
 /**
- * @memberof uiSlider
- * registers @p f to be run when the user changes the value of the uiSlider.
+ * Registers a callback for when the slider value is changed by the user.
  *
- * Only one function can be registered at a time.
+ * @param s uiSlider instance.
+ * @param f Callback function.
+ * @param data User data to be passed to the callback.
+ * @todo document callback
+ *
+ * @note The callback is not triggered when calling uiSliderSetValue().
+ * @note Only one callback can be registered at a time.
+ * @memberof uiSlider
  */
 _UI_EXTERN void uiSliderOnChanged(uiSlider *s, void (*f)(uiSlider *s, void *data), void *data);
 
 /**
+ * Sets the slider range.
+ *
+ * @param s uiSlider instance.
+ * @param min Minimum value.
+ * @param max Maximum value.
+ * @todo Make sure to clamp the slider value to the nearest value in range - should
+ *       it be out of range. Call uiSliderOnChanged() in such a case.
  * @memberof uiSlider
  */
 _UI_EXTERN void uiSliderSetRange(uiSlider *s, int min, int max);
 
 /**
- * @static @memberof uiSlider
- * creates a new uiSlider.
+ * Creates a new slider.
  *
- * If min >= max, they are swapped.
+ * The initial slider value equals the minimum value.
+ *
+ * In the current implementation @p min and @p max are swapped if `min>max`.
+ * This may change in the future though. See TODO.
+ *
+ * @param min Minimum value.
+ * @param max Maximum value.
+ * @returns A new uiSlider instance.
+ * @todo complain or disallow min>max?
+ * @memberof uiSlider
  */
 _UI_EXTERN uiSlider *uiNewSlider(int min, int max);
 
