@@ -597,63 +597,85 @@ _UI_EXTERN uiCheckbox *uiNewCheckbox(const char *text);
 
 
 /**
+ * A control with a single line text entry field.
+ *
  * @struct uiEntry
  * @extends uiControl
- * A uiControl that represents a space that the user can type a single line of text into.
  */
 typedef struct uiEntry uiEntry;
 #define uiEntry(this) ((uiEntry *) (this))
 
 /**
+ * Returns the entry's text.
+ *
+ * @returns The text of the entry.
+ * @returns A `NUL` terminated UTF-8 string.
+ * @returns The data is owned by the caller and needs to be `uiFreeText()`'d.
  * @memberof uiEntry
- * returns the entry's text.
  */
 _UI_EXTERN char *uiEntryText(uiEntry *e);
 
 /**
+ * Sets the entry's text.
+ *
+ * @param text Entry text. Make sure this is a valid, `NUL` terminated UTF-8 string. The data is owned by the caller.
  * @memberof uiEntry
- * sets the entry's text to @p text.
  */
 _UI_EXTERN void uiEntrySetText(uiEntry *e, const char *text);
 
 /**
- * @memberof uiEntry
- * registers @p f to be run when the user makes a change to the entry.
+ * Register a callback for when the user changes the entry's text.
  *
- * Only one function can be registered at a time.
+ * @param e uiEntry instance.
+ * @param f Callback function
+ * @param data User data to be passed to the callback.
+ * @todo document callback
+ *
+ * @note The callback is not triggered when calling uiEntrySetText().
+ * @memberof uiEntry
  */
 _UI_EXTERN void uiEntryOnChanged(uiEntry *e, void (*f)(uiEntry *e, void *data), void *data);
 
 /**
+ * Returns whether or not the entry's text can be changed.
+ *
  * @memberof uiEntry
- * returns whether the entry can be changed.
  */
 _UI_EXTERN int uiEntryReadOnly(uiEntry *e);
 
 /**
+ * Sets whether or not the entry's text is read only.
+ *
  * @memberof uiEntry
- * sets whether the entry can be changed or not.
  */
 _UI_EXTERN void uiEntrySetReadOnly(uiEntry *e, int readonly);
 
 /**
- * @static @memberof uiEntry
- * creates a new entry.
+ * Creates a new entry.
+ *
+ * @returns a new uiEntry instance.
+ * @memberof uiEntry
  */
 _UI_EXTERN uiEntry *uiNewEntry(void);
 
 /**
- * @static @memberof uiEntry
- * creates a new entry whose contents are visibly obfuscated, suitable for passwords.
+ * Creates a new entry suitable for sensitive inputs like passwords.
+ *
+ * The entered text is NOT readable by the user but masked as *******.
+ *
+ * @returns a new uiEntry instance.
+ * @memberof uiEntry
  */
 _UI_EXTERN uiEntry *uiNewPasswordEntry(void);
 
 /**
- * @static @memberof uiEntry
- * creates a new entry suitable for searching with.
+ * Creates a new entry suitable for search.
  *
- * Changed events may, depending on the system, be delayed
- * with a search entry, to produce a smoother user experience.
+ * Some systems will deliberately delay the uiEntryOnChanged() callback for
+ * a more natural feel.
+ *
+ * @returns a new uiEntry instance.
+ * @memberof uiEntry
  */
 _UI_EXTERN uiEntry *uiNewSearchEntry(void);
 
