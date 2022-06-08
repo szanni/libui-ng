@@ -163,4 +163,4 @@ extern CFStringRef uiprivUNDOC_kCTFontPreferredFamilyNameKey;
 extern void uiprivLoadUndocumented(void);
 
 // event.m
-extern BOOL uiprivSendKeyboardEditEvents(uiprivApplicationClass *app, NSEvent *e);
+extern inline BOOL uiprivSendKeyboardEditEvents(uiprivApplicationClass *app, NSEvent *e);
