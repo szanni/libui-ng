@@ -37,6 +37,8 @@ See [CHANGELOG.md](CHANGELOG.md)
 
 ## Building
 
+### Meson
+
 libui uses only [the standard Meson build options](https://mesonbuild.com/Builtin-options.html), so a libui build can be set up just like any other:
 
 ```
@@ -61,6 +63,27 @@ The Meson website and documentation has more in-depth usage instructions.
 For the sake of completeness, I should note that the default value of `--layout` is `flat`, not the usual `mirror`. This is done both to make creating the release archives easier as well as to reduce the chance that shared library builds will fail to start on Windows because the DLL is in another directory. You can always specify this manually if you want.
 
 Backends other than `ninja` should work, but are untested by me.
+
+### xmake
+
+All of the standard xmake commands switches are supported.
+
+To build with default options, run:
+```
+xmake
+```
+
+To set various options, run:
+```
+xmake config --mode=[debug|release] ## xmake f -m [debug|release]
+xmake config --kind=[static|shared] ## xmake f -k [static|shared]
+xmake config --buildir=build        ## xamke f -o build
+```
+
+Cross compiling from unix for windows:
+```
+xmake config --platform=mingw ## xmake f -p mingw
+```
 
 ## Installation
 
