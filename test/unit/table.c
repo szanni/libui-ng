@@ -330,6 +330,33 @@ static void tableSetCurrentSelectionToMultipleAllowMultipleFalseSelectLast(void 
 }
 */
 
+static void tableSetAllowMultipleSelectionFalseWhileSingleSelected(void **state)
+{
+	uiTableModel *m = *uiDataPtrFromState(uiTableModel, state);
+	uiTable **t = uiTablePtrFromState(state);
+	uiTableSelection selSet;
+	uiTableSelection *selGet;
+	int rows[2];
+
+	uiTableParams p = {.Model = m, .RowBackgroundColorModelColumn = -1};
+	*t = uiNewTable(&p);
+	uiTableAppendTextColumn(*t, "Column", MCOL_STRING, uiTableModelColumnNeverEditable, NULL);
+
+	uiTableSetAllowMultipleSelection(*t, 1);
+
+	selSet.NumRows = 1;
+	rows[0] = 1;
+	selSet.Rows = rows;
+	uiTableSetCurrentSelection(*t, &selSet);
+
+	uiTableSetAllowMultipleSelection(*t, 0);
+
+	selGet = uiTableCurrentSelection(*t);
+	assert_int_equal(selGet->NumRows, 1);
+	assert_int_equal(selGet->Rows[0], 1);
+	uiFreeTableSelection(selGet);
+}
+
 static void tableSetAllowMultipleSelectionFalseWhileMultipleSelected(void **state)
 {
 	uiTableModel *m = *uiDataPtrFromState(uiTableModel, state);
@@ -353,11 +380,9 @@ static void tableSetAllowMultipleSelectionFalseWhileMultipleSelected(void **stat
 	uiTableSetAllowMultipleSelection(*t, 0);
 
 	selGet = uiTableCurrentSelection(*t);
-	assert_int_equal(selGet->NumRows, 1);
-	assert_int_equal(selGet->Rows[0], 1);
+	assert_int_equal(selGet->NumRows, 0);
 	uiFreeTableSelection(selGet);
 }
-
 
 
 #define tableUnitTest(f) cmocka_unit_test_setup_teardown((f), \
@@ -376,6 +401,7 @@ int tableRunUnitTests(void)
 		tableUnitTest(tableSetCurrentSelectionToSingleAllowMultipleTrue),
 		tableUnitTest(tableSetCurrentSelectionToMultipleAllowMultipleTrue),
 		//tableUnitTest(tableSetCurrentSelectionToMultipleAllowMultipleFalseSelectLast),
+		tableUnitTest(tableSetAllowMultipleSelectionFalseWhileSingleSelected),
 		tableUnitTest(tableSetAllowMultipleSelectionFalseWhileMultipleSelected),
 	};
 
