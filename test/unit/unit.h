@@ -17,6 +17,7 @@ int initRunUnitTests(void);
 int sliderRunUnitTests(void);
 int spinboxRunUnitTests(void);
 int labelRunUnitTests(void);
+int tableRunUnitTests(void);
 
 /**
  * Helper for general setup/teardown of controls embedded in a window.
@@ -24,6 +25,7 @@ int labelRunUnitTests(void);
 struct state {
 	uiWindow *w;
 	uiControl *c;
+	void *data;
 };
 
 /**
@@ -51,6 +53,7 @@ int unitTestSetup(void **state);
 int unitTestTeardown(void **state);
 
 #define uiControlPtrFromState(t, s) (t**)&(((struct state *)*(s))->c)
+#define uiDataPtrFromState(t, s) (t**)&(((struct state *)*(s))->data)
 
 #endif
 

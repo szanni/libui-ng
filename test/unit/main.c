@@ -71,6 +71,7 @@ int main(void)
 		{ sliderRunUnitTests },
 		{ spinboxRunUnitTests },
 		{ labelRunUnitTests },
+		{ tableRunUnitTests },
 	};
 
 	for (i = 0; i < sizeof(unitTests)/sizeof(*unitTests); ++i) {
