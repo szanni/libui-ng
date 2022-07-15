@@ -227,6 +227,8 @@ int uiTableAllowMultipleSelection(uiTable *t)
 
 void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection)
 {
+	if ([t->tv numberOfSelectedRows] > 1)
+		[t->tv deselectAll: t->tv];
 	[t->tv setAllowsMultipleSelection: (BOOL)multipleSelection];
 }
 
