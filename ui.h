@@ -1519,39 +1519,85 @@ _UI_EXTERN int uiTableColumnWidth(uiTable *t, int column);
 // Note: darwin currently only resizes to header title width on -1
 _UI_EXTERN void uiTableColumnSetWidth(uiTable *t, int column, int width);
 
-// uiTableAllowMultipleSelection() return if table allows for
-// multiple items being selected or not
+/**
+ * Returns whether of not the table allows multiple rows to be selected.
+ *
+ * @param t uiTable instance.
+ * @returns `TRUE` if multi select is allowed, `FALSE` otherwise. [Default: `FALSE`]
+ *
+ * @memberof uiTable
+ */
 _UI_EXTERN int uiTableAllowMultipleSelection(uiTable *t);
 
-// uiTableSetAllowMultipleSelection() set if table allows for
-// multiple items being selected or not
+/**
+ * Sets whether of not the table allows multiple rows to be selected.
+ *
+ * @param t uiTable instance.
+ * @param multipleSelection  `TRUE` to allow multi select, `FALSE` otherwise.
+ *
+ * @memberof uiTable
+ */
 _UI_EXTERN void uiTableSetAllowMultipleSelection(uiTable *t, int multipleSelection);
 
-// uiTableOnSelectionChanged() set a callback function to be called when
-// the table selection changes
+/**
+ * Registers a callback for when the table selection changed.
+ *
+ * @param t uiTable instance.
+ * @param f Callback function.\n
+ *          @p sender Back reference to the instance that triggered the callback.\n
+ *          @p senderData User data registered with the sender instance.
+ * @param data User data to be passed to the callback.
+ *
+ * @note The callback is not triggered when calling uiTableSetCurrentSelection().
+ * @note Only one callback can be registered at a time.
+ * @memberof uiTable
+ */
 _UI_EXTERN void uiTableOnSelectionChanged(uiTable *t, void (*f)(uiTable *t, void *data), void *data);
 
-// uiTableSelection holds an array of selected row indices for a table.
+/**
+ * Holds an array of selected row indices for a table.
+ *
+ * @struct uiTableSelection
+ * @ingroup table
+ */
 typedef struct uiTableSelection uiTableSelection;
 struct uiTableSelection
 {
-	int NumRows; //! Number of selected rows.
-	int *Rows; //! Array containing selected row indices, NULL on empty selection.
+	int NumRows; //!< Number of selected rows.
+	int *Rows;   //!< Array containing selected row indices, NULL on empty selection.
 };
 
-// uiTableCurrentSelection() return the currently selected number of rows and
-// corresponding row indexes.
-// Note: For empty selections the `Rows` pointer will be NULL.
-// Note: Make sure to free the result with uiFreeTableSelection()
+/**
+ * Returns the current table selection.
+ *
+ * @param t uiTable instance.
+ * @returns The number of selected rows and corresponding row indices.\n
+ *          Data is owned by the caller, make sure to call uiFreeTableSelection().
+ *
+ * @note For empty selections the `Rows` pointer will be NULL.
+ * @memberof uiTable
+ */
 _UI_EXTERN uiTableSelection* uiTableCurrentSelection(uiTable *t);
 
-// uiTableSetCurrentSelection() set selected row(s), clearing any existing selection
-// Note: Make sure not to select multiple rows in single select mode
-// Note: For empty selections the Rows pointer is never accessed
-// Note: Data is owned by the caller
+/**
+ * Sets the current table selection clearing any previous selection.
+ *
+ * @param t uiTable instance.
+ * @param sel Table selection.\n
+ *            Data is owned by the caller.
+ *
+ * @note Make sure not to select multiple rows in single select mode
+ * @note For empty selections the Rows pointer is never accessed
+ * @memberof uiTable
+ */
 _UI_EXTERN void uiTableSetCurrentSelection(uiTable *t, uiTableSelection *sel);
 
-// uiFreeTableSelection frees the given uiTableSelection* and all resources.
+/**
+ * Frees the given uiTableSelection and all it's resources.
+ *
+ * @param s uiTableSelection instance.
+ * @memberof uiTableSelection
+ */
 _UI_EXTERN void uiFreeTableSelection(uiTableSelection* s);
 
 #ifdef __cplusplus
