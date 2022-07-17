@@ -24,7 +24,13 @@ void uiprivUninitAlloc(void)
 {
 	NSMutableString *str;
 	NSValue *v;
+	NSObject **delegate;
 
+	// Reset singleton delegates for possible reuse
+	for (v in uiprivDelegates) {
+		delegate = [v pointerValue];
+		*delegate = nil;
+	}
 	[uiprivDelegates release];
 	if ([allocations count] == 0) {
 		[allocations release];
