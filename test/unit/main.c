@@ -2,9 +2,6 @@
 
 #include "unit.h"
 
-#define UNIT_TEST_WIDTH 300
-#define UNIT_TEST_HEIGHT 200
-
 static int onClosing(uiWindow *w, void *data)
 {
 	uiQuit();

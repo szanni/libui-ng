@@ -55,5 +55,8 @@ int unitTestTeardown(void **state);
 #define uiControlPtrFromState(t, s) (t**)&(((struct state *)*(s))->c)
 #define uiDataPtrFromState(t, s) (t**)&(((struct state *)*(s))->data)
 
+#define UNIT_TEST_WIDTH 300
+#define UNIT_TEST_HEIGHT 200
+
 #endif
 
