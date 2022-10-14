@@ -589,35 +589,30 @@ void uiTableOnRowDoubleClicked(uiTable *t, void (*f)(uiTable *, int, void *), vo
 	t->onRowDoubleClickedData = data;
 }
 
-static gboolean onButtonPressed(GtkWidget *tv, GdkEventButton *event, gpointer data)
+static void onButtonPressed(GtkGestureMultiPress *gesture, gint nPress, gdouble wx, gdouble wy, gpointer data)
 {
 	uiTable *t = uiTable(data);
 	GtkTreePath *path;
-	gint row;
+	gint row, x, y;
 
-	if (event->window != gtk_tree_view_get_bin_window(t->tv))
-		return FALSE;
-	if (event->button != GDK_BUTTON_PRIMARY)
-		return FALSE;
-
-	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(tv), event->x, event->y, &path, NULL, NULL, NULL);
+	gtk_tree_view_convert_widget_to_bin_window_coords(t->tv, wx, wy, &x, &y);
+	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(t->tv), x, y, &path, NULL, NULL, NULL);
 	if (path == NULL)
-		return FALSE;
+		return;
 
 	row = gtk_tree_path_get_indices(path)[0];
 	gtk_tree_path_free(path);
 
-	if(event->type == GDK_BUTTON_PRESS)
+	if(nPress == 1)
 		(*(t->onRowClicked))(t, row, t->onRowClickedData);
-	else if(event->type == GDK_2BUTTON_PRESS)
+	if(nPress == 2)
 		(*(t->onRowDoubleClicked))(t, row, t->onRowDoubleClickedData);
-
-	return FALSE;
 }
 
 uiTable *uiNewTable(uiTableParams *p)
 {
 	uiTable *t;
+	GtkGesture *gesture;
 
 	uiUnixNewControl(uiTable, t);
 
@@ -636,7 +631,9 @@ uiTable *uiNewTable(uiTableParams *p)
 	// TODO set up t->tv
 	uiTableOnRowClicked(t, defaultOnRowClicked, NULL);
 	uiTableOnRowDoubleClicked(t, defaultOnRowDoubleClicked, NULL);
-	g_signal_connect(t->tv, "button-press-event", G_CALLBACK(onButtonPressed), t);
+
+	gesture = gtk_gesture_multi_press_new(GTK_WIDGET(t->tv));
+	g_signal_connect(gesture, "pressed", G_CALLBACK(onButtonPressed), t);
 
 	gtk_container_add(t->scontainer, t->treeWidget);
 	// and make the tree view visible; only the scrolled window's visibility is controlled by libui
