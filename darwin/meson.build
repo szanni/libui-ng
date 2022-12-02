@@ -41,6 +41,7 @@ libui_sources += [
 	'darwin/separator.m',
 	'darwin/slider.m',
 	'darwin/spinbox.m',
+	'darwin/split.m',
 	'darwin/stddialogs.m',
 	'darwin/tab.m',
 	'darwin/table.m',

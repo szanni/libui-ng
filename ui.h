@@ -4008,6 +4008,65 @@ _UI_EXTERN void uiTableSetSelection(uiTable *t, uiTableSelection *sel);
  */
 _UI_EXTERN void uiFreeTableSelection(uiTableSelection* s);
 
+/**
+ * A user resizable split pane that holds two controls.
+ *
+ * The contained controls are arranged to be displayed either horizontally or
+ * vertically next to each other.
+ *
+ * @struct uiSplit
+ * @extends uiControl
+ * @ingroup container
+ */
+typedef struct uiSplit uiSplit;
+#define uiSplit(this) ((uiSplit *) (this))
+
+/**
+ * Adds the first control to the split.
+ *
+ * Stretchy items expand to use the remaining space within the box.
+ *
+ * @param b uiSplit instance.
+ * @param child Control instance to append.
+ * @param expand `TRUE` to expand the control, filling the space, `FALSE` otherwise.
+ * @param shrink `TRUE` to shrink the control beyond it's required space, `FALSE` otherwise.
+ * @memberof uiSplit
+ */
+_UI_EXTERN void uiSplitAdd1(uiSplit *b, uiControl *child, int expand, int shrink);
+
+/**
+ * Adds the second control to the split.
+ *
+ * Stretchy items expand to use the remaining space within the box.
+ *
+ * @param b uiSplit instance.
+ * @param child Control instance to append.
+ * @param expand `TRUE` to expand the control, filling the space, `FALSE` otherwise.
+ * @param shrink `TRUE` to shrink the control beyond it's required space, `FALSE` otherwise.
+ * @memberof uiSplit
+ */
+_UI_EXTERN void uiSplitAdd2(uiSplit *b, uiControl *child, int expand, int shrink);
+
+/**
+ * Creates a new, user resizable horizontal split pane.
+ *
+ * Controls within the split are placed next to each other horizontally.
+ *
+ * @returns A new uiSplit instance.
+ * @memberof uiSplit @static
+ */
+_UI_EXTERN uiSplit *uiNewHorizontalSplit(void);
+
+/**
+ * Creates a new, user resizable vertical split pane.
+ *
+ * Controls within the split are placed next to each other vertically.
+ *
+ * @returns A new uiSplit instance.
+ * @memberof uiSplit @static
+ */
+_UI_EXTERN uiSplit *uiNewVerticalSplit(void);
+
 #ifdef __cplusplus
 }
 #endif

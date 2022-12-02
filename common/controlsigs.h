@@ -22,6 +22,7 @@
 #define uiSeparatorSignature 0x53657061
 #define uiSliderSignature 0x536C6964
 #define uiSpinboxSignature 0x5370696E
+#define uiSplitSignature 0x53706C74
 #define uiTabSignature 0x54616273
 #define uiTableSignature 0x5461626C
 #define uiWindowSignature 0x57696E64

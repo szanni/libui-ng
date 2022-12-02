@@ -39,6 +39,14 @@ struct controlTestCase labelTestCases[] = {
 	{NULL, NULL, NULL}
 };
 
+struct controlTestCase splitTestCases[] = {
+	QA_TEST("1. Vertical One Child", splitVOne),
+	QA_TEST("2. Horizontal One Child", splitHOne),
+	QA_TEST("3. Vertical", splitV),
+	QA_TEST("4. Horizontal", splitH),
+	{NULL, NULL, NULL}
+};
+
 struct controlTestCase windowTestCases[] = {
 	QA_TEST("1. Fullscreen", windowFullscreen),
 	QA_TEST("2. Borderless", windowBorderless),
@@ -47,6 +55,7 @@ struct controlTestCase windowTestCases[] = {
 	QA_TEST("5. Fullscreen + Resizeable", windowFullscreenResizeable),
 	QA_TEST("6. Resizeable + Borderless", windowResizeableBorderless),
 	{NULL, NULL, NULL}
+
 };
 
 struct controlTestGroup controlTestGroups[] = {
@@ -54,6 +63,7 @@ struct controlTestGroup controlTestGroups[] = {
 	{"uiCheckbox", checkboxTestCases},
 	{"uiEntry", entryTestCases},
 	{"uiLabel", labelTestCases},
+	{"uiSplit", splitTestCases},
 	{"uiWindow", windowTestCases},
 };
 
