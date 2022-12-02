@@ -66,6 +66,8 @@ void makePage1(uiWindow *w)
 	uiBox *hbox;
 	uiBox *testBox;
 	uiLabel *label;
+	uiSplit *hsplit;
+	uiSplit *vsplit;
 
 	page1 = newVerticalBox();
 
@@ -168,4 +170,18 @@ void makePage1(uiWindow *w)
 	uiBoxAppend(page1, uiControl(hbox), 0);
 
 	uiBoxAppend(page1, uiControl(label), 0);
+
+	hsplit = uiNewHorizontalSplit();
+	getButton = uiNewButton("Split Left");
+	uiSplitAdd1(hsplit, uiControl(getButton), 1, 1);
+	getButton = uiNewButton("Split Right");
+	uiSplitAdd2(hsplit, uiControl(getButton), 1, 1);
+	uiBoxAppend(page1, uiControl(hsplit), 0);
+
+	vsplit = uiNewVerticalSplit();
+	getButton = uiNewButton("Split Top");
+	uiSplitAdd1(vsplit, uiControl(getButton), 1, 1);
+	getButton = uiNewButton("Split Bottom");
+	uiSplitAdd2(vsplit, uiControl(getButton), 1, 1);
+	uiBoxAppend(page1, uiControl(vsplit), 1);
 }

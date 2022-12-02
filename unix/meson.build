@@ -38,6 +38,7 @@ libui_sources += [
 	'unix/separator.c',
 	'unix/slider.c',
 	'unix/spinbox.c',
+	'unix/split.c',
 	'unix/stddialogs.c',
 	'unix/tab.c',
 	'unix/table.c',
