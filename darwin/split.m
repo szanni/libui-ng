@@ -300,6 +300,7 @@ static uiSplit *uiNewSplit(BOOL verticalDivider)
 	//uiDarwinSetControlFont((NSControl *) (t->splitview), NSRegularControlSize);
 
 	[t->splitview setVertical:verticalDivider];
+	[t->splitview setDividerStyle:NSSplitViewDividerStyleThin];
 
 	t->pages = [NSMutableArray new];
 
