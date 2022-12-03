@@ -56,6 +56,15 @@ static void toggleResize(uiMenuItem *item, uiWindow *w, void *data)
 	uiWindowSetResizeable(w, uiMenuItemChecked(item));
 }
 
+void
+helpMenuOnClicked(uiMenuItem *sender, uiWindow *window, void *senderData)
+{
+	uiWindow *w;
+	w = uiNewWindow("About", 640, 480, 0);
+	uiWindowSetChild(w, uiNewCombobox());
+	uiControlShow(uiControl(w));
+}
+
 void initMenus(void)
 {
 	fileMenu = uiNewMenu("File");
@@ -112,6 +121,7 @@ void initMenus(void)
 
 	helpMenu = uiNewMenu("Help");
 	helpItem = uiMenuAppendItem(helpMenu, "Help");
+	uiMenuItemOnClicked(helpItem, helpMenuOnClicked, NULL);
 	aboutItem = uiMenuAppendAboutItem(helpMenu);
 
 	uiMenuItemOnClicked(quitEnabledItem, enableItemTest, quitItem);
