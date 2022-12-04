@@ -12,13 +12,13 @@ int onClosingSub(uiWindow *w, void *data)
 	return 1;
 }
 
-void buttonComboboxWindowOnClicked(uiButton *b, void *data)
+void buttonSliderWindowOnClicked(uiButton *b, void *data)
 {
 	uiWindow *w;
-	uiCombobox *child;
-	w = uiNewWindow("Combobox", 300, 30, 0);
+	uiSlider *child;
+	w = uiNewWindow("Slider", 300, 30, 0);
 	uiWindowOnClosing(w, onClosingSub, NULL);
-	child = uiNewCombobox();
+	child = uiNewSlider(0, 10);
 	uiWindowSetChild(w, uiControl(child));
 	uiControlShow(uiControl(w));
 }
@@ -41,8 +41,8 @@ int main(void)
 	w = uiNewWindow("Hello World!", 300, 30, 0);
 	uiWindowOnClosing(w, onClosing, NULL);
 
-	b = uiNewButton("Combobox");
-	uiButtonOnClicked(b, buttonComboboxWindowOnClicked, NULL);
+	b = uiNewButton("Slider");
+	uiButtonOnClicked(b, buttonSliderWindowOnClicked, NULL);
 	uiWindowSetChild(w, uiControl(b));
 
 	/* Interestingly enough this works AND prevents the crash from happening
