@@ -58,6 +58,8 @@ const char *uiInit(uiInitOptions *o)
 	const char *ce;
 	HICON hDefaultIcon;
 	HCURSOR hDefaultCursor;
+	HCURSOR hCursorResizeNS;
+	HCURSOR hCursorResizeWE;
 	NONCLIENTMETRICSW ncm;
 	INITCOMMONCONTROLSEX icc;
 	HRESULT hr;
@@ -79,6 +81,14 @@ const char *uiInit(uiInitOptions *o)
 	hDefaultCursor = LoadCursorW(NULL, IDC_ARROW);
 	if (hDefaultCursor == NULL)
 		return ieLastErr("loading default cursor for window classes");
+
+	hCursorResizeNS = LoadCursorW(NULL, IDC_SIZENS);
+	if (hCursorResizeNS == NULL)
+		return ieLastErr("loading cursor IDC_SIZENS");
+
+	hCursorResizeWE = LoadCursorW(NULL, IDC_SIZEWE);
+	if (hDefaultCursor == NULL)
+		return ieLastErr("loading cursor IDC_SIZEWE");
 
 	ce = initUtilWindow(hDefaultIcon, hDefaultCursor);
 	if (ce != NULL)
@@ -131,6 +141,12 @@ const char *uiInit(uiInitOptions *o)
 	if (registerD2DScratchClass(hDefaultIcon, hDefaultCursor) == 0)
 		return ieLastErr("initializing D2D scratch window class");
 
+	if (registerSplitHClass(hDefaultIcon, hCursorResizeWE) == 0)
+		return ieLastErr("registering uiSplit window class");
+
+//	if (registerSplitVClass(hDefaultIcon, hCursorResizeNS) == 0)
+//		return ieLastErr("registering uiSplit window class");
+
 	hr = uiprivInitImage();
 	if (hr != S_OK)
 		return ieHRESULT("initializing WIC", hr);
@@ -146,6 +162,7 @@ void uiUninit(void)
 	unregisterD2DScratchClass();
 	unregisterMessageFilter();
 	unregisterArea();
+	unregisterSplitHClass();
 	uiprivUninitDrawText();
 	uninitDraw();
 	CoUninitialize();

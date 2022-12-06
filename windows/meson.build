@@ -50,6 +50,7 @@ libui_sources += [
 	'windows/sizing.cpp',
 	'windows/slider.cpp',
 	'windows/spinbox.cpp',
+	'windows/split.cpp',
 	'windows/stddialogs.cpp',
 	'windows/tab.cpp',
 	'windows/table.cpp',

@@ -84,6 +84,9 @@ ATOM initContainer(HICON hDefaultIcon, HCURSOR hDefaultCursor)
 	wc.hInstance = hInstance;
 	wc.hIcon = hDefaultIcon;
 	wc.hCursor = hDefaultCursor;
+	// TODO add 2 new windows classes for this?
+	wc.hCursor = LoadCursorW(NULL, IDC_SIZENS);
+	wc.hCursor = LoadCursorW(NULL, IDC_SIZEWE);
 	wc.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
 	wc.cbWndExtra = sizeof (void *);
 	return RegisterClassW(&wc);
