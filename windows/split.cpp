@@ -1,8 +1,14 @@
 #include "uipriv_windows.hpp"
 
+/*
+ * TODO block cursor:
+ * https://forums.codeguru.com/showthread.php?303994-How-to-disable-mouse-move-event
+ */
+
 struct splitChild {
 	uiControl *c;
 	int stretchy;
+	int collapse;
 	int width;
 	int height;
 };
@@ -10,19 +16,20 @@ struct splitChild {
 struct uiSplit {
 	uiWindowsControl c;
 	HWND hwnd;
-	HCURSOR hCursor;
 	std::vector<struct splitChild> *controls;
 	int vertical;
 	int padded;
 	int moving;
-	int splitX;
-	int splitY;
+	float ratio;
+	int mouseOffset;
 };
 
 static void onResize(uiWindowsControl *c);
 
 /********************* uiSplit WNDCLASS *********************/
 
+// Modified containerWndProc
+// TODO add a mechanism to mainly reuse containerWndProc
 static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT r;
@@ -31,14 +38,11 @@ static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	CREATESTRUCTW *cs = (CREATESTRUCTW *) lParam;
 	WINDOWPOS *wp = (WINDOWPOS *) lParam;
 	MINMAXINFO *mmi = (MINMAXINFO *) lParam;
-	struct containerInit *init;
-	uiWindowsControl *c;
 	int minwid, minht;
 	LRESULT lResult;
 	uiSplit *s;
 
 	s = (uiSplit *) GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-	printf("uMsg %d\n", uMsg);
 	switch (uMsg) {
 	case WM_CREATE:
 		if (s == NULL) {
@@ -59,59 +63,41 @@ static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 		mmi->ptMinTrackSize.y = minht;
 		return lResult;
 	case WM_LBUTTONDOWN:
-		s->moving = 1;
-		SetCapture(hwnd);
+		{
+			int x = LOWORD(lParam);
+			int y = HIWORD(lParam);
+			GetClientRect(hwnd, &r);
+			if (s->vertical)
+				s->mouseOffset = y - s->ratio * r.bottom;
+			else
+				s->mouseOffset = x - s->ratio * r.right;
+
+			s->moving = 1;
+			SetCapture(hwnd);
+		}
 		return 0;
 	case WM_LBUTTONUP:
 		ReleaseCapture();
 		s->moving = 0;
 		return 0;
-
 	case WM_MOUSEMOVE:
-		if (s->moving && wParam == MK_LBUTTON)
+		if (wParam == MK_LBUTTON && s->moving)
 		{
-			RECT rect;
-			GetClientRect(hwnd, &rect);
-			/*
-			if (HIWORD(lParam) > rect.bottom)
-				return 0;
-
-			dwSplitterPos = HIWORD(lParam);
-			SendMessage(hWnd, WM_SIZE, 0, MAKELPARAM(rect.right, rect.bottom));
-			*/
 			int x = LOWORD(lParam);
 			int y = HIWORD(lParam);
-			if (x > rect.right || y > rect.bottom)
+
+			GetClientRect(hwnd, &r);
+			if (x > r.right || y > r.bottom)
 				return 0;
-			s->splitX = x;
-			s->splitY = y;
-			printf("Mouse pos: %d %d\n", x, y);
+
+			if (s->vertical)
+				s->ratio = 1.0 * (y - s->mouseOffset) / r.bottom;
+			else
+				s->ratio = 1.0 * (x - s->mouseOffset) / r.right;
+
+			onResize(uiWindowsControl(s));
 		}
 		return 0;
-	}
-	/*
-	if (handleParentMessages(hwnd, uMsg, wParam, lParam, &lResult) != FALSE)
-		return lResult;
-	switch (uMsg) {
-	case WM_CREATE:
-		init = (struct containerInit *) (cs->lpCreateParams);
-		SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) (init->onResize));
-		SetWindowLongPtrW(hwnd, 0, (LONG_PTR) (init->c));
-		break;		// defer to DefWindowProc()
-	case WM_WINDOWPOSCHANGED:
-		if ((wp->flags & SWP_NOSIZE) != 0)
-			break;	// defer to DefWindowProc();
-		onResize = (void (*)(uiWindowsControl *)) GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-		c = (uiWindowsControl *) GetWindowLongPtrW(hwnd, 0);
-		(*(onResize))(c);
-		return 0;
-	case WM_GETMINMAXINFO:
-		lResult = DefWindowProcW(hwnd, uMsg, wParam, lParam);
-		c = (uiWindowsControl *) GetWindowLongPtrW(hwnd, 0);
-		uiWindowsControlMinimumSize(c, &minwid, &minht);
-		mmi->ptMinTrackSize.x = minwid;
-		mmi->ptMinTrackSize.y = minht;
-		return lResult;
 	case WM_PAINT:
 		dc = BeginPaint(hwnd, &ps);
 		if (dc == NULL) {
@@ -133,7 +119,6 @@ static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 		// we draw the whole update area anyway
 		return 1;
 	}
-	*/
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
@@ -166,12 +151,8 @@ static void splitPadding(uiSplit *b, int *xpadding, int *ypadding)
 {
 	uiWindowsSizing sizing;
 
-	*xpadding = 0;
-	*ypadding = 0;
-	if (b->padded) {
-		uiWindowsGetSizing(b->hwnd, &sizing);
-		uiWindowsSizingStandardPadding(&sizing, xpadding, ypadding);
-	}
+	uiWindowsGetSizing(b->hwnd, &sizing);
+	uiWindowsSizingStandardPadding(&sizing, xpadding, ypadding);
 }
 
 static void splitRelayout(uiSplit *b)
@@ -234,6 +215,7 @@ static void splitRelayout(uiSplit *b)
 	}
 
 	// 3) now get the size of stretchy controls
+	/*
 	if (nStretchy != 0) {
 		if (b->vertical)
 			stretchyht /= nStretchy;
@@ -248,6 +230,14 @@ static void splitRelayout(uiSplit *b)
 			}
 		}
 	}
+	*/
+	if (b->controls->size() != 2)
+		return;
+	b->controls->at(0).height = stretchyht;
+	b->controls->at(1).height = stretchyht;
+
+	b->controls->at(0).width = stretchywid * b->ratio;
+	b->controls->at(1).width = stretchywid - b->controls->at(0).width;
 
 	// 4) now we can position controls
 	// first, make relative to the top-left corner of the container
@@ -426,17 +416,6 @@ int uiSplitNumChildren(uiSplit *b)
 	return (int) b->controls->size();
 }
 
-int uiSplitPadded(uiSplit *b)
-{
-	return b->padded;
-}
-
-void uiSplitSetPadded(uiSplit *b, int padded)
-{
-	b->padded = padded;
-	uiWindowsControlMinimumSizeChanged(uiWindowsControl(b));
-}
-
 static void onResize(uiWindowsControl *c)
 {
 	splitRelayout(uiSplit(c));
@@ -452,11 +431,8 @@ static uiSplit *uiNewSplit(int vertical)
 
 	s->vertical = vertical;
 	s->controls = new std::vector<struct splitChild>;
-
-	if (s->vertical)
-		s->hCursor = LoadCursorW(NULL, IDC_SIZENS);
-	else
-		s->hCursor = LoadCursorW(NULL, IDC_SIZEWE);
+	s->moving = 0;
+	s->ratio = 0.5;
 
 	// s->hwnd is assigned in splitWndProc()
 	uiWindowsEnsureCreateControlHWND(0,
@@ -464,8 +440,6 @@ static uiSplit *uiNewSplit(int vertical)
 			0,
 			hInstance, s,
 			FALSE);
-
-	uiSplitSetPadded(s, 1);
 
 	return s;
 }
