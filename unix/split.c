@@ -73,6 +73,15 @@ static uiSplit *uiNewSplit(GtkOrientation orientation)
 	s->container = GTK_CONTAINER(s->widget);
 	s->split = GTK_PANED(s->widget);
 
+
+	if (orientation == GTK_ORIENTATION_VERTICAL) {
+		gtk_widget_set_vexpand(s->widget, TRUE);
+		gtk_widget_set_valign(s->widget, GTK_ALIGN_FILL);
+	} else {
+		gtk_widget_set_hexpand(s->widget, TRUE);
+		gtk_widget_set_halign(s->widget, GTK_ALIGN_FILL);
+	}
+
 	s->controls = g_array_new(FALSE, TRUE, sizeof(uiControl*));
 
 	return s;
