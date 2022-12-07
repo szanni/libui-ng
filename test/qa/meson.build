@@ -2,6 +2,7 @@ libui_qa_sources = [
 	'qa.c',
 	'main.c',
 	'label.c',
+	'split.c',
 ]
 
 if libui_OS == 'windows'

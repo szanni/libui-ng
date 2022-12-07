@@ -20,8 +20,17 @@ struct controlTestCase labelTestCases[] = {
 	{NULL, NULL, NULL}
 };
 
+struct controlTestCase splitTestCases[] = {
+	QA_TEST("1. Vertical One Child", splitVOne),
+	QA_TEST("2. Horizontal One Child", splitHOne),
+	QA_TEST("3. Vertical", splitV),
+	QA_TEST("3. Horizontal", splitH),
+	{NULL, NULL, NULL}
+};
+
 struct controlTestGroup controlTestGroups[] = {
 	{"uiLabel", labelTestCases},
+	{"uiSplit", splitTestCases},
 };
 
 uiControl* qaGuide()
