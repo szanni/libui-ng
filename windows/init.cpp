@@ -87,7 +87,7 @@ const char *uiInit(uiInitOptions *o)
 		return ieLastErr("loading cursor IDC_SIZENS");
 
 	hCursorResizeWE = LoadCursorW(NULL, IDC_SIZEWE);
-	if (hDefaultCursor == NULL)
+	if (hCursorResizeWE == NULL)
 		return ieLastErr("loading cursor IDC_SIZEWE");
 
 	ce = initUtilWindow(hDefaultIcon, hDefaultCursor);
@@ -144,8 +144,8 @@ const char *uiInit(uiInitOptions *o)
 	if (registerSplitHClass(hDefaultIcon, hCursorResizeWE) == 0)
 		return ieLastErr("registering uiSplit window class");
 
-//	if (registerSplitVClass(hDefaultIcon, hCursorResizeNS) == 0)
-//		return ieLastErr("registering uiSplit window class");
+	if (registerSplitVClass(hDefaultIcon, hCursorResizeNS) == 0)
+		return ieLastErr("registering uiSplit window class");
 
 	hr = uiprivInitImage();
 	if (hr != S_OK)
@@ -163,6 +163,7 @@ void uiUninit(void)
 	unregisterMessageFilter();
 	unregisterArea();
 	unregisterSplitHClass();
+	unregisterSplitVClass();
 	uiprivUninitDrawText();
 	uninitDraw();
 	CoUninitialize();

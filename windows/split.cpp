@@ -122,8 +122,6 @@ static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-
-
 ATOM registerSplitHClass(HICON hDefaultIcon, HCURSOR hDefaultCursor)
 {
 	WNDCLASSW wc;
@@ -139,9 +137,30 @@ ATOM registerSplitHClass(HICON hDefaultIcon, HCURSOR hDefaultCursor)
 	return RegisterClassW(&wc);
 }
 
+ATOM registerSplitVClass(HICON hDefaultIcon, HCURSOR hDefaultCursor)
+{
+	WNDCLASSW wc;
+
+	ZeroMemory(&wc, sizeof (WNDCLASSW));
+	wc.lpszClassName = splitVClass;
+	wc.lpfnWndProc = splitWndProc;
+	wc.hInstance = hInstance;
+	wc.hIcon = hDefaultIcon;
+	wc.hCursor = hDefaultCursor;
+	wc.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
+	wc.cbWndExtra = sizeof (void *);
+	return RegisterClassW(&wc);
+}
+
 void unregisterSplitHClass(void)
 {
 	if (UnregisterClassW(splitHClass, hInstance) == 0)
+		logLastError(L"error unregistering uiSplit window class");
+}
+
+void unregisterSplitVClass(void)
+{
+	if (UnregisterClassW(splitVClass, hInstance) == 0)
 		logLastError(L"error unregistering uiSplit window class");
 }
 
@@ -189,6 +208,9 @@ static void splitRelayout(uiSplit *b)
 		nVisible++;
 		if (bc.stretchy) {
 			nStretchy++;
+			uiWindowsControlMinimumSize(uiWindowsControl(bc.c), &minimumWidth, &minimumHeight);
+			bc.height = minimumHeight;
+			bc.width = minimumWidth;
 			continue;
 		}
 		uiWindowsControlMinimumSize(uiWindowsControl(bc.c), &minimumWidth, &minimumHeight);
@@ -231,13 +253,20 @@ static void splitRelayout(uiSplit *b)
 		}
 	}
 	*/
-	if (b->controls->size() != 2)
-		return;
-	b->controls->at(0).height = stretchyht;
-	b->controls->at(1).height = stretchyht;
-
-	b->controls->at(0).width = stretchywid * b->ratio;
-	b->controls->at(1).width = stretchywid - b->controls->at(0).width;
+	if (b->controls->size() == 1) {
+		if (b->vertical)
+			b->controls->at(0).height = stretchyht;
+		else
+			b->controls->at(0).width = stretchywid;
+	} else {
+		if (b->vertical) {
+			b->controls->at(0).height = stretchyht * b->ratio;
+			b->controls->at(1).height = stretchyht - b->controls->at(0).height;
+		} else {
+			b->controls->at(0).width = stretchywid * b->ratio;
+			b->controls->at(1).width = stretchywid - b->controls->at(0).width;
+		}
+	}
 
 	// 4) now we can position controls
 	// first, make relative to the top-left corner of the container
@@ -424,6 +453,7 @@ static void onResize(uiWindowsControl *c)
 static uiSplit *uiNewSplit(int vertical)
 {
 	uiSplit *s;
+	const wchar_t *sClass;
 
 	uiWindowsNewControl(uiSplit, s);
 
@@ -434,9 +464,14 @@ static uiSplit *uiNewSplit(int vertical)
 	s->moving = 0;
 	s->ratio = 0.5;
 
+	if (vertical)
+		sClass = splitVClass;
+	else
+		sClass = splitHClass;
+
 	// s->hwnd is assigned in splitWndProc()
 	uiWindowsEnsureCreateControlHWND(0,
-			splitHClass, L"",
+			sClass, L"",
 			0,
 			hInstance, s,
 			FALSE);

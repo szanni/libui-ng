@@ -119,8 +119,8 @@ extern HWND newD2DScratch(HWND parent, RECT *rect, HMENU controlID, SUBCLASSPROC
 
 // split.cpp
 #define splitVClass L"libui_splitVClass"
-//extern ATOM registerSplitVClass(HICON, HCURSOR);
-//extern void unregisterSplitVClass(void);
+extern ATOM registerSplitVClass(HICON, HCURSOR);
+extern void unregisterSplitVClass(void);
 #define splitHClass L"libui_splitHClass"
 extern ATOM registerSplitHClass(HICON, HCURSOR);
 extern void unregisterSplitHClass(void);
