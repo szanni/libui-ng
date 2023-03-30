@@ -57,6 +57,7 @@ int main(void)
 	int failedComponents = 0;
 	struct unitTest unitTests[] = {
 		{ initRunUnitTests },
+		{ windowRunUnitTests },
 		{ menuRunUnitTests },
 		{ sliderRunUnitTests },
 		{ spinboxRunUnitTests },

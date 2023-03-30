@@ -443,7 +443,7 @@ _UI_EXTERN int uiWindowFocused(uiWindow *w);
  * Returns whether or not the window is borderless.
  *
  * @param w uiWindow instance.
- * @returns `TRUE` if window is borderless, `FALSE` otherwise. [Default: `TODO`]
+ * @returns `TRUE` if window is borderless, `FALSE` otherwise. [Default: `FALSE`]
  * @memberof uiWindow
  */
 _UI_EXTERN int uiWindowBorderless(uiWindow *w);
@@ -471,7 +471,7 @@ _UI_EXTERN void uiWindowSetChild(uiWindow *w, uiControl *child);
  * Returns whether or not the window has a margin.
  *
  * @param w uiWindow instance.
- * @returns `TRUE` if window has a margin, `FALSE` otherwise. [Default: `TODO`]
+ * @returns `TRUE` if window has a margin, `FALSE` otherwise. [Default: `FALSE`]
  * @memberof uiWindow
  */
 _UI_EXTERN int uiWindowMargined(uiWindow *w);
