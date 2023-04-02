@@ -293,24 +293,15 @@ static CGColorRef mkcolor(double r, double g, double b, double a)
 
 static void addBackgroundAttribute(struct foreachParams *p, size_t start, size_t end, double r, double g, double b, double a)
 {
-	uiprivDrawTextBackgroundParams *dtb;
-
 	// TODO make sure this works properly with line paragraph spacings (after figuring out what that means, of course)
-	if (uiprivFUTURE_kCTBackgroundColorAttributeName != NULL) {
-		CGColorRef color;
-		CFRange range;
+	CGColorRef color;
+	CFRange range;
 
-		color = mkcolor(r, g, b, a);
-		range.location = start;
-		range.length = end - start;
-		CFAttributedStringSetAttribute(p->mas, range, *uiprivFUTURE_kCTBackgroundColorAttributeName, color);
-		CFRelease(color);
-		return;
-	}
-
-	dtb = [[uiprivDrawTextBackgroundParams alloc] initWithStart:start end:end r:r g:g b:b a:a];
-	[p->backgroundParams addObject:dtb];
-	[dtb release];
+	color = mkcolor(r, g, b, a);
+	range.location = start;
+	range.length = end - start;
+	CFAttributedStringSetAttribute(p->mas, range, kCTBackgroundColorAttributeName, color);
+	CFRelease(color);
 }
 
 static uiForEach processAttribute(const uiAttributedString *s, const uiAttribute *attr, size_t start, size_t end, void *data)
