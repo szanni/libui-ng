@@ -20,15 +20,6 @@ void uiprivLoadFutures(void)
 // wrappers for methods that exist in the future that we can check for with respondsToSelector:
 // keep them in one place for convenience
 
-// apparently only added in 10.9; we need 10.8
-void uiprivFUTURE_NSLayoutConstraint_setIdentifier(NSLayoutConstraint *constraint, NSString *identifier)
-{
-	id cid = (id) constraint;
-
-	if ([constraint respondsToSelector:@selector(setIdentifier:)])
-		[cid setIdentifier:identifier];
-}
-
 // added in 10.11; we need 10.8
 // return whether this was done because we recreate its effects if not (see winmoveresize.m)
 BOOL uiprivFUTURE_NSWindow_performWindowDragWithEvent(NSWindow *w, NSEvent *initialEvent)
