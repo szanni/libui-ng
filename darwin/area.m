@@ -159,7 +159,6 @@ struct uiArea {
 	me.Up = 0;
 	me.Count = 0;
 
-if (@available(macOS 10.12, *)) {
 	switch ([e type]) {
 	case NSEventTypeLeftMouseDown:
 	case NSEventTypeRightMouseDown:
@@ -179,20 +178,6 @@ if (@available(macOS 10.12, *)) {
 		buttonNumber = 0;
 		break;
 	}
-} else {
-	NSEventType type = [e type];
-	if (type == NSEventTypeLeftMouseDown || type == NSEventTypeRightMouseDown || type == NSEventTypeOtherMouseDown) {
-		me.Down = buttonNumber;
-		me.Count = [e clickCount];
-	}
-	else if (type == NSEventTypeLeftMouseUp || type == NSEventTypeRightMouseUp || type == NSEventTypeOtherMouseUp) {
-		me.Up = buttonNumber;
-	}
-	else if (type == NSEventTypeLeftMouseDragged || type == NSEventTypeRightMouseDragged || type == NSEventTypeOtherMouseDragged) {
-		// we include the button that triggered the dragged event in the Held fields
-		buttonNumber = 0;
-	}
-}
 
 	me.Modifiers = [self parseModifiers:e];
 
@@ -391,20 +376,11 @@ int uiprivSendAreaEvents(NSEvent *e)
 	if (![focused isKindOfClass:[areaView class]])
 		return 0;
 	view = (areaView *) focused;
-if (@available(macOS 10.12, *)) {
 	switch (type) {
 		case NSEventTypeKeyDown:      return [view doKeyDown:e];
 		case NSEventTypeKeyUp:        return [view doKeyUp:e];
 		case NSEventTypeFlagsChanged: return [view doFlagsChanged:e];
 	}
-} else {
-	if (type == NSEventTypeKeyDown)
-		return [view doKeyDown:e];
-	if (type == NSEventTypeKeyUp)
-		return [view doKeyUp:e];
-	if (type == NSEventTypeFlagsChanged)
-		return [view doFlagsChanged:e];
-}
 	return 0;
 }
 
