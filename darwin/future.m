@@ -20,15 +20,3 @@ void uiprivLoadFutures(void)
 // wrappers for methods that exist in the future that we can check for with respondsToSelector:
 // keep them in one place for convenience
 
-// added in 10.11; we need 10.8
-// return whether this was done because we recreate its effects if not (see winmoveresize.m)
-BOOL uiprivFUTURE_NSWindow_performWindowDragWithEvent(NSWindow *w, NSEvent *initialEvent)
-{
-	id cw = (id) w;
-
-	if ([w respondsToSelector:@selector(performWindowDragWithEvent:)]) {
-		[cw performWindowDragWithEvent:initialEvent];
-		return YES;
-	}
-	return NO;
-}

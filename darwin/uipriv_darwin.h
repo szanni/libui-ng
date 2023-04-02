@@ -161,7 +161,6 @@ extern void uiprivDoManualResize(NSWindow *w, NSEvent *initialEvent, uiWindowRes
 
 // future.m
 extern void uiprivLoadFutures(void);
-extern BOOL uiprivFUTURE_NSWindow_performWindowDragWithEvent(NSWindow *w, NSEvent *initialEvent);
 
 // undocumented.m
 extern CFStringRef uiprivUNDOC_kCTFontPreferredSubFamilyNameKey;

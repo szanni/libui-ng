@@ -45,36 +45,7 @@ void onMoveDrag(struct onMoveDragParams *p, NSEvent *e)
 
 void uiprivDoManualMove(NSWindow *w, NSEvent *initialEvent)
 {
-	__block struct onMoveDragParams mdp;
-	uiprivNextEventArgs nea;
-	BOOL (^handleEvent)(NSEvent *e);
-	__block BOOL done;
-
-	// 10.11 gives us a method to handle this for us
-	// use it if available; this lets us use the real OS dragging code, which means we can take advantage of OS features like Spaces
-	if (uiprivFUTURE_NSWindow_performWindowDragWithEvent(w, initialEvent))
-		return;
-
-	mdp.w = w;
-	mdp.initialFrame = [mdp.w frame];
-	mdp.initialPoint = makeIndependent([initialEvent locationInWindow], mdp.w);
-
-	nea.mask = NSEventMaskLeftMouseDragged | NSEventTypeLeftMouseUp;
-	nea.duration = [NSDate distantFuture];
-	nea.mode = NSEventTrackingRunLoopMode;		// nextEventMatchingMask: docs suggest using this for manual mouse tracking
-	nea.dequeue = YES;
-	handleEvent = ^(NSEvent *e) {
-		if ([e type] == NSEventTypeLeftMouseUp) {
-			done = YES;
-			return YES;	// do not send
-		}
-		onMoveDrag(&mdp, e);
-		return YES;		// do not send
-	};
-	done = NO;
-	while (uiprivMainStep(&nea, handleEvent))
-		if (done)
-			break;
+	[w performWindowDragWithEvent:initialEvent];
 }
 
 // see http://stackoverflow.com/a/40352996/3408572
