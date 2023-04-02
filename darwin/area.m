@@ -55,7 +55,7 @@ struct uiArea {
 	CGContextRef c;
 	uiAreaDrawParams dp;
 
-	c = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+	c = (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
 	// see draw.m under text for why we need the height
 	dp.Context = uiprivDrawNewContext(c, [self bounds].size.height);
 
