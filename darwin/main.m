@@ -122,7 +122,6 @@ const char *uiInit(uiInitOptions *o)
 		[uiprivNSApp() setDelegate:delegate];
 
 		uiprivInitAlloc();
-		uiprivLoadFutures();
 		uiprivLoadUndocumented();
 
 		// always do this so we always have an application menu

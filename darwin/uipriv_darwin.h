@@ -159,9 +159,6 @@ extern NSImage *uiprivImageNSImage(uiImage *);
 extern void uiprivDoManualMove(NSWindow *w, NSEvent *initialEvent);
 extern void uiprivDoManualResize(NSWindow *w, NSEvent *initialEvent, uiWindowResizeEdge edge);
 
-// future.m
-extern void uiprivLoadFutures(void);
-
 // undocumented.m
 extern CFStringRef uiprivUNDOC_kCTFontPreferredSubFamilyNameKey;
 extern CFStringRef uiprivUNDOC_kCTFontPreferredFamilyNameKey;
