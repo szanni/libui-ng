@@ -59,12 +59,12 @@ void uiprivDoManualMove(NSWindow *w, NSEvent *initialEvent)
 	mdp.initialFrame = [mdp.w frame];
 	mdp.initialPoint = makeIndependent([initialEvent locationInWindow], mdp.w);
 
-	nea.mask = NSLeftMouseDraggedMask | NSLeftMouseUpMask;
+	nea.mask = NSEventMaskLeftMouseDragged | NSEventTypeLeftMouseUp;
 	nea.duration = [NSDate distantFuture];
 	nea.mode = NSEventTrackingRunLoopMode;		// nextEventMatchingMask: docs suggest using this for manual mouse tracking
 	nea.dequeue = YES;
 	handleEvent = ^(NSEvent *e) {
-		if ([e type] == NSLeftMouseUp) {
+		if ([e type] == NSEventTypeLeftMouseUp) {
 			done = YES;
 			return YES;	// do not send
 		}
@@ -234,12 +234,12 @@ void uiprivDoManualResize(NSWindow *w, NSEvent *initialEvent, uiWindowResizeEdge
 	// TODO what happens if these change during the loop?
 	minMaxAutoLayoutSizes(rdp.w, &(rdp.min), &(rdp.max));
 
-	nea.mask = NSLeftMouseDraggedMask | NSLeftMouseUpMask;
+	nea.mask = NSEventMaskLeftMouseDragged | NSEventTypeLeftMouseUp;
 	nea.duration = [NSDate distantFuture];
 	nea.mode = NSEventTrackingRunLoopMode;		// nextEventMatchingMask: docs suggest using this for manual mouse tracking
 	nea.dequeue = YES;
 	handleEvent = ^(NSEvent *e) {
-		if ([e type] == NSLeftMouseUp) {
+		if ([e type] == NSEventTypeLeftMouseUp) {
 			done = YES;
 			return YES;	// do not send
 		}

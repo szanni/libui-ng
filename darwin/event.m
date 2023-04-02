@@ -15,11 +15,11 @@ BOOL uiprivSendKeyboardEditEvents(uiprivApplicationClass *app, NSEvent *e)
 	NSString *chars;
 	NSEventModifierFlags flags;
 
-	if ([e type] != NSKeyDown)
+	if ([e type] != NSEventTypeKeyDown)
 		return FALSE;
 
-	flags = [e modifierFlags] & NSDeviceIndependentModifierFlagsMask;
-	if (flags != NSCommandKeyMask && flags != (NSCommandKeyMask | NSShiftKeyMask))
+	flags = [e modifierFlags] & NSEventModifierFlagDeviceIndependentFlagsMask;
+	if (flags != NSEventModifierFlagCommand && flags != (NSEventModifierFlagCommand | NSEventModifierFlagShift))
 		return FALSE;
 
 	chars = [e charactersIgnoringModifiers];

@@ -69,9 +69,9 @@ uiProgressBar *uiNewProgressBar(void)
 	uiDarwinNewControl(uiProgressBar, p);
 
 	p->pi = [[intrinsicWidthNSProgressIndicator alloc] initWithFrame:NSZeroRect];
-	[p->pi setControlSize:NSRegularControlSize];
+	[p->pi setControlSize:NSControlSizeRegular];
 	[p->pi setBezeled:YES];
-	[p->pi setStyle:NSProgressIndicatorBarStyle];
+	[p->pi setStyle:NSProgressIndicatorStyleBar];
 	[p->pi setIndeterminate:NO];
 
 	return p;

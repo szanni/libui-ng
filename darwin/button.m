@@ -23,9 +23,9 @@ struct uiButton {
 	if (self) {
 		self->button = b;
 
-		[self setButtonType:NSMomentaryPushInButton];
+		[self setButtonType:NSButtonTypeMomentaryPushIn];
 		[self setBordered:YES];
-		[self setBezelStyle:NSRoundedBezelStyle];
+		[self setBezelStyle:NSBezelStyleRounded];
 
 		[self setTarget:self];
 		[self setAction:@selector(onClicked:)];
@@ -81,7 +81,7 @@ uiButton *uiNewButton(const char *text)
 
 	b->button = [[uiprivButton alloc] initWithFrame:NSZeroRect uiButton:b];
 	uiButtonSetText(b, text);
-	uiDarwinSetControlFont(b->button, NSRegularControlSize);
+	uiDarwinSetControlFont(b->button, NSControlSizeRegular);
 
 	uiButtonOnClicked(b, defaultOnClicked, NULL);
 

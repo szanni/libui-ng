@@ -32,7 +32,7 @@ uiTableColumn *uiTableAppendColumn(uiTable *t, const char *name)
 	// 10.10 adds -[NSTableColumn setTitle:]; before then we have to do this
 	[[c->c headerCell] setStringValue:uiprivToNSString(name)];
 	// TODO is this sufficient?
-	[[c->c headerCell] setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]]];
+	[[c->c headerCell] setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]]];
 	c->parts = [NSMutableArray new];
 	[t->tv addTableColumn:c->c];
 	return c;

@@ -280,7 +280,7 @@ uiTab *uiNewTab(void)
 
 	t->tabview = [[NSTabView alloc] initWithFrame:NSZeroRect];
 	// also good for NSTabView (same selector and everything)
-	uiDarwinSetControlFont((NSControl *) (t->tabview), NSRegularControlSize);
+	uiDarwinSetControlFont((NSControl *) (t->tabview), NSControlSizeRegular);
 
 	t->pages = [NSMutableArray new];
 

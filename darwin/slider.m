@@ -34,8 +34,8 @@ static void _uiSliderUpdateToolTip(uiSlider *s);
 
 		[self setAllowsTickMarkValuesOnly:NO];
 		[self setNumberOfTickMarks:0];
-		[self setTickMarkPosition:NSTickMarkAbove];
-		[[self cell] setSliderType:NSLinearSlider];
+		[self setTickMarkPosition:NSTickMarkPositionAbove];
+		[[self cell] setSliderType:NSSliderTypeLinear];
 
 		[self setTarget:self];
 		[self setAction:@selector(onChanged:)];
@@ -48,7 +48,7 @@ static void _uiSliderUpdateToolTip(uiSlider *s);
 	uiSlider *s = self->slider;
 
 	NSEvent *currentEvent = [[sender window] currentEvent];
-	if([currentEvent type] == NSLeftMouseUp) {
+	if([currentEvent type] == NSEventTypeLeftMouseUp) {
 		(*(s->onReleased))(s, s->onReleasedData);
 	} else {
 		(*(s->onChanged))(s, s->onChangedData);

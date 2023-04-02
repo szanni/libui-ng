@@ -23,7 +23,7 @@ struct uiCheckbox {
 	if (self) {
 		self->checkbox = c;
 
-		[self setButtonType:NSSwitchButton];
+		[self setButtonType:NSButtonTypeSwitch];
 		[self setBordered:NO];
 		// doesn't seem to have an associated bezel style
 		[self setTransparent:NO];
@@ -71,14 +71,14 @@ void uiCheckboxOnToggled(uiCheckbox *c, void (*f)(uiCheckbox *, void *), void *d
 
 int uiCheckboxChecked(uiCheckbox *c)
 {
-	return [c->button state] == NSOnState;
+	return [c->button state] == NSControlStateValueOn;
 }
 
 void uiCheckboxSetChecked(uiCheckbox *c, int checked)
 {
 	NSInteger state;
 
-	state = (checked) ? NSOnState : NSOffState;
+	state = (checked) ? NSControlStateValueOn : NSControlStateValueOff;
 	[c->button setState:state];
 }
 
@@ -95,7 +95,7 @@ uiCheckbox *uiNewCheckbox(const char *text)
 
 	c->button = [[uiprivCheckbox alloc] initWithFrame:NSZeroRect uiCheckbox:c];
 	uiCheckboxSetText(c, text);
-	uiDarwinSetControlFont(c->button, NSRegularControlSize);
+	uiDarwinSetControlFont(c->button, NSControlSizeRegular);
 
 	uiCheckboxOnToggled(c, defaultOnToggled, NULL);
 
