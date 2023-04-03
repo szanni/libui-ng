@@ -141,9 +141,7 @@ static uiMultilineEntry *finishMultilineEntry(BOOL hscroll)
 	[e->tv setUsesFontPanel:NO];
 	[e->tv setRulerVisible:NO];
 	// we'll handle font last
-	// while setAlignment: has been around since 10.0, the named constant "NSTextAlignmentNatural" seems to have only been introduced in 10.11
-#define ourNSTextAlignmentNatural 4
-	[e->tv setAlignment:ourNSTextAlignmentNatural];
+	[e->tv setAlignment:NSTextAlignmentNatural];
 	// textColor is set to nil, just keep the dfault
 	[e->tv setBaseWritingDirection:NSWritingDirectionNatural];
 	[e->tv setHorizontallyResizable:NO];
