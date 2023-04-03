@@ -18,6 +18,9 @@ struct uiWindow {
 	void *onFocusChangedData;
 	void (*onPositionChanged)(uiWindow*, void *);
 	void *onPositionChangedData;
+	void (*onDrop)(uiWindow*, uiDragDropData *, void *);
+	void *onDropData;
+	int dropMask;
 	BOOL suppressPositionChanged;
 	int fullscreen;
 	int borderless;
@@ -111,6 +114,59 @@ struct uiWindow {
 
 	w->focused = 0;
 	(*(w->onFocusChanged))(w, w->onFocusChangedData);
+}
+
+- (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender
+{
+	uiWindow *w = self->window;
+	NSPasteboard *pboard;
+
+	if (w->dropMask == 0)
+		return NSDragOperationNone;
+
+	pboard  = [sender draggingPasteboard];
+	if (w->dropMask & uiDragDropTypeURLs && [[pboard types] containsObject:NSFilenamesPboardType])
+		return NSDragOperationCopy;
+
+	if (w->dropMask & uiDragDropTypeText && [[pboard types] containsObject:NSStringPboardType])
+		return NSDragOperationCopy;
+
+	return NSDragOperationNone;
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+	uiWindow *w = self->window;
+	uiDragDropData *d;
+	NSPasteboard *pboard;
+
+	if (w->dropMask == 0)
+		return NO;
+
+	d = uiprivNew(uiDragDropData);
+
+	pboard	= [sender draggingPasteboard];
+
+	if ([[pboard types] containsObject:NSFilenamesPboardType]) {
+		NSLog(@"url");
+		int i;
+		NSArray *urls = [pboard propertyListForType:NSFilenamesPboardType];
+
+		d->type = uiDragDropTypeURLs;
+		d->data.URLs.numURLs = [urls count];
+		d->data.URLs.URLs = uiprivAlloc(d->data.URLs.numURLs * sizeof(*d->data.URLs.URLs), "uiDrag    DropData->data.URLs.URLs");
+		for (i = 0; i < d->data.URLs.numURLs; ++i)
+			d->data.URLs.URLs[i] = uiDarwinNSStringToText(urls[i]);
+	}
+	if ([[pboard types] containsObject:NSStringPboardType]) {
+		NSLog(@"text");
+		NSString *text = [pboard stringForType:NSPasteboardTypeString];
+		d->type = uiDragDropTypeText;
+		d->data.text = uiDarwinNSStringToText(text);
+	}
+
+	w->onDrop(w, d, w->onDropData);
+	return YES;
 }
 
 - (uiWindow *)window
@@ -416,6 +472,50 @@ void uiWindowSetResizeable(uiWindow *w, int resizeable)
 	}
 }
 
+void uiFreeDragDropData(uiDragDropData* d)
+{
+	int i;
+
+	switch (d->type) {
+		case uiDragDropTypeText:
+			uiFreeText(d->data.text);
+			break;
+		case uiDragDropTypeURLs:
+			for (i = 0; i < d->data.URLs.numURLs; ++i)
+				uiFreeText(d->data.URLs.URLs[i]);
+			if (d->data.URLs.URLs != NULL)
+				uiprivFree(d->data.URLs.URLs);
+			break;
+	}
+	uiprivFree(d);
+}
+
+int uiWindowDropType(uiWindow* w)
+{
+	return w->dropMask;
+}
+
+void uiWindowSetDropType(uiWindow* w, int mask)
+{
+	w->dropMask = mask;
+
+	NSMutableArray *types = [NSMutableArray new];
+	if (mask & uiDragDropTypeURLs) {
+		[types addObject:NSFilenamesPboardType];
+	}
+	if (mask & uiDragDropTypeURLs) {
+		[types addObject:NSStringPboardType];
+	}
+
+	[w->window registerForDraggedTypes:types];
+}
+
+void uiWindowOnDrop(uiWindow *w, void (*f)(uiWindow *, uiDragDropData *, void *), void *data)
+{
+	w->onDrop = f;
+	w->onDropData = data;
+}
+
 static int defaultOnClosing(uiWindow *w, void *data)
 {
 	return 0;
@@ -427,6 +527,11 @@ static void defaultOnPositionContentSizeChanged(uiWindow *w, void *data)
 }
 
 static void defaultOnFocusChanged(uiWindow *w, void *data)
+{
+	// do nothing
+}
+
+static void defaultOnDrop(uiWindow *w, uiDragDropData *dropData, void *data)
 {
 	// do nothing
 }
@@ -449,6 +554,7 @@ uiWindow *uiNewWindow(const char *title, int width, int height, int hasMenubar)
 	uiWindowOnFocusChanged(w, defaultOnFocusChanged, NULL);
 	uiWindowOnContentSizeChanged(w, defaultOnPositionContentSizeChanged, NULL);
 	uiWindowOnPositionChanged(w, defaultOnPositionContentSizeChanged, NULL);
+	uiWindowOnDrop(w, defaultOnDrop, NULL);
 
 	return w;
 }
