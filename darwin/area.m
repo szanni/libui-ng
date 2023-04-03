@@ -1,9 +1,6 @@
 // 9 september 2015
 #import "uipriv_darwin.h"
 
-// 10.8 fixups
-#define NSEventModifierFlags NSUInteger
-
 @interface areaView : NSView {
 	uiArea *libui_a;
 	NSTrackingArea *libui_ta;
