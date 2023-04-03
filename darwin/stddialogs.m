@@ -70,48 +70,9 @@ char *uiSaveFile(uiWindow *parent)
 	return runSavePanel(windowWindow(parent), s);
 }
 
-// I would use a completion handler for NSAlert as well, but alas NSAlert's are 10.9 and higher only
-@interface libuiCodeModalAlertPanel : NSObject {
-	NSAlert *panel;
-	NSWindow *parent;
-}
-- (id)initWithPanel:(NSAlert *)p parent:(NSWindow *)w;
-- (NSInteger)run;
-- (void)panelEnded:(NSAlert *)panel result:(NSInteger)result data:(void *)data;
-@end
-
-@implementation libuiCodeModalAlertPanel
-
-- (id)initWithPanel:(NSAlert *)p parent:(NSWindow *)w
-{
-	self = [super init];
-	if (self) {
-		self->panel = p;
-		self->parent = w;
-	}
-	return self;
-}
-
-- (NSInteger)run
-{
-	[self->panel beginSheetModalForWindow:self->parent
-		modalDelegate:self
-		didEndSelector:@selector(panelEnded:result:data:)
-		contextInfo:NULL];
-	return [uiprivNSApp() runModalForWindow:[self->panel window]];
-}
-
-- (void)panelEnded:(NSAlert *)panel result:(NSInteger)result data:(void *)data
-{
-	[uiprivNSApp() stopModalWithCode:result];
-}
-
-@end
-
 static void msgbox(NSWindow *parent, const char *title, const char *description, NSAlertStyle style)
 {
 	NSAlert *a;
-	libuiCodeModalAlertPanel *cm;
 
 	a = [NSAlert new];
 	[a setAlertStyle:style];
@@ -120,9 +81,10 @@ static void msgbox(NSWindow *parent, const char *title, const char *description,
 	[a setMessageText:uiprivToNSString(title)];
 	[a setInformativeText:uiprivToNSString(description)];
 	[a addButtonWithTitle:@"OK"];
-	cm = [[libuiCodeModalAlertPanel alloc] initWithPanel:a parent:parent];
-	[cm run];
-	[cm release];
+	[a beginSheetModalForWindow:parent completionHandler:^(NSInteger result) {
+		[uiprivNSApp() stopModalWithCode:result];
+	}];
+	[uiprivNSApp() runModalForWindow:[a window]];
 	[a release];
 }
 
