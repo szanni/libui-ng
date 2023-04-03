@@ -14,11 +14,6 @@
 #define uiprivToNSString(str) [NSString stringWithUTF8String:(str)]
 #define uiprivFromNSString(str) [(str) UTF8String]
 
-// TODO find a better place for this
-#ifndef NSAppKitVersionNumber10_9
-#define NSAppKitVersionNumber10_9 1265
-#endif
-
 // nstextfield.m
 void uiprivNSTextFieldSetStyleLabel(NSTextField *t);
 void uiprivNSTextFieldSetStyleEntry(NSTextField *t);
