@@ -406,3 +406,43 @@ uiControl* windowResizeableBorderless()
 	return uiControl(uiNewLabel("Use controls in the secondary window."));
 }
 
+#include <stdio.h>
+
+void windowOnDropCb(uiWindow *w, uiDragDropData *dropData, void *data)
+{
+	int i;
+
+	if (dropData->type == uiDragDropTypeText) {
+		puts("Dropped text:");
+		puts(dropData->data.text);
+	}
+	if (dropData->type == uiDragDropTypeURLs) {
+		puts("Dropped URLs:");
+		for (i = 0; i < dropData->data.URLs.numURLs; ++i)
+			puts(dropData->data.URLs.URLs[i]);
+	}
+
+	uiFreeDragDropData(dropData);
+}
+
+const char *windowDropGuide() {
+	return
+	"1.\tDrop some files from the file manager.\n"
+	;
+}
+
+uiControl* windowDrop()
+{
+	uiWindow *w;
+	uiLabel *l;
+
+	l = uiNewLabel("Drop");
+	w = windowNew(uiControl(l), windowDropGuide);
+
+	uiWindowSetDropType(w, uiDragDropTypeURLs|uiDragDropTypeText);
+	uiWindowOnDrop(w, windowOnDropCb, NULL);
+	uiWindowDropType(w);
+
+	return uiControl(uiNewLabel("Use controls in the secondary window."));
+}
+

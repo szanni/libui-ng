@@ -27,6 +27,7 @@ QA_DECLARE_TEST(windowResizeable);
 QA_DECLARE_TEST(windowFullscreenBorderless);
 QA_DECLARE_TEST(windowFullscreenResizeable);
 QA_DECLARE_TEST(windowResizeableBorderless);
+QA_DECLARE_TEST(windowDrop);
 
 #endif
 

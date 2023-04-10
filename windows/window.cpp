@@ -28,6 +28,8 @@ struct uiWindow {
 	void (*onPositionChanged)(uiWindow *, void *);
 	void *onPositionChangedData;
 	BOOL changingPosition;
+	void (*onDropFile)(uiWindow *, char *, void *);
+	void *onDropFileData;
 };
 
 // from https://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
@@ -426,6 +428,12 @@ void uiWindowOnClosing(uiWindow *w, int (*f)(uiWindow *, void *), void *data)
 	w->onClosingData = data;
 }
 
+void uiWindowOnDropFile(uiWindow *w, void (*f)(uiWindow *, char *, void *), void *data)
+{
+	w->onDropFile = f;
+	w->onDropFileData = data;
+}
+
 void uiWindowOnFocusChanged(uiWindow *w, void (*f)(uiWindow *, void *), void *data)
 {
 	w->onFocusChanged = f;
@@ -493,6 +501,11 @@ void uiWindowSetResizeable(uiWindow *w, int resizeable)
 	} else {
 		setStyle(w->hwnd, getStyle(w->hwnd) & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX);
 	}
+}
+
+void uiWindowSetDropTarget(uiWindow* w, int drop)
+{
+	DragAcceptFiles(w->hwnd, drop?TRUE:FALSE);
 }
 
 // see http://blogs.msdn.com/b/oldnewthing/archive/2003/09/11/54885.aspx and http://blogs.msdn.com/b/oldnewthing/archive/2003/09/13/54917.aspx
@@ -563,6 +576,7 @@ uiWindow *uiNewWindow(const char *title, int width, int height, int hasMenubar)
 	uiWindowOnContentSizeChanged(w, defaultOnPositionContentSizeChanged, NULL);
 	uiWindowOnFocusChanged(w, defaultOnFocusChanged, NULL);
 	uiWindowOnPositionChanged(w, defaultOnPositionContentSizeChanged, NULL);
+	uiWindowOnDropFile(w, NULL, NULL);
 
 	windows[w] = true;
 	return w;

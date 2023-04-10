@@ -506,6 +506,84 @@ _UI_EXTERN int uiWindowResizeable(uiWindow *w);
  */
 _UI_EXTERN void uiWindowSetResizeable(uiWindow *w, int resizeable);
 
+
+/**
+ * Drag and Drop content types.
+ *
+ * Usable as bit masks.
+ *
+ * @enum uiDragDropType
+ * @ingroup dragndrop
+ */
+_UI_ENUM(uiDragDropType) {
+	uiDragDropTypeText  = 1 << 0, //!< Plain text
+	uiDragDropTypeURLs  = 1 << 1, //!< List of URLs
+};
+
+/**
+ * Holds an array of selected row indices for a table.
+ *
+ * @struct uiDragDropData
+ * @ingroup dragndrop
+ */
+typedef struct uiDragDropData uiDragDropData;
+struct uiDragDropData
+{
+	uiDragDropType type;
+	union {
+		char *text;
+		struct uiDragDropDataURLs {
+			int numURLs;
+			char **URLs;
+		} URLs;
+	} data;
+};
+
+/**
+ * Frees the given uiDragDropData and all its resources.
+ *
+ * @param d uiDragDropData instance.
+ * @memberof uiDragDropData
+ */
+_UI_EXTERN void uiFreeDragDropData(uiDragDropData* d);
+
+/**
+ * Returns what type of drop events the windows support, if any.
+ *
+ * @param w uiWindow instance.
+ * @returns uiDragDropType bit mask, `0` when no drop events are processed.
+ * @memberof uiWindow
+ */
+_UI_EXTERN int uiWindowDropType(uiWindow* w);
+
+/**
+ * Sets what type of drop events the window supports, if any.
+ *
+ * @param w uiWindow instance.
+ * @param mask uiDragDropType bit mask, `0` to not receive any drop events.
+ * @memberof uiWindow
+ */
+_UI_EXTERN void uiWindowSetDropType(uiWindow* w, int mask);
+
+/**
+ * Registers a callback for when the user drops something at the end of a drag & drop operation.
+ *
+ * @param w uiWindow instance.
+ * @param f Callback function.\n
+ *          @p sender Back reference to the instance that triggered the callback.\n
+ *          @p dropType Drop event type.
+ *          @p dropData Drop event data.\n
+ *                      A `NUL` terminated UTF-8 string.\n
+ *                      Ownership is not transferred. Data is only valid for the duration of the callback.
+ *          @p senderData User data registered with the sender instance.
+ * @param data User data to be passed to the callback.
+ *
+ * @note Only one callback can be registered at a time.
+ * @memberof uiWindow
+ */
+_UI_EXTERN void uiWindowOnDrop(uiWindow *w,
+	void (*f)(uiWindow *sender, uiDragDropData *dropData, void *senderData), void *data);
+
 /**
  * Creates a new uiWindow.
  *
@@ -519,7 +597,6 @@ _UI_EXTERN void uiWindowSetResizeable(uiWindow *w, int resizeable);
  * @memberof uiWindow @static
  */
 _UI_EXTERN uiWindow *uiNewWindow(const char *title, int width, int height, int hasMenubar);
-
 
 /**
  * A control that visually represents a button to be clicked by the user to trigger an action.

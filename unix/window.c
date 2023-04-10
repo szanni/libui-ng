@@ -21,6 +21,7 @@ struct uiWindow {
 	int margined;
 	int resizeable;
 	int focused;
+	int dropMask;
 
 	int (*onClosing)(uiWindow *, void *);
 	void *onClosingData;
@@ -28,6 +29,9 @@ struct uiWindow {
 	void *onContentSizeChangedData;
 	void (*onFocusChanged)(uiWindow *, void *);
 	void *onFocusChangedData;
+	void (*onDrop)(uiWindow *, uiDragDropData *, void *);
+	void *onDropData;
+
 	gboolean fullscreen;
 	void (*onPositionChanged)(uiWindow *, void *);
 	void *onPositionChangedData;
@@ -117,6 +121,11 @@ static void defaultOnPositionContentSizeChanged(uiWindow *w, void *data)
 }
 
 static void defaultOnFocusChanged(uiWindow *w, void *data)
+{
+	// do nothing
+}
+
+static void defaultOnDrop(uiWindow *w, uiDragDropData *dropData, void *data)
 {
 	// do nothing
 }
@@ -284,6 +293,12 @@ void uiWindowOnClosing(uiWindow *w, int (*f)(uiWindow *, void *), void *data)
 	w->onClosingData = data;
 }
 
+void uiWindowOnDrop(uiWindow *w, void (*f)(uiWindow *, uiDragDropData *, void *), void *data)
+{
+	w->onDrop = f;
+	w->onDropData = data;
+}
+
 int uiWindowFocused(uiWindow *w)
 {
 	return w->focused;
@@ -351,6 +366,105 @@ void uiWindowSetResizeable(uiWindow *w, int resizeable)
 	gtk_window_set_resizable(w->window, resizeable);
 }
 
+void uiFreeDragDropData(uiDragDropData* d)
+{
+	int i;
+
+	switch (d->type) {
+		case uiDragDropTypeText:
+			g_free(d->data.text);
+			break;
+		case uiDragDropTypeURLs:
+			for (i = 0; i < d->data.URLs.numURLs; ++i)
+				g_free(d->data.URLs.URLs[i]);
+			if (d->data.URLs.URLs != NULL)
+				uiprivFree(d->data.URLs.URLs);
+			break;
+	}
+	uiprivFree(d);
+}
+
+static void onDragDataReceived(GtkWidget* widget, GdkDragContext* context, gint x, gint y, GtkSelectionData* data, guint info, guint time, gpointer userdata)
+{
+	uiWindow* w = (uiWindow*)userdata;
+	uiDragDropData *d = uiprivNew(uiDragDropData);
+
+	d->type = info;
+
+	if (info == uiDragDropTypeText) {
+		guchar *text;
+
+		text = gtk_selection_data_get_text(data);
+		if (text == NULL) {
+			gtk_drag_finish(context, FALSE, FALSE, time);
+			return;
+		}
+		d->data.text = (char*)text;
+	}
+	if (info == uiDragDropTypeURLs) {
+		int i;
+		gchar **uris;
+
+		uris = gtk_selection_data_get_uris(data);
+		if (uris == NULL) {
+			gtk_drag_finish(context, FALSE, FALSE, time);
+			return;
+		}
+
+		d->data.URLs.numURLs = 0;
+		for (i = 0; uris[i] != NULL; ++i)
+			++d->data.URLs.numURLs;
+
+		if (d->data.URLs.numURLs == 0)
+			d->data.URLs.URLs = NULL;
+		else
+			d->data.URLs.URLs = uiprivAlloc(d->data.URLs.numURLs * sizeof(*d->data.URLs.URLs), "uiDragDropData->data.URLs.URLs");
+
+		for (i = 0; uris[i] != NULL; ++i) {
+			d->data.URLs.URLs[i] = g_filename_from_uri(uris[i], NULL, NULL);
+		}
+		g_strfreev(uris);
+	}
+
+	w->onDrop(w, d, w->onDropData);
+	gtk_drag_finish(context, TRUE, FALSE, time);
+}
+
+
+int uiWindowDropType(uiWindow* w)
+{
+	return w->dropMask;
+}
+
+void uiWindowSetDropType(uiWindow* w, int mask)
+{
+	GArray *targets;
+
+	w->dropMask = mask;
+
+	if (mask == 0) {
+		gtk_drag_dest_unset(w->widget);
+		//TODO unset signal?
+		return;
+	}
+
+	targets = g_array_new(0, 0, sizeof(GtkTargetEntry));
+	if (mask & uiDragDropTypeURLs) {
+		GtkTargetEntry entryURLs = {"text/uri-list", GTK_TARGET_OTHER_APP, uiDragDropTypeURLs};
+		g_array_append_vals(targets, &entryURLs, 1);
+	}
+	// text/plain needs to be added after text/uri-list otherwise URLs get processed as plain text
+	if (mask & uiDragDropTypeText) {
+		GtkTargetEntry entryText = {"text/plain", GTK_TARGET_OTHER_APP, uiDragDropTypeText};
+		g_array_append_vals(targets, &entryText, 1);
+	}
+
+	// CHECKME: action copy?
+	gtk_drag_dest_set(w->widget, GTK_DEST_DEFAULT_ALL, (GtkTargetEntry*)targets->data, targets->len, GDK_ACTION_COPY|GDK_ACTION_MOVE);
+	g_array_free(targets, 1);
+	g_signal_connect(w->widget, "drag-data-received", G_CALLBACK(onDragDataReceived), w);
+}
+
 uiWindow *uiNewWindow(const char *title, int width, int height, int hasMenubar)
 {
 	uiWindow *w;
@@ -399,6 +513,7 @@ uiWindow *uiNewWindow(const char *title, int width, int height, int hasMenubar)
 	uiWindowOnContentSizeChanged(w, defaultOnPositionContentSizeChanged, NULL);
 	uiWindowOnFocusChanged(w, defaultOnFocusChanged, NULL);
 	uiWindowOnPositionChanged(w, defaultOnPositionContentSizeChanged, NULL);
+	uiWindowOnDrop(w, defaultOnDrop, NULL);
 
 	// normally it's SetParent() that does this, but we can't call SetParent() on a uiWindow
 	// TODO we really need to clean this up, especially since see uiWindowDestroy() above

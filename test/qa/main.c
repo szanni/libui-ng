@@ -38,6 +38,7 @@ struct controlTestCase labelTestCases[] = {
 };
 
 struct controlTestCase windowTestCases[] = {
+	QA_TEST("0. Drop", windowDrop),
 	QA_TEST("1. Fullscreen", windowFullscreen),
 	QA_TEST("2. Borderless", windowBorderless),
 	QA_TEST("3. Resizable", windowResizeable),
