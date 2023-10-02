@@ -77,6 +77,11 @@ enum uiprivMenuItemType {
 	self->item = i;
 }
 
+- (BOOL)validateMenuItem:(NSMenuItem *)item
+{
+	return [uiprivAppDelegate().menuManager validateMenuItem:item];
+}
+
 @end
 
 @implementation uiprivMenuManager
