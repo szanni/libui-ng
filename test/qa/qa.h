@@ -22,6 +22,9 @@ QA_DECLARE_TEST(labelMultiLine);
 
 QA_DECLARE_TEST(progressBarValues);
 
+QA_DECLARE_TEST(separatorVertical);
+QA_DECLARE_TEST(separatorHorizontal);
+
 
 QA_DECLARE_TEST(windowFullscreen);
 QA_DECLARE_TEST(windowBorderless);

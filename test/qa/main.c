@@ -42,6 +42,12 @@ struct controlTestCase progressBarTestCases[] = {
 	{NULL, NULL, NULL}
 };
 
+struct controlTestCase separatorTestCases[] = {
+	QA_TEST("1. Vertical Separator", separatorVertical),
+	QA_TEST("2. Horizontal Separator", separatorHorizontal),
+	{NULL, NULL, NULL}
+};
+
 struct controlTestCase windowTestCases[] = {
 	QA_TEST("1. Fullscreen", windowFullscreen),
 	QA_TEST("2. Borderless", windowBorderless),
@@ -58,6 +64,7 @@ struct controlTestGroup controlTestGroups[] = {
 	{"uiEntry", entryTestCases},
 	{"uiLabel", labelTestCases},
 	{"uiProgressBar", progressBarTestCases},
+	{"uiSeparator", separatorTestCases},
 	{"uiWindow", windowTestCases},
 };
 

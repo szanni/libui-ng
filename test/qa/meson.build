@@ -6,6 +6,7 @@ libui_qa_sources = [
 	'entry.c',
 	'label.c',
 	'progressbar.c',
+	'separator.c',
 	'window.c',
 ]
 
