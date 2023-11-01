@@ -79,7 +79,7 @@ endif()
 add_library(ui ${CommonSourceList} ${TargetSourceList})
 target_link_libraries(ui ${TargetLinkLibraries})
 list(APPEND TargetLinkLibraries ui)
-target_sources(ui PUBLIC FILE_SET HEADERS BASE_DIRS . FILES ui.h)
+target_sources(ui PUBLIC FILE_SET HEADERS BASE_DIRS . FILES ui.h ${TargetHeader})
 
 # TODO rename variable to something like _UI_BUILD_LIBRARY
 target_compile_definitions(ui PRIVATE libui_EXPORTS)
@@ -92,7 +92,6 @@ install(TARGETS ui
 	LIBRARY DESTINATION lib
 	FILE_SET HEADERS DESTINATION include
 )
-install(FILES ${TargetHeader} DESTINATION include)
 
 add_subdirectory(examples)
 
