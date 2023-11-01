@@ -94,4 +94,5 @@ install(TARGETS ui
 )
 
 add_subdirectory(examples)
+add_subdirectory(test)
 
