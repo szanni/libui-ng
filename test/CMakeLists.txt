@@ -27,5 +27,6 @@ add_executable(tester
 	resources.rc)
 target_link_libraries(tester ${TargetLinkLibraries})
 
+add_subdirectory(unit)
 add_subdirectory(qa)
 
