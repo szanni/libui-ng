@@ -33,7 +33,7 @@ See [CHANGELOG.md](CHANGELOG.md)
 	* MinGW-w64 (other flavors of MinGW may not work) — **you can only build a static library**; shared library support will be re-added once the following features come in:
 		* [Isolation awareness](https://msdn.microsoft.com/en-us/library/aa375197%28v=vs.85%29.aspx), which is how you get themed controls from a DLL without needing a manifest
 * Unix: nothing else specific
-* Mac OS X: nothing else specific, so long as you can build Cocoa programs
+* macOS: nothing else specific, so long as you can build Cocoa programs
 
 ## Building
 
@@ -135,8 +135,8 @@ Swift | [libui-swift](https://github.com/sclukey/libui-swift)
 
 ## Frequently Asked Questions
 
-### Why does my program start in the background on OS X if I run from the command line?
-OS X normally does not start program executables directly; instead, it uses [Launch Services](https://developer.apple.com/reference/coreservices/1658613-launch_services?language=objc) to coordinate the launching of the program between the various parts of the system and the loading of info from an .app bundle. One of these coordination tasks is responsible for bringing a newly launched app into the foreground. This is called "activation".
+### Why does my program start in the background on macOS if I run from the command line?
+macOS normally does not start program executables directly; instead, it uses [Launch Services](https://developer.apple.com/reference/coreservices/1658613-launch_services?language=objc) to coordinate the launching of the program between the various parts of the system and the loading of info from an .app bundle. One of these coordination tasks is responsible for bringing a newly launched app into the foreground. This is called "activation".
 
 When you run a binary directly from the Terminal, however, you are running it directly, not through Launch Services. Therefore, the program starts in the background, because no one told it to activate! Now, it turns out [there is an API](https://developer.apple.com/reference/appkit/nsapplication/1428468-activateignoringotherapps) that we can use to force our app to be activated. But if we use it, then we'd be trampling over Launch Services, which already knows whether it should activate or not. Therefore, libui does not step over Launch Services, at the cost of requiring an extra user step if running directly from the command line.
 
@@ -154,4 +154,4 @@ From examples/controlgallery:
 
 ![Unix](examples/controlgallery/unix.png)
 
-![OS X](examples/controlgallery/darwin.png)
+![macOS](examples/controlgallery/darwin.png)
