@@ -4,16 +4,20 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8" CACHE STRING "Minimum macOS deployment version")
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build fat binary")
 
-project(libui)
+project(libui LANGUAGES C)
 
 # Strict C99 and C++11
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_C_EXTENSIONS OFF)
-if(WIN32)
+if(WIN32 OR BUILD_EXAMPLES)
+	enable_language(CXX)
 	set(CMAKE_CXX_STANDARD 11)
 	set(CMAKE_CXX_STANDARD_REQUIRED True)
 	set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
+if(APPLE)
+	enable_language(OBJC)
 endif()
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -76,6 +80,7 @@ endif()
 if(APPLE)
 	add_subdirectory(darwin) # Defines: TargetSourceList
 	set(TargetHeader ui_darwin.h)
+	set(TargetLinkLibraries objc "-framework Foundation" "-framework AppKit")
 endif()
 
 add_library(ui ${CommonSourceList} ${TargetSourceList})

@@ -30,7 +30,6 @@ set(TargetSourceList
 	darwin/image.m
 	darwin/label.m
 	darwin/main.m
-	darwin/map.m
 	darwin/menu.m
 	darwin/multilineentry.m
 	darwin/opentype.m
@@ -49,5 +48,6 @@ set(TargetSourceList
 	darwin/util.m
 	darwin/window.m
 	darwin/winmoveresize.m
+	darwin/nstextfield.m
 	PARENT_SCOPE)
 
