@@ -36,6 +36,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 
 option(BUILD_SHARED_LIBS "Build as shared library" ON)
+option(BUILD_TESTS "Build test suite" ON)
+option(BUILD_EXAMPLES "Build examples" ON)
 
 # Defines: CommonSourceList
 add_subdirectory(common)
@@ -93,6 +95,10 @@ install(TARGETS ui
 	FILE_SET HEADERS DESTINATION include
 )
 
-add_subdirectory(examples)
-add_subdirectory(test)
+if(BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif()
+if(BUILD_TESTS)
+	add_subdirectory(test)
+endif()
 
