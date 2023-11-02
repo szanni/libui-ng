@@ -6,6 +6,10 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build fat binary")
 
 project(libui LANGUAGES C)
 
+option(BUILD_SHARED_LIBS "Build as shared library" ON)
+option(BUILD_TESTS "Build test suite" ON)
+option(BUILD_EXAMPLES "Build examples" ON)
+
 # Strict C99 and C++11
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
@@ -38,10 +42,6 @@ endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
-
-option(BUILD_SHARED_LIBS "Build as shared library" ON)
-option(BUILD_TESTS "Build test suite" ON)
-option(BUILD_EXAMPLES "Build examples" ON)
 
 # Defines: CommonSourceList
 add_subdirectory(common)
