@@ -449,11 +449,6 @@ void uiSplitDelete(uiSplit *b, int index)
 	uiWindowsControlMinimumSizeChanged(uiWindowsControl(b));
 }
 
-int uiSplitNumChildren(uiSplit *b)
-{
-	return (int) b->controls->size();
-}
-
 static void onResize(uiWindowsControl *c)
 {
 	splitRelayout(uiSplit(c));
