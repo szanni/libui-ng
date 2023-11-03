@@ -11,7 +11,7 @@
 - (NSView *)view;
 - (void)establishChildConstraints;
 - (void)removeChildConstraints;
-- (id)initWithControl:(uiControl *)c expand:(BOOL)e shrink:(BOOL)s;
+- (id)initWithControl:(uiControl *)c;
 @end
 
 @interface splitView : NSSplitView {
@@ -286,13 +286,13 @@ struct uiSplit {
 
 @implementation splitChild
 
-- (id)initWithControl:(uiControl *)c expand:(BOOL)e shrink:(BOOL)s
+- (id)initWithControl:(uiControl *)c
 {
 	self = [super initWithFrame:NSZeroRect];
 	if (self != nil) {
 		self.c = c;
-		self.stretchy = e;
-		self.shrink = s;
+		self.stretchy = YES;
+		self.shrink = NO;
 
 		self.oldHorzHuggingPri = uiDarwinControlHuggingPriority(uiDarwinControl(self.c), NSLayoutConstraintOrientationHorizontal);
 		self.oldVertHuggingPri = uiDarwinControlHuggingPriority(uiDarwinControl(self.c), NSLayoutConstraintOrientationVertical);
@@ -428,13 +428,13 @@ static void uiSplitChildVisibilityChanged(uiDarwinControl *c)
 
 
 
-void uiSplitInsertAt(uiSplit *t, int n, uiControl *c, int expand, int shrink)
+static void uiSplitInsertAt(uiSplit *t, int n, uiControl *c)
 {
 	splitChild *sc;
 
 	uiControlSetParent(c, uiControl(t));
 
-	sc = [[splitChild alloc] initWithControl:c expand:expand shrink:shrink];
+	sc = [[splitChild alloc] initWithControl:c];
 	//[sc setTranslatesAutoresizingMaskIntoConstraints:NO];
 	//view = uiControlHandle(c);
 
@@ -480,26 +480,25 @@ void uiSplitDelete(uiSplit *t, int n)
 	splitRelayout(t);
 }
 
-static void uiSplitAppend(uiSplit *s, uiControl *child, int expand, int shrink)
+static void uiSplitAppend(uiSplit *s, uiControl *child)
 {
-	uiSplitInsertAt(s, [s->splitview->children count], child, expand, shrink);
+	uiSplitInsertAt(s, [s->splitview->children count], child);
 }
 
-void uiSplitAdd1(uiSplit *s, uiControl *c, int expand, int shrink)
+void uiSplitSetFirst(uiSplit *s, uiControl *child)
 {
-	uiSplitAppend(s, c, expand, shrink);
+	uiSplitAppend(s, child);
 }
 
 
-void uiSplitAdd2(uiSplit *s, uiControl *c, int expand, int shrink)
+void uiSplitSetSecond(uiSplit *s, uiControl *child)
 {
-	uiSplitAppend(s, c, expand, shrink);
+	uiSplitAppend(s, child);
 }
 
 static uiSplit *uiNewSplit(BOOL vertical)
 {
 	uiSplit *s;
-	BOOL verticalDivider = !vertical;
 
 	uiDarwinNewControl(uiSplit, s);
 
