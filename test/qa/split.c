@@ -32,7 +32,7 @@ uiControl* splitHOne()
 	return uiControl(split);
 }
 
-const char *splitVGuide() {
+const char *splitVerticalGuide() {
 	return
 	"1.\tYou should see two buttons `One` and `Two` stacked on top of each\n"
 	"\tother. They should be equal in size.\n"
@@ -51,7 +51,7 @@ const char *splitVGuide() {
 	;
 }
 
-uiControl* splitV()
+uiControl* splitVertical()
 {
 	uiSplit *split;
 
@@ -62,7 +62,7 @@ uiControl* splitV()
 	return uiControl(split);
 }
 
-const char *splitHGuide() {
+const char *splitHorizontalGuide() {
 	return
 	"1.\tYou should see two buttons `One` and `Two` places next to each\n"
 	"\tother. They should be equal in size.\n"
@@ -81,13 +81,27 @@ const char *splitHGuide() {
 	;
 }
 
-uiControl* splitH()
+uiControl* splitHorizontal()
 {
 	uiSplit *split;
 
 	split = uiNewHorizontalSplit();
 	uiSplitAdd1(split, uiControl(uiNewButton("One")), 1, 1);
 	uiSplitAdd2(split, uiControl(uiNewButton("Two")), 1, 1);
+
+	return uiControl(split);
+}
+const char *splitHorizontal0010Guide() {
+	return "NONE";
+}
+
+uiControl* splitHorizontal0010()
+{
+	uiSplit *split;
+
+	split = uiNewHorizontalSplit();
+	uiSplitAdd1(split, uiControl(uiNewButton("One")), 0, 0);
+	uiSplitAdd2(split, uiControl(uiNewButton("Two")), 1, 0);
 
 	return uiControl(split);
 }

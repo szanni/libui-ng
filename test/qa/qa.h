@@ -24,8 +24,9 @@ QA_DECLARE_TEST(labelMultiLine);
 
 QA_DECLARE_TEST(splitVOne);
 QA_DECLARE_TEST(splitHOne);
-QA_DECLARE_TEST(splitV);
-QA_DECLARE_TEST(splitH);
+QA_DECLARE_TEST(splitVertical);
+QA_DECLARE_TEST(splitHorizontal);
+QA_DECLARE_TEST(splitHorizontal0010);
 
 QA_DECLARE_TEST(windowFullscreen);
 QA_DECLARE_TEST(windowBorderless);
