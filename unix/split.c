@@ -5,8 +5,7 @@ struct uiSplit {
 	GtkWidget *widget;
 	GtkContainer *container;
 	GtkPaned *split;
-	uiControl *first;
-	uiControl *second;
+	uiControl* controls[2];
 };
 
 uiUnixControlAllDefaultsExceptDestroy(uiSplit)
@@ -18,21 +17,19 @@ uiUnixControlAllDefaultsExceptDestroy(uiSplit)
                 uiUnixControl(c)->addedBefore = TRUE; \
         }
 
-static void uiSplitDestroyChild(uiSplit *s, uiControl *child)
-{
-	uiControlSetParent(child, NULL);
-	uiUnixControlSetContainer(uiUnixControl(child), s->container, TRUE);
-	uiControlDestroy(child);
-}
-
 static void uiSplitDestroy(uiControl *c)
 {
 	uiSplit *s = uiSplit(c);
+	int i;
 
-	if (s->first != NULL)
-		uiSplitDestroyChild(s, s->first);
-	if (s->second != NULL)
-		uiSplitDestroyChild(s, s->second);
+	for (i = 0; i < 2; ++i) {
+		uiControl *child = s->controls[i];
+		if (child == NULL)
+			continue;
+		uiControlSetParent(child, NULL);
+		uiUnixControlSetContainer(uiUnixControl(child), s->container, TRUE);
+		uiControlDestroy(child);
+	}
 
 	g_object_unref(s->widget);
 	uiFreeControl(uiControl(s));
@@ -42,24 +39,18 @@ void uiSplitSetFirst(uiSplit *s, uiControl *c)
 {
 	GtkWidget *widget;
 
-	if (s->first != NULL)
-		uiSplitDestroyChild(s, s->first);
-
 	widget = GTK_WIDGET(uiControlHandle(c));
 
 	uiControlSetParent(c, uiControl(s));
 	TODO_MASSIVE_HACK(uiUnixControl(c));
 	gtk_paned_pack1(s->split, widget, 1, 0);
 
-	s->first = c;
+	s->controls[0] = c;
 }
 
 void uiSplitSetSecond(uiSplit *s, uiControl *c)
 {
 	GtkWidget *widget;
-
-	if (s->second != NULL)
-		uiSplitDestroyChild(s, s->second);
 
 	widget = GTK_WIDGET(uiControlHandle(c));
 
@@ -67,20 +58,21 @@ void uiSplitSetSecond(uiSplit *s, uiControl *c)
 	TODO_MASSIVE_HACK(uiUnixControl(c));
 	gtk_paned_pack2(s->split, widget, 1, 0);
 
-	s->second = c;
+	s->controls[1] = c;
 }
 
 static uiSplit *uiNewSplit(GtkOrientation orientation)
 {
 	uiSplit *s;
+	int i;
 
 	uiUnixNewControl(uiSplit, s);
 
 	s->widget = gtk_paned_new(orientation);
 	s->container = GTK_CONTAINER(s->widget);
 	s->split = GTK_PANED(s->widget);
-	s->first = NULL;
-	s->second = NULL;
+	for (i = 0; i < 2; ++i)
+		s->controls[i] = NULL;
 
 	if (orientation == GTK_ORIENTATION_VERTICAL) {
 		gtk_widget_set_vexpand(s->widget, TRUE);
