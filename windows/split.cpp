@@ -4,15 +4,16 @@ struct splitChild {
 	uiControl *c;
 	int width;
 	int height;
+	// for future uiSplitSetShrink*
 	bool shrink;
 };
 
 struct uiSplit {
 	uiWindowsControl c;
 	HWND hwnd;
+	HCURSOR cursor;
 	float ratio;
 	int mouseOffset;
-	HCURSOR cursor;
 	struct splitChild controls[2];
 	bool vertical;
 	bool moving;
@@ -366,7 +367,6 @@ static void uiSplitInsertAt(uiSplit *s, uiControl *c, int i)
 	struct splitChild *sc = &s->controls[i];
 
 	sc->c = c;
-	// for future uiSplitSet(First|Second)Shrink
 	sc->shrink = false;
 	uiControlSetParent(sc->c, uiControl(s));
 	uiWindowsControlSetParentHWND(uiWindowsControl(sc->c), s->hwnd);
