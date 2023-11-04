@@ -1,136 +1,90 @@
 #include "uipriv_windows.hpp"
 
-/*
- * TODO block cursor:
- * https://forums.codeguru.com/showthread.php?303994-How-to-disable-mouse-move-event
- */
-
 struct splitChild {
 	uiControl *c;
-	int stretchy;
-	int shrink;
-	int collapse;
 	int width;
 	int height;
+	bool shrink;
 };
 
 struct uiSplit {
 	uiWindowsControl c;
 	HWND hwnd;
-	std::vector<struct splitChild> *controls;
-	int vertical;
-	int padded;
-	int moving;
 	float ratio;
 	int mouseOffset;
 	HCURSOR cursor;
+	struct splitChild controls[2];
+	bool vertical;
+	bool moving;
 };
 
 static void splitPadding(uiSplit *b, int *xpadding, int *ypadding);
-
-static BOOL onSplitter(uiSplit *s, int px, int py)
-{
-	int xpadding, ypadding;
-	splitPadding(s, &xpadding, &ypadding);
-
-	int x = 0;
-	int y = 0;
-	for (const struct splitChild &sc : *(s->controls)) {
-		if (!uiControlVisible(sc.c))
-			continue;
-
-		x += sc.width;
-		y += sc.height;
-
-		if (s->vertical) {
-			if (py >= y && py < y + ypadding)
-				return TRUE;
-		} else {
-			if (px >= x && px < x + xpadding)
-				return TRUE;
-		}
-		x += xpadding;
-		y += ypadding;
-	}
-	return FALSE;
-}
+static void splitRelayout(uiSplit *s);
 
 static int nControlsVisible(uiSplit *s)
 {
 	int n = 0;
 
-	for (struct splitChild &sc : *(s->controls)) {
-		if (uiControlVisible(sc.c))
-			++n;
+	for (int i = 0; i < 2; i++) {
+		struct splitChild *sc = &s->controls[i];
+		if (sc->c == NULL || !uiControlVisible(sc->c))
+			continue;
+		n++;
 	}
 	return n;
 }
 
+static bool cursorOnSplitter(uiSplit *s, int px, int py)
+{
+	int xpadding, ypadding;
+	splitPadding(s, &xpadding, &ypadding);
 
-static void onResize(uiWindowsControl *c);
+	if (nControlsVisible(s) != 2)
+		return false;
 
-// Modified containerWndProc
-// TODO add a mechanism to mainly reuse containerWndProc
+	int x = s->controls[0].width;
+	int y = s->controls[0].height;
+	if (s->vertical) {
+		if (py >= y && py < y + ypadding)
+			return true;
+	} else {
+		if (px >= x && px < x + xpadding)
+			return true;
+	}
+	return false;
+}
+
 static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-	RECT r;
-	HDC dc;
-	PAINTSTRUCT ps;
-	CREATESTRUCTW *cs = (CREATESTRUCTW *) lParam;
-	WINDOWPOS *wp = (WINDOWPOS *) lParam;
-	MINMAXINFO *mmi = (MINMAXINFO *) lParam;
-	int minwid, minht;
-	LRESULT lResult;
 	uiSplit *s = uiSplit(dwRefData);
 
 	switch (uMsg) {
-		/*
-	case WM_CREATE:
-		if (s == NULL) {
-			s = (uiSplit *) (cs->lpCreateParams);
-			s->hwnd = hwnd;
-			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) s);
-		}
-		break;
-		*/
-	case WM_WINDOWPOSCHANGED:
-		if ((wp->flags & SWP_NOSIZE) != 0)
-			break;
-		onResize(uiWindowsControl(s));
-		return 0;
-	case WM_GETMINMAXINFO:
-		lResult = DefWindowProcW(hwnd, uMsg, wParam, lParam);
-		uiWindowsControlMinimumSize(uiWindowsControl(s), &minwid, &minht);
-		mmi->ptMinTrackSize.x = minwid;
-		mmi->ptMinTrackSize.y = minht;
-		return lResult;
 	case WM_LBUTTONDOWN:
 		{
 			int x = LOWORD(lParam);
 			int y = HIWORD(lParam);
 
-			if (nControlsVisible(s) < 2)
+			if (nControlsVisible(s) != 2)
 				return 0;
 
 			if (s->vertical)
-				s->mouseOffset = y - s->controls->at(0).height;
+				s->mouseOffset = y - s->controls[0].height;
 			else
-				s->mouseOffset = x - s->controls->at(0).width;
+				s->mouseOffset = x - s->controls[0].width;
 
-			printf("mouse offset %d\n", s->mouseOffset);
-
-			s->moving = 1;
+			s->moving = true;
 			SetCapture(hwnd);
 		}
 		return 0;
 	case WM_LBUTTONUP:
 		if (s->moving) {
-			s->moving = 0;
+			s->moving = false;
 			ReleaseCapture();
 		}
 		return 0;
 	case WM_MOUSEMOVE:
 		if (wParam == MK_LBUTTON && s->moving) {
+			RECT r;
 			int x = LOWORD(lParam);
 			int y = HIWORD(lParam);
 
@@ -139,12 +93,6 @@ static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 				return 0;
 			if (!s->vertical && x - s->mouseOffset > r.right)
 				return 0;
-			/*
-			if (x > r.right || y > r.bottom)
-				return 0;
-			*/
-
-			printf("move %d %d\n", x, y);
 
 			if (s->vertical)
 				s->ratio = 1.0 * (y - s->mouseOffset) / r.bottom;
@@ -156,31 +104,9 @@ static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 			if (s->ratio > 1.0)
 				s->ratio = 1.0;
 
-			onResize(uiWindowsControl(s));
+			splitRelayout(s);
 		}
 		return 0;
-		/*
-	case WM_PAINT:
-		dc = BeginPaint(hwnd, &ps);
-		if (dc == NULL) {
-			logLastError(L"error beginning container paint");
-			// bail out; hope DefWindowProc() catches us
-			break;
-		}
-		r = ps.rcPaint;
-		paintContainerBackground(hwnd, dc, &r);
-		EndPaint(hwnd, &ps);
-		return 0;
-	// tab controls use this to draw the background of the tab area
-	case WM_PRINTCLIENT:
-		uiWindowsEnsureGetClientRect(hwnd, &r);
-		paintContainerBackground(hwnd, (HDC) wParam, &r);
-		return 0;
-	case WM_ERASEBKGND:
-		// avoid some flicker
-		// we draw the whole update area anyway
-		return 1;
-		*/
 	case WM_SETCURSOR:
 		{
 			POINT pt;
@@ -195,7 +121,7 @@ static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 			pt.x = GET_X_LPARAM(pos);
 			pt.y = GET_Y_LPARAM(pos);
 			ScreenToClient(s->hwnd, &pt);
-			if (onSplitter(s, pt.x, pt.y)) {
+			if (cursorOnSplitter(s, pt.x, pt.y)) {
 				SetCursor(s->cursor);
 				return 1;
 			}
@@ -209,11 +135,11 @@ static LRESULT CALLBACK splitWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	return DefSubclassProc(hwnd, uMsg, wParam, lParam);
 }
 
-static void splitPadding(uiSplit *b, int *xpadding, int *ypadding)
+static void splitPadding(uiSplit *s, int *xpadding, int *ypadding)
 {
 	uiWindowsSizing sizing;
 
-	uiWindowsGetSizing(b->hwnd, &sizing);
+	uiWindowsGetSizing(s->hwnd, &sizing);
 	uiWindowsSizingStandardPadding(&sizing, xpadding, ypadding);
 }
 
@@ -222,131 +148,116 @@ static void splitRelayout(uiSplit *s)
 	RECT r;
 	int x, y, width, height;
 	int xpadding, ypadding;
-	int nStretchy;
-	int stretchywid, stretchyht;
 	int minWidth, minHeight;
-	int nVisible;
+	int nVisible = 0;
 	bool resetRatio = false;
-
-	if (s->controls->size() == 0)
-		return;
 
 	uiWindowsEnsureGetClientRect(s->hwnd, &r);
 	width = r.right - r.left;
 	height = r.bottom - r.top;
 
-	// 1) get width and height of non-stretchy controls
-	// this will tell us how much space will be left for stretchy controls
-	stretchywid = width;
-	stretchyht = height;
-	nStretchy = 0;
-	nVisible = 0;
-	for (struct splitChild &bc : *(s->controls)) {
-		if (!uiControlVisible(bc.c))
+	for (int i = 0; i < 2; i++) {
+		struct splitChild *sc = &s->controls[i];
+		if (sc->c == NULL || !uiControlVisible(sc->c))
 			continue;
+
+		uiWindowsControlMinimumSize(uiWindowsControl(sc->c), &minWidth, &minHeight);
+		if (s->vertical) {
+			sc->width = width;
+			sc->height = minHeight;
+		} else {
+			sc->width = minWidth;
+			sc->height = height;
+		}
 		nVisible++;
-		if (bc.stretchy) {
-			nStretchy++;
-			uiWindowsControlMinimumSize(uiWindowsControl(bc.c), &minWidth, &minHeight);
-			bc.height = minHeight;
-			bc.width = minWidth;
-			continue;
-		}
-		uiWindowsControlMinimumSize(uiWindowsControl(bc.c), &minWidth, &minHeight);
-		if (s->vertical) {		// all controls have same width
-			bc.width = width;
-			bc.height = minHeight;
-			stretchyht -= minHeight;
-		} else {				// all controls have same height
-			bc.width = minWidth;
-			bc.height = height;
-			stretchywid -= minWidth;
-		}
 	}
+
 	if (nVisible == 0)
 		return;
 
-	// subtract spacer padding if needed
 	splitPadding(s, &xpadding, &ypadding);
-	if (s->vertical) {
-		height -= (nVisible - 1) * ypadding;
-		stretchyht -= (nVisible - 1) * ypadding;
-	} else {
-		width -= (nVisible - 1) * xpadding;
-		stretchywid -= (nVisible - 1) * xpadding;
-	}
 
-	// 3) now get the size of stretchy controls and make sure to not shrink unshrinkable controls
-	if (s->controls->size() == 1) {
-		if (s->vertical)
-			s->controls->at(0).height = stretchyht;
-		else
-			s->controls->at(0).width = stretchywid;
+	if (nVisible == 1) {
+		for (int i = 0; i < 2; i++) {
+			struct splitChild *sc = &s->controls[i];
+			if (sc->c == NULL || !uiControlVisible(sc->c))
+				continue;
+
+			if (s->vertical)
+				sc->height = height;
+			else
+				sc->width = width;
+		}
 	} else {
 		if (s->vertical) {
-			int height0 = stretchyht * s->ratio;
+			height -= ypadding;
+			int height0 = height * s->ratio;
 
-			if (!s->controls->at(0).shrink && height0 < s->controls->at(0).height) {
+			if (!s->controls[0].shrink && height0 < s->controls[0].height) {
 				resetRatio = true;
-				height0 = s->controls->at(0).height;
+				height0 = s->controls[0].height;
 			}
-			if (!s->controls->at(1).shrink && stretchyht - height0 < s->controls->at(1).height) {
+			if (!s->controls[1].shrink && height - height0 < s->controls[1].height) {
 				resetRatio = true;
-				height0 = stretchyht - s->controls->at(1).height;
+				height0 = height - s->controls[1].height;
 			}
 
-			s->controls->at(0).height = height0;
-			s->controls->at(1).height = stretchyht - height0;
+			s->controls[0].height = height0;
+			s->controls[1].height = height - height0;
 		} else {
-			int width0 = stretchywid * s->ratio;
-
-			if (!s->controls->at(0).shrink && width0 < s->controls->at(0).width) {
+			width -= xpadding;
+			int width0 = width * s->ratio;
+			if (!s->controls[0].shrink && width0 < s->controls[0].width) {
 				resetRatio = true;
-				width0 = s->controls->at(0).width;
+				width0 = s->controls[0].width;
 			}
-			if (!s->controls->at(1).shrink && stretchywid - width0 < s->controls->at(1).width) {
+			if (!s->controls[1].shrink && width - width0 < s->controls[1].width) {
 				resetRatio = true;
-				width0 = stretchywid - s->controls->at(1).width;
+				width0 = width - s->controls[1].width;
 			}
 
-			s->controls->at(0).width = width0;
-			s->controls->at(1).width = stretchywid - width0;
+			s->controls[0].width = width0;
+			s->controls[1].width = width - width0;
 		}
 	}
 
 	// reset ratio to account for no shrink adjustments
 	if (resetRatio) {
 		if (s->vertical)
-			s->ratio = 1.0 * s->controls->at(0).height / stretchyht;
+			s->ratio = 1.0 * s->controls[0].height / height;
 		else
-			s->ratio = 1.0 * s->controls->at(0).width / stretchywid;
+			s->ratio = 1.0 * s->controls[0].width / width;
 	}
 
 	// position controls
 	x = 0;
 	y = 0;
-	for (const struct splitChild &sc : *(s->controls)) {
-		if (!uiControlVisible(sc.c))
+	for (int i = 0; i < 2; i++) {
+		struct splitChild *sc = &s->controls[i];
+		if (sc->c == NULL || !uiControlVisible(sc->c))
 			continue;
-		uiWindowsEnsureMoveWindowDuringResize((HWND) uiControlHandle(sc.c), x, y, sc.width, sc.height);
+
+		uiWindowsEnsureMoveWindowDuringResize((HWND) uiControlHandle(sc->c), x, y, sc->width, sc->height);
 		if (s->vertical)
-			y += sc.height + ypadding;
+			y += sc->height + ypadding;
 		else
-			x += sc.width + xpadding;
+			x += sc->width + xpadding;
 	}
 }
 
 static void uiSplitDestroy(uiControl *c)
 {
-	uiSplit *b = uiSplit(c);
+	uiSplit *s = uiSplit(c);
 
-	for (const struct splitChild &bc : *(b->controls)) {
-		uiControlSetParent(bc.c, NULL);
-		uiControlDestroy(bc.c);
+	for (int i = 0; i < 2; i++) {
+		struct splitChild *sc = &s->controls[i];
+		if (sc->c == NULL)
+			continue;
+		uiControlSetParent(sc->c, NULL);
+		uiControlDestroy(sc->c);
 	}
-	delete b->controls;
-	uiWindowsEnsureDestroyWindow(b->hwnd);
-	uiFreeControl(uiControl(b));
+	uiWindowsEnsureDestroyWindow(s->hwnd);
+	uiFreeControl(uiControl(s));
 }
 
 uiWindowsControlDefaultHandle(uiSplit)
@@ -362,90 +273,68 @@ uiWindowsControlDefaultDisable(uiSplit)
 
 static void uiSplitSyncEnableState(uiWindowsControl *c, int enabled)
 {
-	uiSplit *b = uiSplit(c);
+	uiSplit *s = uiSplit(c);
 
-	if (uiWindowsShouldStopSyncEnableState(uiWindowsControl(b), enabled))
+	if (uiWindowsShouldStopSyncEnableState(uiWindowsControl(s), enabled))
 		return;
-	for (const struct splitChild &bc : *(b->controls))
-		uiWindowsControlSyncEnableState(uiWindowsControl(bc.c), enabled);
+
+	for (int i = 0; i < 2; i++) {
+		struct splitChild *sc = &s->controls[i];
+		if (sc->c == NULL)
+			continue;
+		uiWindowsControlSyncEnableState(uiWindowsControl(sc->c), enabled);
+	}
 }
 
 uiWindowsControlDefaultSetParentHWND(uiSplit)
 
 static void uiSplitMinimumSize(uiWindowsControl *c, int *width, int *height)
 {
-	uiSplit *b = uiSplit(c);
+	uiSplit *s = uiSplit(c);
 	int xpadding, ypadding;
-	int nStretchy;
-	// these two contain the largest minimum width and height of all stretchy controls in the split
-	// all stretchy controls will use this value to determine the final minimum size
-	int maxStretchyWidth, maxStretchyHeight;
-	int minimumWidth, minimumHeight;
-	int nVisible;
+	int minWidth, minHeight;
+	int nVisible = 0;
 
 	*width = 0;
 	*height = 0;
-	if (b->controls->size() == 0)
-		return;
 
-	// 0) get this Split's padding
-	splitPadding(b, &xpadding, &ypadding);
-
-	// 1) add in the size of non-stretchy controls and get (but not add in) the largest widths and heights of stretchy controls
-	// we still add in like direction of stretchy controls
-	nStretchy = 0;
-	maxStretchyWidth = 0;
-	maxStretchyHeight = 0;
-	nVisible = 0;
-	for (const struct splitChild &bc : *(b->controls)) {
-		if (!uiControlVisible(bc.c))
+	for (int i = 0; i < 2; i++) {
+		struct splitChild *sc = &s->controls[i];
+		if (sc->c == NULL || !uiControlVisible(sc->c))
 			continue;
-		nVisible++;
-		uiWindowsControlMinimumSize(uiWindowsControl(bc.c), &minimumWidth, &minimumHeight);
-		if (bc.stretchy) {
-			nStretchy++;
-			if (maxStretchyWidth < minimumWidth)
-				maxStretchyWidth = minimumWidth;
-			if (maxStretchyHeight < minimumHeight)
-				maxStretchyHeight = minimumHeight;
-		}
-		if (b->vertical) {
-			if (*width < minimumWidth)
-				*width = minimumWidth;
-			if (!bc.stretchy)
-				*height += minimumHeight;
+
+		uiWindowsControlMinimumSize(uiWindowsControl(sc->c), &minWidth, &minHeight);
+		if (s->vertical) {
+			if (*width < minWidth)
+				*width = minWidth;
+			*height += minHeight;
 		} else {
-			if (!bc.stretchy)
-				*width += minimumWidth;
-			if (*height < minimumHeight)
-				*height = minimumHeight;
+			if (*height < minHeight)
+				*height = minHeight;
+			*width += minWidth;
 		}
+		nVisible++;
 	}
-	if (nVisible == 0)		// just return 0x0
-		return;
 
-	// 2) now outset the desired rect with the needed padding
-	if (b->vertical)
-		*height += (nVisible - 1) * ypadding;
-	else
-		*width += (nVisible - 1) * xpadding;
+	if (nVisible == 2) {
+		splitPadding(s, &xpadding, &ypadding);
 
-	// 3) and now we can add in stretchy controls
-	if (b->vertical)
-		*height += nStretchy * maxStretchyHeight;
-	else
-		*width += nStretchy * maxStretchyWidth;
+		if (s->vertical)
+			*height += ypadding;
+		else
+			*width += xpadding;
+	}
 }
 
 static void uiSplitMinimumSizeChanged(uiWindowsControl *c)
 {
-	uiSplit *b = uiSplit(c);
+	uiSplit *s = uiSplit(c);
 
-	if (uiWindowsControlTooSmall(uiWindowsControl(b))) {
-		uiWindowsControlContinueMinimumSizeChanged(uiWindowsControl(b));
+	if (uiWindowsControlTooSmall(uiWindowsControl(s))) {
+		uiWindowsControlContinueMinimumSizeChanged(uiWindowsControl(s));
 		return;
 	}
-	splitRelayout(b);
+	splitRelayout(s);
 }
 
 uiWindowsControlDefaultLayoutRect(uiSplit)
@@ -457,41 +346,32 @@ static void uiSplitChildVisibilityChanged(uiWindowsControl *c)
 	uiWindowsControlMinimumSizeChanged(c);
 }
 
-static void splitArrangeChildren(uiSplit *b)
+static void splitArrangeChildren(uiSplit *s)
 {
 	LONG_PTR controlID;
 	HWND insertAfter;
 
 	controlID = 100;
 	insertAfter = NULL;
-	for (const struct splitChild &bc : *(b->controls))
-		uiWindowsControlAssignControlIDZOrder(uiWindowsControl(bc.c), &controlID, &insertAfter);
+	for (int i = 0; i < 2; i++) {
+		struct splitChild *sc = &s->controls[i];
+		if (sc->c == NULL)
+			continue;
+		uiWindowsControlAssignControlIDZOrder(uiWindowsControl(sc->c), &controlID, &insertAfter);
+	}
 }
 
-static void uiSplitAppend(uiSplit *b, uiControl *c, int stretchy, int shrink)
+static void uiSplitInsertAt(uiSplit *s, uiControl *c, int i)
 {
-	struct splitChild bc;
+	struct splitChild *sc = &s->controls[i];
 
-	bc.c = c;
-	bc.stretchy = stretchy;
-	bc.shrink = shrink;
-	uiControlSetParent(bc.c, uiControl(b));
-	uiWindowsControlSetParentHWND(uiWindowsControl(bc.c), b->hwnd);
-	b->controls->push_back(bc);
-	splitArrangeChildren(b);
-	uiWindowsControlMinimumSizeChanged(uiWindowsControl(b));
-}
-
-void uiSplitDelete(uiSplit *b, int index)
-{
-	uiControl *c;
-
-	c = (*(b->controls))[index].c;
-	uiControlSetParent(c, NULL);
-	uiWindowsControlSetParentHWND(uiWindowsControl(c), NULL);
-	b->controls->erase(b->controls->begin() + index);
-	splitArrangeChildren(b);
-	uiWindowsControlMinimumSizeChanged(uiWindowsControl(b));
+	sc->c = c;
+	// for future uiSplitSet(First|Second)Shrink
+	sc->shrink = false;
+	uiControlSetParent(sc->c, uiControl(s));
+	uiWindowsControlSetParentHWND(uiWindowsControl(sc->c), s->hwnd);
+	splitArrangeChildren(s);
+	uiWindowsControlMinimumSizeChanged(uiWindowsControl(s));
 }
 
 static void onResize(uiWindowsControl *c)
@@ -499,7 +379,7 @@ static void onResize(uiWindowsControl *c)
 	splitRelayout(uiSplit(c));
 }
 
-static uiSplit *uiNewSplit(int vertical)
+static uiSplit *uiNewSplit(bool vertical)
 {
 	uiSplit *s;
 
@@ -507,9 +387,12 @@ static uiSplit *uiNewSplit(int vertical)
 	s->hwnd = uiWindowsMakeContainer(uiWindowsControl(s), onResize);
 
 	s->vertical = vertical;
-	s->controls = new std::vector<struct splitChild>;
-	s->moving = 0;
+	s->moving = false;
 	s->ratio = 0.5;
+	for (int i = 0; i < 2; i++) {
+		s->controls[i].c = NULL;
+	}
+
 	if (s->vertical)
 		s->cursor = LoadCursorW(NULL, IDC_SIZENS);
 	else
@@ -521,22 +404,22 @@ static uiSplit *uiNewSplit(int vertical)
 	return s;
 }
 
-void uiSplitAdd1(uiSplit *s, uiControl *child, int expand, int shrink)
+void uiSplitSetFirst(uiSplit *s, uiControl *child)
 {
-	uiSplitAppend(s, child, expand, shrink);
+	uiSplitInsertAt(s, child, 0);
 }
 
-void uiSplitAdd2(uiSplit *s, uiControl *child, int expand, int shrink)
+void uiSplitSetSecond(uiSplit *s, uiControl *child)
 {
-	uiSplitAppend(s, child, expand, shrink);
+	uiSplitInsertAt(s, child, 1);
 }
 
 uiSplit *uiNewHorizontalSplit(void)
 {
-	return uiNewSplit(0);
+	return uiNewSplit(false);
 }
 
 uiSplit *uiNewVerticalSplit(void)
 {
-	return uiNewSplit(1);
+	return uiNewSplit(true);
 }
