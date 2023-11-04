@@ -5,7 +5,8 @@ struct uiSplit {
 	GtkWidget *widget;
 	GtkContainer *container;
 	GtkPaned *split;
-	GArray *controls;
+	uiControl *first;
+	uiControl *second;
 };
 
 uiUnixControlAllDefaultsExceptDestroy(uiSplit)
@@ -17,50 +18,56 @@ uiUnixControlAllDefaultsExceptDestroy(uiSplit)
                 uiUnixControl(c)->addedBefore = TRUE; \
         }
 
+static void uiSplitDestroyChild(uiSplit *s, uiControl *child)
+{
+	uiControlSetParent(child, NULL);
+	uiUnixControlSetContainer(uiUnixControl(child), s->container, TRUE);
+	uiControlDestroy(child);
+}
+
 static void uiSplitDestroy(uiControl *c)
 {
 	uiSplit *s = uiSplit(c);
-	uiControl *child;
-	guint i;
 
-	// free all controls
-	for (i = 0; i < s->controls->len; i++) {
-		child = g_array_index(s->controls, uiControl*, i);
-		uiControlSetParent(child, NULL);
-		uiUnixControlSetContainer(uiUnixControl(child), s->container, TRUE);
-		uiControlDestroy(child);
-	}
+	if (s->first != NULL)
+		uiSplitDestroyChild(s, s->first);
+	if (s->second != NULL)
+		uiSplitDestroyChild(s, s->second);
 
-	g_array_free(s->controls, TRUE);
-	// and then ourselves
 	g_object_unref(s->widget);
 	uiFreeControl(uiControl(s));
 }
 
-void uiSplitAdd1(uiSplit *s, uiControl *c, int expand, int shrink)
+void uiSplitSetFirst(uiSplit *s, uiControl *c)
 {
 	GtkWidget *widget;
+
+	if (s->first != NULL)
+		uiSplitDestroyChild(s, s->first);
 
 	widget = GTK_WIDGET(uiControlHandle(c));
 
 	uiControlSetParent(c, uiControl(s));
 	TODO_MASSIVE_HACK(uiUnixControl(c));
-	gtk_paned_pack1(s->split, widget, expand, shrink);
+	gtk_paned_pack1(s->split, widget, 1, 0);
 
-	g_array_append_val(s->controls, c);
+	s->first = c;
 }
 
-void uiSplitAdd2(uiSplit *s, uiControl *c, int expand, int shrink)
+void uiSplitSetSecond(uiSplit *s, uiControl *c)
 {
 	GtkWidget *widget;
+
+	if (s->second != NULL)
+		uiSplitDestroyChild(s, s->second);
 
 	widget = GTK_WIDGET(uiControlHandle(c));
 
 	uiControlSetParent(c, uiControl(s));
 	TODO_MASSIVE_HACK(uiUnixControl(c));
-	gtk_paned_pack2(s->split, widget, expand, shrink);
+	gtk_paned_pack2(s->split, widget, 1, 0);
 
-	g_array_append_val(s->controls, c);
+	s->second = c;
 }
 
 static uiSplit *uiNewSplit(GtkOrientation orientation)
@@ -72,7 +79,8 @@ static uiSplit *uiNewSplit(GtkOrientation orientation)
 	s->widget = gtk_paned_new(orientation);
 	s->container = GTK_CONTAINER(s->widget);
 	s->split = GTK_PANED(s->widget);
-
+	s->first = NULL;
+	s->second = NULL;
 
 	if (orientation == GTK_ORIENTATION_VERTICAL) {
 		gtk_widget_set_vexpand(s->widget, TRUE);
@@ -81,8 +89,6 @@ static uiSplit *uiNewSplit(GtkOrientation orientation)
 		gtk_widget_set_hexpand(s->widget, TRUE);
 		gtk_widget_set_halign(s->widget, GTK_ALIGN_FILL);
 	}
-
-	s->controls = g_array_new(FALSE, TRUE, sizeof(uiControl*));
 
 	return s;
 }

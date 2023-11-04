@@ -4022,30 +4022,24 @@ typedef struct uiSplit uiSplit;
 #define uiSplit(this) ((uiSplit *) (this))
 
 /**
- * Adds the first control to the split.
+ * Sets the first control of the split.
  *
  * Stretchy items expand to use the remaining space within the box.
  *
  * @param b uiSplit instance.
  * @param child Control instance to append.
- * @param expand `TRUE` to expand the control, filling the space, `FALSE` otherwise.
- * @param shrink `TRUE` to shrink the control beyond it's required space, `FALSE` otherwise.
  * @memberof uiSplit
  */
-_UI_EXTERN void uiSplitAdd1(uiSplit *b, uiControl *child, int expand, int shrink);
+_UI_EXTERN void uiSplitSetFirst(uiSplit *b, uiControl *child);
 
 /**
- * Adds the second control to the split.
- *
- * Stretchy items expand to use the remaining space within the box.
+ * Sets the second control of the split.
  *
  * @param b uiSplit instance.
  * @param child Control instance to append.
- * @param expand `TRUE` to expand the control, filling the space, `FALSE` otherwise.
- * @param shrink `TRUE` to shrink the control beyond it's required space, `FALSE` otherwise.
  * @memberof uiSplit
  */
-_UI_EXTERN void uiSplitAdd2(uiSplit *b, uiControl *child, int expand, int shrink);
+_UI_EXTERN void uiSplitSetSecond(uiSplit *b, uiControl *child);
 
 /**
  * Creates a new, user resizable horizontal split pane.

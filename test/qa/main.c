@@ -44,7 +44,6 @@ struct controlTestCase splitTestCases[] = {
 	QA_TEST("2. Horizontal One Child", splitHOne),
 	QA_TEST("3. Vertical", splitVertical),
 	QA_TEST("4. Horizontal", splitHorizontal),
-	QA_TEST("5. Horizontal !Expand !Shrink x Expand !Shrink", splitHorizontal0010),
 	{NULL, NULL, NULL}
 };
 

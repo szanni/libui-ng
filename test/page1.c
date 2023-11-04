@@ -173,15 +173,15 @@ void makePage1(uiWindow *w)
 
 	hsplit = uiNewHorizontalSplit();
 	getButton = uiNewButton("Split Left");
-	uiSplitAdd1(hsplit, uiControl(getButton), 1, 1);
+	uiSplitSetFirst(hsplit, uiControl(getButton));
 	getButton = uiNewButton("Split Right");
-	uiSplitAdd2(hsplit, uiControl(getButton), 1, 1);
+	uiSplitSetSecond(hsplit, uiControl(getButton));
 	uiBoxAppend(page1, uiControl(hsplit), 0);
 
 	vsplit = uiNewVerticalSplit();
 	getButton = uiNewButton("Split Top");
-	uiSplitAdd1(vsplit, uiControl(getButton), 1, 1);
+	uiSplitSetFirst(vsplit, uiControl(getButton));
 	getButton = uiNewButton("Split Bottom");
-	uiSplitAdd2(vsplit, uiControl(getButton), 1, 1);
+	uiSplitSetSecond(vsplit, uiControl(getButton));
 	uiBoxAppend(page1, uiControl(vsplit), 1);
 }
