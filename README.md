@@ -20,7 +20,7 @@ See [CHANGELOG.md](CHANGELOG.md)
 ## Runtime Requirements
 
 * Windows: Windows Vista SP2 with Platform Update or newer
-* Unix: GTK+ 3.10 or newer
+* Unix: GTK+ 3.22 or newer
 * Mac OS X: OS X 10.8 or newer
 
 ## Build Requirements
