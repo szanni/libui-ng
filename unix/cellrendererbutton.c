@@ -72,9 +72,7 @@ static GtkStyleContext *setButtonStyle(GtkWidget *widget)
 
 	gtk_style_context_set_path(context, path);
 	gtk_style_context_set_parent(context, base);
-	// the gtk3-demo example (which says we need to do this) uses gtk_widget_path_iter_get_state(path, -1) but that's not available until 3.14
-	// TODO make a future for that too
-	gtk_style_context_set_state(context, gtk_style_context_get_state(base));
+	gtk_style_context_set_state (context, gtk_widget_path_iter_get_state (path, -1));
 	gtk_widget_path_unref(path);
 
 	// and if the above widget path screwery stil doesn't work, this will
