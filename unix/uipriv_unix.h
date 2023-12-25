@@ -58,4 +58,3 @@ extern void uiprivLoadFutures(void);
 extern PangoAttribute *uiprivFUTURE_pango_attr_font_features_new(const gchar *features);
 extern PangoAttribute *uiprivFUTURE_pango_attr_foreground_alpha_new(guint16 alpha);
 extern PangoAttribute *uiprivFUTURE_pango_attr_background_alpha_new(guint16 alpha);
-extern gboolean uiprivFUTURE_gtk_widget_path_iter_set_object_name(GtkWidgetPath *path, gint pos, const char *name);

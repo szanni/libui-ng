@@ -10,9 +10,6 @@ static PangoAttribute *(*newFeaturesAttr)(const gchar *features) = NULL;
 static PangoAttribute *(*newFGAlphaAttr)(guint16 alpha) = NULL;
 static PangoAttribute *(*newBGAlphaAttr)(guint16 alpha) = NULL;
 
-// added in GTK+ 3.20; we need 3.10
-static void (*gwpIterSetObjectName)(GtkWidgetPath *path, gint pos, const char *name) = NULL;
-
 // note that we treat any error as "the symbols aren't there" (and don't care if dlclose() failed)
 void uiprivLoadFutures(void)
 {
@@ -26,7 +23,6 @@ void uiprivLoadFutures(void)
 	GET(newFeaturesAttr, pango_attr_font_features_new);
 	GET(newFGAlphaAttr, pango_attr_foreground_alpha_new);
 	GET(newBGAlphaAttr, pango_attr_background_alpha_new);
-	GET(gwpIterSetObjectName, gtk_widget_path_iter_set_object_name);
 	dlclose(handle);
 }
 
@@ -51,10 +47,3 @@ PangoAttribute *uiprivFUTURE_pango_attr_background_alpha_new(guint16 alpha)
 	return (*newBGAlphaAttr)(alpha);
 }
 
-gboolean uiprivFUTURE_gtk_widget_path_iter_set_object_name(GtkWidgetPath *path, gint pos, const char *name)
-{
-	if (gwpIterSetObjectName == NULL)
-		return FALSE;
-	(*gwpIterSetObjectName)(path, pos, name);
-	return TRUE;
-}
