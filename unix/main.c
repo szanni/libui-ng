@@ -17,7 +17,6 @@ const char *uiInit(uiInitOptions *o)
 		return msg;
 	}
 	uiprivInitAlloc();
-	uiprivLoadFutures();
 	timers = g_hash_table_new(g_direct_hash, g_direct_equal);
 	return NULL;
 }

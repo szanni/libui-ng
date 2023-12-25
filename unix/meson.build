@@ -23,7 +23,6 @@ libui_sources += [
 	'unix/fontbutton.c',
 	'unix/fontmatch.c',
 	'unix/form.c',
-	'unix/future.c',
 	'unix/graphemes.c',
 	'unix/grid.c',
 	'unix/group.c',
@@ -52,10 +51,13 @@ libui_deps += [
 		version: '>=3.22.0',
 		method: 'pkg-config',
 		required: true),
+	# Ensure pango >= 1.38 as gtk 3.22 only requires pango >= 1.37.3
+	dependency('pango',
+		version: '>=1.38.0',
+		method: 'pkg-config',
+		required: true),
 	# We specify these as not required because some Unix systems include them with libc instead of providing them as separate files (thanks textshell and jpakkane in freenode #mesonbuild)
 	meson.get_compiler('c').find_library('m',
-		required: false),
-	meson.get_compiler('c').find_library('dl',
 		required: false),
 ]
 libui_rpath = '$ORIGIN'
